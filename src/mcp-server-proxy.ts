@@ -25,14 +25,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
       {
-        name: 'get_recent_utterances',
-        description: 'Get recent utterances from the HTTP server queue',
+        name: 'dequeue_utterances',
+        description: 'Dequeue pending utterances and mark them as delivered',
         inputSchema: {
           type: 'object',
           properties: {
             limit: {
               type: 'number',
-              description: 'Maximum number of utterances to return (default: 10)',
+              description: 'Maximum number of utterances to dequeue (default: 10)',
               default: 10,
             },
           },
@@ -46,36 +46,34 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   switch (name) {
-    case 'get_recent_utterances': {
+    case 'dequeue_utterances': {
       try {
         const limit = args?.limit || 10;
         
-        // Fetch utterances from HTTP server
-        const response = await fetch(`${HTTP_SERVER_URL}/api/utterances?limit=${limit}`);
+        // Use atomic dequeue endpoint
+        const response = await fetch(`${HTTP_SERVER_URL}/api/dequeue-utterances`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ limit }),
+        });
         
         if (!response.ok) {
           throw new Error(`HTTP server returned ${response.status}: ${response.statusText}`);
         }
         
-        const data = await response.json();
+        const data: any = await response.json();
         const utterances = data.utterances || [];
         
-        // Mark utterances as delivered by calling HTTP server
-        // (We could add a PATCH endpoint for this, but for now we'll just mark them locally)
-        for (const utterance of utterances) {
-          if (utterance.status === 'pending') {
-            // In a full implementation, we'd call PATCH /api/utterances/:id/delivered
-            // For now, we'll just note that they've been delivered
-            console.error(`[MCP Proxy] Delivered utterance: ${utterance.id}`);
-          }
-        }
+        console.error(`[MCP Proxy] Dequeued ${utterances.length} utterances`);
 
         return {
           content: [
             {
               type: 'text',
               text: utterances.length > 0 
-                ? `Found ${utterances.length} recent utterances:\n\n${utterances.map(u => 
+                ? `Found ${utterances.length} recent utterances:\n\n${utterances.map((u: any) => 
                     `[${new Date(u.timestamp).toISOString()}] "${u.text}"`
                   ).join('\n')}`
                 : 'No recent utterances found.',
@@ -88,7 +86,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: `Error fetching utterances: ${error.message}. Make sure the HTTP server is running on ${HTTP_SERVER_URL}`,
+              text: `Error fetching utterances: ${(error as Error).message}. Make sure the HTTP server is running on ${HTTP_SERVER_URL}`,
             },
           ],
         };

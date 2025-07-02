@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Hooks - MCP POC</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 24px;
+        }
+        
+        .input-section {
+            margin-bottom: 24px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        #utteranceInput {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        #utteranceInput:focus {
+            outline: none;
+            border-color: #007AFF;
+        }
+        
+        #sendBtn {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        #sendBtn:hover {
+            background: #0056CC;
+        }
+        
+        #sendBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .status-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .status-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007AFF;
+        }
+        
+        .status-label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .utterances-section h3 {
+            color: #333;
+            margin-bottom: 16px;
+        }
+        
+        .utterances-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .utterance-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .utterance-item:last-child {
+            border-bottom: none;
+        }
+        
+        .utterance-text {
+            flex: 1;
+            margin-right: 12px;
+        }
+        
+        .utterance-meta {
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+        }
+        
+        .utterance-status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+        
+        .status-pending {
+            background: #FFF3CD;
+            color: #856404;
+        }
+        
+        .status-delivered {
+            background: #D1ECF1;
+            color: #0C5460;
+        }
+        
+        .refresh-btn {
+            background: #6C757D;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: 12px;
+        }
+        
+        .refresh-btn:hover {
+            background: #545B62;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 40px 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Voice Hooks - MCP POC</h1>
+        <p class="subtitle">Type utterances to test the MCP voice interaction system</p>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="utteranceInput" 
+                    placeholder="Type your utterance here..." 
+                    autofocus
+                >
+                <button id="sendBtn">Send</button>
+            </div>
+        </div>
+        
+        <div class="status">
+            <div class="status-item">
+                <div class="status-number" id="totalCount">0</div>
+                <div class="status-label">Total</div>
+            </div>
+            <div class="status-item">
+                <div class="status-number" id="pendingCount">0</div>
+                <div class="status-label">Pending</div>
+            </div>
+            <div class="status-item">
+                <div class="status-number" id="deliveredCount">0</div>
+                <div class="status-label">Delivered</div>
+            </div>
+        </div>
+        
+        <div class="utterances-section">
+            <h3>
+                Recent Utterances
+                <button class="refresh-btn" id="refreshBtn">Refresh</button>
+            </h3>
+            <div class="utterances-list" id="utterancesList">
+                <div class="empty-state">No utterances yet. Type something above to get started!</div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

@@ -33,33 +33,37 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 ## Project Phases & Roadmap
 
-### Text-Based POC (Current Focus)
+### Text-Based POC ✅ **COMPLETED**
 
 #### Core MCP Server
 
 - [x] Research Claude Code hooks integration
 - [x] Set up TypeScript MCP server project structure
-- [ ] Implement utterance queue with basic MCP tools for LLM:
-  - `get_recent_utterances(limit?: number)`
-  - [ ] immediately returns none if there are no recent utterances (doesn't block or wait for an utterance)
-- [ ] API for browser client to send text input to MCP server
-  - [ ] `send_potential_utterance(potential_utterance: string)`
-  - [ ] `get_recent_utterances(limit?: number)`
-- [ ] Always categorize text input as a complete utterance for Phase 1
-- [ ] Add utterance to queue with timestamp
-- [ ] Unit test send_text_input, get_recent_utterances, wait_for_utterance
+- [x] Implement utterance queue with basic MCP tools for LLM:
+  - [x] `get_recent_utterances(limit?: number)`
+  - [x] immediately returns none if there are no recent utterances (doesn't block or wait for an utterance)
+- [x] API for browser client to send potential utterances to MCP server
+  - [x] HTTP API: `POST /api/potential-utterances`, `GET /api/utterances`
+  - [x] MCP tool: `get_recent_utterances(limit?: number)`
+- [x] Always categorize text input as a complete utterance for Phase 1
+- [x] Add utterance to queue with timestamp
+- [x] Unit test send_text_input, get_recent_utterances
 
 #### Browser Client
 
-- [ ] Create simple HTML/JS client with text input
-- [ ] Implement WebSocket/HTTP communication with MCP server
-- [ ] Add real-time utterance submission
-- [ ] Show utterances from server in a reverse chronological list with the status (pending, delivered)
+- [x] Create simple HTML/JS client with text input
+- [x] Implement HTTP communication with MCP server
+- [x] Add real-time utterance submission
+- [x] Show utterances from server in a reverse chronological list with the status (pending, delivered)
+- [x] Auto-refresh utterance list every 2 seconds
+- [x] Status dashboard showing total/pending/delivered counts
 
 #### Preliminary Hook Integration
 
-- [ ] Test MCP server with Claude Code client
-- [ ] Configure PostToolUse hooks to check for utterances
+- [x] Test MCP server with Claude Code client
+- [x] Verify `get_recent_utterances` tool works in Claude Code
+- [x] Basic MCP integration working - utterances visible to Claude Code
+- [ ] Configure PostToolUse hooks to check for utterances automatically
 
 ### Wait for utterance
 
@@ -71,6 +75,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 - [ ] Add server-side LLM integration for utterance completion detection (POC should use claude cli or sdk <https://docs.anthropic.com/en/docs/claude-code/sdk> to categorize utterances as complete or not)
 - [ ] unit test the utterance classification
+- [ ] Design: Consider segmenting potential utterances into a complete utterance, which would be the first and the first word up to the last word in the complete utterance, and then our remaining words that are incomplete. Then the client would just pop the complete utterance out of the end. Continue appending things on to the end of the incomplete.
 
 ### Speech Recognition
 
@@ -110,7 +115,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - **HTTP for POC**:
   - **Pros**: Simple REST API, easier debugging, faster initial implementation
   - **Cons**: Polling overhead, higher latency, no real-time push notifications
-  - **API**: `POST /api/utterances`, `GET /api/utterances`, `GET /api/utterances/status`
+  - **API**: `POST /api/potential-utterances`, `GET /api/utterances`, `GET /api/utterances/status`
 - **WebSockets for Production**:
   - **Pros**: Real-time bidirectional communication, low latency, efficient for voice interaction
   - **Cons**: Connection management complexity, harder to debug
@@ -125,8 +130,39 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 4. **Test hook integration** with Claude Code to verify real-time interaction
 5. **Iterate on user experience** before adding speech capabilities
 
-## Success Metrics
+## ✅ **POC SUCCESS METRICS ACHIEVED**
 
-- [ ] Claude Code can successfully interrupt operations via text input
-- [ ] Utterances are queued and consumed reliably
-- [ ] Utterances are classified as complete or not
+- [x] **Claude Code Integration** - Can see browser utterances via MCP proxy
+- [x] **Utterance Queue** - Browser to Claude Code communication working
+- [x] **Real-time Sharing** - Typing in browser visible immediately to Claude Code
+- [x] **Development Workflow** - Terminal-managed server with fast iteration
+- [ ] **Proper Delivery** - Fix duplicate utterance delivery (in progress)
+
+## 🔧 **Current Task: Fix Utterance Delivery**
+
+**Problem:** MCP calls return same utterances multiple times  
+**Solution:** Create atomic dequeue endpoint  
+**Status:** About to implement simpler approach  
+
+## **Next Development Phases**
+
+1. **✅ Complete Delivery Fix** - Atomic dequeue endpoint  
+2. **Hook Integration** - Configure PostToolUse hooks for interruption  
+3. **Speech Recognition** - Add Web Speech API for voice input  
+4. **Text-to-Speech** - Mac `say` command integration  
+5. **LLM Classification** - Smart utterance completion detection  
+6. **Production Ready** - Error handling, logging, deployment  
+
+## **Architecture Achieved**
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Browser UI    │    │ Unified Server  │    │  Claude Code    │
+│                 │    │                 │    │                 │
+│ • Text Input    │◄──►│ • HTTP Server   │    │ • MCP Proxy     │
+│ • Status View   │    │ • Shared Queue  │◄──►│ • Tool Calls    │
+│ • Auto Refresh  │    │ • Dequeue API   │    │ • Interruption  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+**Key Innovation:** MCP proxy architecture enabling shared state between browser and Claude Code while maintaining development flexibility.

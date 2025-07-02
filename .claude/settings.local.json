@@ -6,8 +6,18 @@
       "Bash(npm install:*)",
       "Bash(mkdir:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run:*)",
+      "mcp__voice-hooks__get_recent_utterances",
+      "Bash(npm test)",
+      "Bash(npm test:*)",
+      "Bash(curl:*)",
+      "mcp__voice-hooks__dequeue_utterances"
     ],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "voice-hooks"
+  ]
 }

@@ -121,6 +121,38 @@ function setupHttpServer() {
     });
   });
 
+  // Atomic dequeue endpoint - returns pending utterances and marks them as delivered
+  app.post('/api/dequeue-utterances', (req, res) => {
+    const limit = parseInt(req.body.limit) || 10;
+    const pendingUtterances = queue.utterances
+      .filter(u => u.status === 'pending')
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+      .slice(0, limit);
+    
+    // Mark them as delivered atomically
+    pendingUtterances.forEach(u => {
+      queue.markDelivered(u.id);
+    });
+    
+    res.json({
+      success: true,
+      utterances: pendingUtterances.map(u => ({
+        id: u.id,
+        text: u.text,
+        timestamp: u.timestamp,
+        status: 'delivered', // Return with updated status
+      })),
+      count: pendingUtterances.length,
+    });
+  });
+
+  // Mark utterance as delivered (kept for backwards compatibility)
+  app.patch('/api/utterances/:id/delivered', (req, res) => {
+    const { id } = req.params;
+    queue.markDelivered(id);
+    res.json({ success: true, message: `Utterance ${id} marked as delivered` });
+  });
+
   app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
   });
