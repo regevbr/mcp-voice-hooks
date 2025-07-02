@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:docs.anthropic.com)",
-      "WebFetch(domain:modelcontextprotocol.io)"
+      "WebFetch(domain:modelcontextprotocol.io)",
+      "Bash(npm install:*)",
+      "Bash(mkdir:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }
