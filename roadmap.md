@@ -43,7 +43,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - `get_recent_utterances(limit?: number)`
   - [ ] immediately returns none if there are no recent utterances (doesn't block or wait for an utterance)
 - [ ] API for browser client to send text input to MCP server
-  - [ ] `send_text_input(text: string)`
+  - [ ] `send_potential_utterance(potential_utterance: string)`
   - [ ] `get_recent_utterances(limit?: number)`
 - [ ] Always categorize text input as a complete utterance for Phase 1
 - [ ] Add utterance to queue with timestamp
@@ -104,6 +104,18 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - **Pros**: Leverages browser capabilities, clean separation of concerns
 - **Cons**: Additional complexity vs. pure CLI approach
 - **Decision**: Hybrid approach provides best user experience
+
+### Communication Protocol: HTTP (POC) → WebSockets (Later)
+
+- **HTTP for POC**:
+  - **Pros**: Simple REST API, easier debugging, faster initial implementation
+  - **Cons**: Polling overhead, higher latency, no real-time push notifications
+  - **API**: `POST /api/utterances`, `GET /api/utterances`, `GET /api/utterances/status`
+- **WebSockets for Production**:
+  - **Pros**: Real-time bidirectional communication, low latency, efficient for voice interaction
+  - **Cons**: Connection management complexity, harder to debug
+  - **Events**: `utterance`, `utterance_queued`, `utterance_delivered`
+- **Decision**: Start with HTTP for rapid POC development, migrate to WebSockets when real-time features become critical
 
 ## Next Steps
 

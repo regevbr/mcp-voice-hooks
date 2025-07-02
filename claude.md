@@ -4,6 +4,7 @@
 
 Read:
 
+- roadmap.md
 - ./docs/
 - <https://modelcontextprotocol.io/tutorials/building-mcp-with-llms>
 - <https://docs.anthropic.com/en/docs/claude-code/hooks>
