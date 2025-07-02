@@ -1,5 +1,13 @@
-# Read the docs
+# Claude
 
-read <https://modelcontextprotocol.io/tutorials/building-mcp-with-llms>
+## Read the docs
 
-and read ./docs/
+Read:
+
+- ./docs/
+- <https://modelcontextprotocol.io/tutorials/building-mcp-with-llms>
+- <https://docs.anthropic.com/en/docs/claude-code/hooks>
+
+## Add an emoji at the end of each response
+
+please add an emoji at the end of each response.
