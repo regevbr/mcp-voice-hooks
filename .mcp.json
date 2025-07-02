@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "voice-hooks": {
+      "type": "stdio",
+      "command": "npm",
+      "args": [
+        "run",
+        "mcp-proxy"
+      ],
+      "env": {}
+    }
+  }
+}

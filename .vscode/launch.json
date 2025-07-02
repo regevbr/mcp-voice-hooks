@@ -1,0 +1,79 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch HTTP Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.js",
+      "console": "integratedTerminal",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "runtimeArgs": ["--experimental-modules"],
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Launch TypeScript HTTP Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/index.ts",
+      "console": "integratedTerminal",
+      "runtimeArgs": ["--loader", "ts-node/esm"],
+      "env": {
+        "NODE_ENV": "development",
+        "NODE_OPTIONS": "--loader ts-node/esm"
+      },
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Launch MCP Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/mcp-server-simple.ts", 
+      "console": "integratedTerminal",
+      "runtimeArgs": ["--loader", "ts-node/esm"],
+      "env": {
+        "NODE_ENV": "development",
+        "NODE_OPTIONS": "--loader ts-node/esm"
+      },
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Run Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": ["--runInBand"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "disableOptimisticBPs": true,
+      "env": {
+        "NODE_ENV": "test"
+      }
+    },
+    {
+      "name": "Debug Single Test File",
+      "type": "node", 
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": ["--runInBand", "${relativeFile}"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "disableOptimisticBPs": true,
+      "env": {
+        "NODE_ENV": "test"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launch HTTP + MCP Servers",
+      "configurations": [
+        "Launch HTTP Server",
+        "Launch MCP Server"
+      ],
+      "stopAll": true
+    }
+  ]
+}
