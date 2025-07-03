@@ -48,11 +48,14 @@ claude
 
 ## To use in your own project
 
+Disclaimer: This just a proof of concept. It is not really user friendly or ready for distribution. But you should be able to get it working if you're interested.
+
 1. **Copy the hooks to your project**:
+
    ```bash
    # Copy the hooks directory to your project
    cp -r /path/to/mcp-voice-hooks/.claude/hooks /path/to/your-project/.claude/
-   
+
    # Make the hook files executable
    chmod +x /path/to/your-project/.claude/hooks/*.sh
    ```
