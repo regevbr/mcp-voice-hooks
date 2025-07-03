@@ -2,15 +2,21 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Unified Server (HTTP + MCP)",
+      "name": "Dev Server",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "npx",
       "runtimeArgs": [
-        "nodemon"
+        "nodemon",
+        "--exec",
+        "ts-node --esm",
+        "--ext",
+        "ts",
+        "--watch",
+        "src"
       ],
       "args": [
-        "${workspaceFolder}/unified-server.js"
+        "${workspaceFolder}/src/unified-server.ts"
       ],
       "console": "integratedTerminal",
       "env": {
@@ -18,7 +24,8 @@
       },
       "skipFiles": [
         "<node_internals>/**"
-      ]
+      ],
+      "restart": true
     }
   ]
 }
