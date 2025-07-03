@@ -123,7 +123,7 @@ function setupHttpServer() {
 
   // Atomic dequeue endpoint - returns pending utterances and marks them as delivered
   app.post('/api/dequeue-utterances', (req, res) => {
-    const limit = parseInt(req.body.limit) || 10;
+    const limit = parseInt(req.body?.limit) || 10;
     const pendingUtterances = queue.utterances
       .filter(u => u.status === 'pending')
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())

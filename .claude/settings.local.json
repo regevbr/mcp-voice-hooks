@@ -19,5 +19,17 @@
   },
   "enabledMcpjsonServers": [
     "voice-hooks"
-  ]
+  ],
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hook-check.sh"
+          }
+        ]
+      }
+    ]
+  }
 }
