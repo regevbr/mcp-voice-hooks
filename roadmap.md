@@ -75,6 +75,26 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [x] Stop hook calls this endpoint to decide whether to block or approve
 - [x] Stop hook now provides clear feedback messages when blocking or approving
 
+### Front-End Utterance Segmentation ✅ **COMPLETED**
+
+- [x] Implement Web Speech API continuous listening in browser client
+  - [x] Add "Start Listening" button to enable continuous speech recognition
+  - [x] Configure `recognition.continuous = true` for uninterrupted listening
+  - [x] Enable `recognition.interimResults = true` for real-time feedback
+- [x] Implement automatic utterance segmentation based on speech pauses
+  - [x] Monitor `onresult` event for `isFinal` results
+  - [x] Send completed utterances to server when user pauses
+  - [x] Continue listening for next utterance without interruption
+- [x] Update UI to show listening status and interim transcription
+  - [x] Visual indicator for active listening (e.g., microphone icon)
+  - [x] Display interim text as user speaks
+  - [x] Clear interim text after sending final utterance
+- [x] Handle edge cases
+  - [x] Microphone permissions
+  - [x] Recognition errors
+  - [x] Browser compatibility checks
+- [x] Tested utterance segmentation behavior successfully
+
 ### Utterance classification
 
 - [ ] Add server-side LLM integration for utterance completion detection (POC should use claude cli or sdk <https://docs.anthropic.com/en/docs/claude-code/sdk> to categorize utterances as complete or not)
@@ -83,10 +103,10 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 ### Speech Recognition
 
-- [ ] Integrate Web Speech API in browser client
-- [ ] Add microphone input selection and monitoring
-- [ ] Implement continuous speech recognition (Probably the way this should work is we should send candidate utterances to the server over and over again. Basically we should just keep adding the words as the user speaks them to these utterances, and keep sending longer and longer potential utterances to the server. And then once we get a response that an utterance was accepted or completed, then we pop that out of the current potential utterance, and we just send new words only that haven't yet been accepted into an utterance.)
-- [ ] Add a button to start/stop listening
+- [x] Integrate Web Speech API in browser client
+- [x] Add microphone input selection and monitoring
+- [x] Implement continuous speech recognition (using Web Speech API's built-in pause detection with `isFinal` results instead of the originally planned approach)
+- [x] Add a button to start/stop listening
 
 ### Text-to-Speech
 
@@ -128,7 +148,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 ## **Architecture Achieved**
 
-```
+```text
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Browser UI    │    │ Unified Server  │    │  Claude Code    │
 │                 │    │                 │    │                 │

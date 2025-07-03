@@ -9,6 +9,17 @@ class VoiceHooksClient {
         this.pendingCount = document.getElementById('pendingCount');
         this.deliveredCount = document.getElementById('deliveredCount');
         
+        // Voice controls
+        this.listenBtn = document.getElementById('listenBtn');
+        this.listenBtnText = document.getElementById('listenBtnText');
+        this.listeningIndicator = document.getElementById('listeningIndicator');
+        this.interimText = document.getElementById('interimText');
+        
+        // Speech recognition
+        this.recognition = null;
+        this.isListening = false;
+        this.initializeSpeechRecognition();
+        
         this.setupEventListeners();
         this.loadData();
         
@@ -16,9 +27,83 @@ class VoiceHooksClient {
         setInterval(() => this.loadData(), 2000);
     }
     
+    initializeSpeechRecognition() {
+        // Check for browser support
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+            console.error('Speech recognition not supported in this browser');
+            this.listenBtn.disabled = true;
+            this.listenBtnText.textContent = 'Not Supported';
+            return;
+        }
+        
+        this.recognition = new SpeechRecognition();
+        this.recognition.continuous = true;
+        this.recognition.interimResults = true;
+        this.recognition.lang = 'en-US';
+        
+        // Handle results
+        this.recognition.onresult = (event) => {
+            let interimTranscript = '';
+            
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                
+                if (event.results[i].isFinal) {
+                    // User paused - send as complete utterance
+                    this.sendVoiceUtterance(transcript);
+                    // Clear interim text
+                    this.interimText.textContent = '';
+                    this.interimText.classList.remove('active');
+                } else {
+                    // Still speaking - show interim results
+                    interimTranscript += transcript;
+                }
+            }
+            
+            if (interimTranscript) {
+                this.interimText.textContent = interimTranscript;
+                this.interimText.classList.add('active');
+            }
+        };
+        
+        // Handle errors
+        this.recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            
+            if (event.error === 'no-speech') {
+                // Continue listening
+                return;
+            }
+            
+            if (event.error === 'not-allowed') {
+                alert('Microphone access denied. Please allow microphone access to use voice input.');
+            } else {
+                alert(`Speech recognition error: ${event.error}`);
+            }
+            
+            this.stopListening();
+        };
+        
+        // Handle end
+        this.recognition.onend = () => {
+            if (this.isListening) {
+                // Restart recognition to continue listening
+                try {
+                    this.recognition.start();
+                } catch (e) {
+                    console.error('Failed to restart recognition:', e);
+                    this.stopListening();
+                }
+            }
+        };
+    }
+    
     setupEventListeners() {
         this.sendBtn.addEventListener('click', () => this.sendUtterance());
         this.refreshBtn.addEventListener('click', () => this.loadData());
+        this.listenBtn.addEventListener('click', () => this.toggleListening());
         
         this.utteranceInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -116,6 +201,75 @@ class VoiceHooksClient {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+    
+    toggleListening() {
+        if (this.isListening) {
+            this.stopListening();
+        } else {
+            this.startListening();
+        }
+    }
+    
+    startListening() {
+        if (!this.recognition) {
+            alert('Speech recognition not supported in this browser');
+            return;
+        }
+        
+        try {
+            this.recognition.start();
+            this.isListening = true;
+            this.listenBtn.classList.add('listening');
+            this.listenBtnText.textContent = 'Stop Listening';
+            this.listeningIndicator.classList.add('active');
+            console.log('Started listening');
+        } catch (e) {
+            console.error('Failed to start recognition:', e);
+            alert('Failed to start speech recognition. Please try again.');
+        }
+    }
+    
+    stopListening() {
+        if (this.recognition) {
+            this.isListening = false;
+            this.recognition.stop();
+            this.listenBtn.classList.remove('listening');
+            this.listenBtnText.textContent = 'Start Listening';
+            this.listeningIndicator.classList.remove('active');
+            this.interimText.textContent = '';
+            this.interimText.classList.remove('active');
+            console.log('Stopped listening');
+        }
+    }
+    
+    async sendVoiceUtterance(text) {
+        const trimmedText = text.trim();
+        if (!trimmedText) return;
+        
+        console.log('Sending voice utterance:', trimmedText);
+        
+        try {
+            const response = await fetch(`${this.baseUrl}/api/potential-utterances`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text: trimmedText,
+                    timestamp: new Date().toISOString()
+                }),
+            });
+            
+            if (response.ok) {
+                this.loadData(); // Refresh the list
+            } else {
+                const error = await response.json();
+                console.error('Error sending voice utterance:', error);
+            }
+        } catch (error) {
+            console.error('Failed to send voice utterance:', error);
+        }
     }
 }
 

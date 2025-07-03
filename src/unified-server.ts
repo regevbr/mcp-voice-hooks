@@ -16,6 +16,11 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Constants
+const DEFAULT_WAIT_TIMEOUT_SECONDS = 30;
+const MIN_WAIT_TIMEOUT_SECONDS = 30;
+const MAX_WAIT_TIMEOUT_SECONDS = 60;
+
 // Shared utterance queue
 interface Utterance {
   id: string;
@@ -147,8 +152,11 @@ app.post('/api/dequeue-utterances', (req: Request, res: Response) => {
 
 // Wait for utterance endpoint
 app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
-  const { seconds_to_wait = 10 } = req.body;
-  const secondsToWait = seconds_to_wait;
+  const { seconds_to_wait = DEFAULT_WAIT_TIMEOUT_SECONDS } = req.body;
+  const secondsToWait = Math.max(
+    MIN_WAIT_TIMEOUT_SECONDS,
+    Math.min(MAX_WAIT_TIMEOUT_SECONDS, seconds_to_wait)
+  );
   const maxWaitMs = secondsToWait * 1000;
   const startTime = Date.now();
   
@@ -281,8 +289,10 @@ if (IS_MCP_MANAGED) {
             properties: {
               seconds_to_wait: {
                 type: 'number',
-                description: 'Maximum seconds to wait for an utterance (default: 10)',
-                default: 10,
+                description: `Maximum seconds to wait for an utterance (default: ${DEFAULT_WAIT_TIMEOUT_SECONDS}, min: ${MIN_WAIT_TIMEOUT_SECONDS}, max: ${MAX_WAIT_TIMEOUT_SECONDS})`,
+                default: DEFAULT_WAIT_TIMEOUT_SECONDS,
+                minimum: MIN_WAIT_TIMEOUT_SECONDS,
+                maximum: MAX_WAIT_TIMEOUT_SECONDS,
               },
             },
           },
@@ -329,7 +339,11 @@ if (IS_MCP_MANAGED) {
       }
       
       if (name === 'wait_for_utterance') {
-        const secondsToWait = (args?.seconds_to_wait as number) ?? 10;
+        const requestedSeconds = (args?.seconds_to_wait as number) ?? DEFAULT_WAIT_TIMEOUT_SECONDS;
+        const secondsToWait = Math.max(
+          MIN_WAIT_TIMEOUT_SECONDS,
+          Math.min(MAX_WAIT_TIMEOUT_SECONDS, requestedSeconds)
+        );
         console.log(`[MCP] Calling wait_for_utterance with ${secondsToWait}s timeout`);
         
         const response = await fetch('http://localhost:3000/api/wait-for-utterances', {
