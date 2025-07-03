@@ -186,13 +186,18 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
       const sortedUtterances = pendingUtterances
         .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
       
+      // Mark utterances as delivered
+      sortedUtterances.forEach(u => {
+        queue.markDelivered(u.id);
+      });
+      
       res.json({
         success: true,
         utterances: sortedUtterances.map(u => ({
           id: u.id,
           text: u.text,
           timestamp: u.timestamp,
-          status: u.status,
+          status: 'delivered', // They are now delivered
         })),
         count: pendingUtterances.length,
         waitTime: Date.now() - startTime,
