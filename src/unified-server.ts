@@ -41,7 +41,7 @@ class UtteranceQueue {
     };
 
     this.utterances.push(utterance);
-    console.log(`[Queue] Added utterance: "${utterance.text}" (${utterance.id})`);
+    console.log(`[Queue] queued: "${utterance.text}"	[id: ${utterance.id}]`);
     return utterance;
   }
 
@@ -55,7 +55,7 @@ class UtteranceQueue {
     const utterance = this.utterances.find(u => u.id === id);
     if (utterance) {
       utterance.status = 'delivered';
-      console.log(`[Queue] Marked utterance as delivered: ${id}`);
+      console.log(`[Queue] delivered: "${utterance.text}"	[id: ${id}]`);
     }
   }
 
@@ -342,7 +342,7 @@ if (IS_MCP_MANAGED) {
             {
               type: 'text',
               text: `Dequeued ${data.utterances.length} utterance(s):\n\n${
-                data.utterances.map((u: any) => `[${u.timestamp}] "${u.text}"`).join('\n')
+                data.utterances.reverse().map((u: any) => `delivered:\t"${u.text}"\t[id: ${u.id}, time: ${new Date(u.timestamp).toISOString()}]`).join('\n')
               }`,
             },
           ],

@@ -13,7 +13,7 @@ export class InMemoryUtteranceQueue implements UtteranceQueue {
     };
     
     this.utterances.push(utterance);
-    console.log(`[Queue] Added utterance: "${utterance.text}" (${utterance.id})`);
+    console.log(`[Queue] queued:	"${utterance.text}"	[id: ${utterance.id}]`);
     return utterance;
   }
 
@@ -27,7 +27,7 @@ export class InMemoryUtteranceQueue implements UtteranceQueue {
     const utterance = this.utterances.find(u => u.id === id);
     if (utterance) {
       utterance.status = 'delivered';
-      console.log(`[Queue] Marked utterance as delivered: ${id}`);
+      console.log(`[Queue] delivered:	"${utterance.text}"	[id: ${id}]`);
     }
   }
 
