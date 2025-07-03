@@ -65,11 +65,15 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] Basic MCP integration working - utterances visible to Claude Code
 - [x] Configure PostToolUse hooks to check for utterances automatically
 
-### Wait for utterance
+### Wait for utterance ✅ **COMPLETED**
 
-- [ ] Add a `wait_for_utterance` tool to the MCP server: `wait_for_utterance(seconds_to_wait?: number)`
-  - [ ] wait_for_utterance should block until an utterance is able to be dequeued or the timeout is reached (default 10 seconds). It should return immediately if there has been no utterance since the last time it timed out (we'll need to keep track of the last time it timed out)
-- [ ] Configure the Stop hook to check if the LLM called `wait_for_utterance` for this Stop hook already. If not, require it to call `wait_for_utterance`. Store a state variable to track if the LLM has called `wait_for_utterance` for this Stop hook.
+- [x] Add a `wait_for_utterance` tool to the MCP server: `wait_for_utterance(seconds_to_wait?: number)`
+  - [x] wait_for_utterance should block until an utterance is able to be dequeued or the timeout is reached (default 10 seconds). It should return immediately if there has been no utterance since the last time it timed out (we'll need to keep track of the last time it timed out)
+- [x] Configure the Stop hook to require `wait_for_utterance` to be called
+- [x] Add `should_wait` endpoint to intelligently decide when to block Stop hook
+  - [x] `/api/should-wait` returns `{ shouldWait: boolean }` based on utterances since last timeout
+  - [x] Stop hook calls this endpoint to decide whether to block or approve
+- [x] Stop hook now provides clear feedback messages when blocking or approving
 
 ### Utterance classification
 

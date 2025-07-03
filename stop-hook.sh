@@ -1,11 +1,29 @@
 #!/bin/bash
 
-# Stop Hook - Requires wait_for_utterance to be called
-# This hook triggers when Claude stops working and asks if we should wait for voice input
+# Stop Hook - Intelligently decides whether to wait for voice input
+# Checks if there have been any utterances since the last timeout
 
-cat <<EOF
+# Check should-wait endpoint
+response=$(curl -s http://localhost:3000/api/should-wait 2>/dev/null)
+
+if [ $? -ne 0 ]; then
+    # Server not available, allow stop
+    echo '{"decision": "approve"}'
+    exit 0
+fi
+
+# Extract shouldWait boolean
+shouldWait=$(echo "$response" | jq -r '.shouldWait')
+
+if [ "$shouldWait" = "true" ]; then
+    # There have been utterances since last timeout, block and ask to wait
+    cat <<EOF
 {
-  "decision": "approve",
+  "decision": "block",
   "reason": "Please use wait_for_utterance to check for voice input before stopping"
 }
 EOF
+else
+    # No utterances since last timeout, allow stop
+    echo '{"decision": "approve", "reason": "No utterances since last timeout"}'
+fi

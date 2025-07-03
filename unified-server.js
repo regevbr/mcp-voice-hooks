@@ -219,6 +219,14 @@ function setupHttpServer() {
     res.json({ success: true, message: `Utterance ${id} marked as delivered` });
   });
 
+  // Should wait endpoint - checks if there are any utterances since last timeout
+  app.get('/api/should-wait', (req, res) => {
+    const shouldWait = !lastTimeoutTimestamp || 
+      queue.utterances.some(u => u.timestamp > lastTimeoutTimestamp);
+    
+    res.json({ shouldWait });
+  });
+
   app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
   });

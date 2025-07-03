@@ -15,7 +15,9 @@
       "Bash(curl:*)",
       "mcp__voice-hooks__dequeue_utterances",
       "Bash(grep:*)",
-      "mcp__voice-hooks__wait_for_utterance"
+      "mcp__voice-hooks__wait_for_utterance",
+      "Bash(./stop-hook.sh:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   },
@@ -25,6 +27,7 @@
   "hooks": {
     "Stop": [
       {
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
