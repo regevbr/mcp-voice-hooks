@@ -48,11 +48,20 @@ claude
 
 ## To use in your own project
 
-1. **Configure Claude Code**:
+1. **Copy the hooks to your project**:
+   ```bash
+   # Copy the hooks directory to your project
+   cp -r /path/to/mcp-voice-hooks/.claude/hooks /path/to/your-project/.claude/
+   
+   # Make the hook files executable
+   chmod +x /path/to/your-project/.claude/hooks/*.sh
+   ```
+
+2. **Configure Claude Code**:
 
    copy the mcp settings from `.mcp.json` to your own project
 
-2. **Configure hooks** in your claude settings:
+3. **Configure hooks** in your claude settings:
 
 ```json
 {
@@ -62,14 +71,14 @@ claude
          "matcher": "^(?!mcp__voice-hooks__).*",
          "hooks": [{
            "type": "command",
-           "command": "./pre-tool-hook.sh"
+           "command": "./.claude/hooks/pre-tool-hook.sh"
          }]
        }],
        "Stop": [{
          "matcher": "",
          "hooks": [{
            "type": "command",
-           "command": "./stop-hook.sh"
+           "command": "./.claude/hooks/stop-hook.sh"
          }]
        }]
      }
@@ -91,7 +100,7 @@ Add the post tool hook to your claude settings:
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "./post-tool-voice-hook.sh"
+                        "command": "./.claude/hooks/post-tool-voice-hook.sh"
                     }
                 ]
             }
