@@ -2,6 +2,10 @@
 
 Real-time voice interaction for Claude Code. Speak naturally while Claude works - interrupt, redirect, or provide continuous feedback without stopping.
 
+## Demo
+
+[![Voice Hooks Demo](https://img.youtube.com/vi/KpkxvJ65gbM/0.jpg)](https://youtu.be/KpkxvJ65gbM)
+
 ## Overview
 
 mcp-voice-hooks enables continuous voice conversations with AI assistants by:
