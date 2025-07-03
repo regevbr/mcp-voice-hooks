@@ -92,7 +92,26 @@ Add the post tool hook to your claude settings:
                 ]
             }
         ]
+     },
+     "env": {
+       "VOICE_RESPONSES_ENABLED": "true"
      }
    }
 }
 ```
+
+### Configuration
+
+Voice responses are disabled by default. To enable them:
+
+Add to your Claude Code settings JSON:
+
+```json
+{
+  "env": {
+    "VOICE_RESPONSES_ENABLED": "true"
+  }
+}
+```
+
+To disable voice responses, set the value to `false` or remove the setting entirely.

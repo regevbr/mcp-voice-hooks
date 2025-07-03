@@ -20,5 +20,8 @@
       "Bash(ls:*)"
     ],
     "deny": []
+  },
+  "env": {
+    "VOICE_RESPONSES_ENABLED": "false"
   }
 }
