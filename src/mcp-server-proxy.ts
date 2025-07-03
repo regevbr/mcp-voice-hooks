@@ -38,6 +38,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
         },
       },
+      {
+        name: 'wait_for_utterance',
+        description: 'Wait for an utterance to be available or until timeout. Returns immediately if no utterances since last timeout.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            seconds_to_wait: {
+              type: 'number',
+              description: 'Maximum seconds to wait for an utterance (default: 10)',
+              default: 10,
+            },
+          },
+        },
+      },
     ],
   };
 });
@@ -87,6 +101,61 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: `Error fetching utterances: ${(error as Error).message}. Make sure the HTTP server is running on ${HTTP_SERVER_URL}`,
+            },
+          ],
+        };
+      }
+    }
+
+    case 'wait_for_utterance': {
+      try {
+        const secondsToWait = args?.seconds_to_wait || 10;
+        
+        // Call the wait-for-utterances endpoint which actually waits
+        const response = await fetch(`${HTTP_SERVER_URL}/api/wait-for-utterances`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ seconds_to_wait: secondsToWait }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP server returned ${response.status}: ${response.statusText}`);
+        }
+        
+        const data: any = await response.json();
+        const utterances = data.utterances || [];
+        
+        if (utterances.length > 0) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Found ${utterances.length} utterance(s):\n\n${utterances.map((u: any) => 
+                  `[${new Date(u.timestamp).toISOString()}] "${u.text}"`
+                ).join('\n')}`,
+              },
+            ],
+          };
+        } else {
+          // Return the message from the server (includes wait time info)
+          return {
+            content: [
+              {
+                type: 'text',
+                text: data.message || `No utterances found after waiting ${secondsToWait} seconds.`,
+              },
+            ],
+          };
+        }
+      } catch (error) {
+        console.error('[MCP Proxy] Error in wait_for_utterance:', error);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error waiting for utterances: ${(error as Error).message}`,
             },
           ],
         };

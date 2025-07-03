@@ -13,7 +13,9 @@
       "Bash(npm test)",
       "Bash(npm test:*)",
       "Bash(curl:*)",
-      "mcp__voice-hooks__dequeue_utterances"
+      "mcp__voice-hooks__dequeue_utterances",
+      "Bash(grep:*)",
+      "mcp__voice-hooks__wait_for_utterance"
     ],
     "deny": []
   },
@@ -21,12 +23,12 @@
     "voice-hooks"
   ],
   "hooks": {
-    "PostToolUse": [
+    "Stop": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "./hook-check.sh"
+            "command": "./stop-hook.sh"
           }
         ]
       }

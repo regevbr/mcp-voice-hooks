@@ -58,6 +58,9 @@ class UtteranceQueue {
 // Global shared queue
 const queue = new UtteranceQueue();
 
+// Track last timeout for wait_for_utterance
+let lastTimeoutTimestamp = null;
+
 // Parse command line arguments
 const args = process.argv.slice(2);
 const mode = args.includes('--mcp-connect') ? 'connect' :
@@ -146,6 +149,69 @@ function setupHttpServer() {
     });
   });
 
+  // Wait for utterances endpoint
+  app.post('/api/wait-for-utterances', async (req, res) => {
+    const secondsToWait = req.body?.seconds_to_wait || 10;
+    const maxWaitMs = secondsToWait * 1000;
+    const startTime = Date.now();
+    
+    // Check if we should return immediately (no utterances since last timeout)
+    if (lastTimeoutTimestamp) {
+      const hasNewUtterances = queue.utterances.some(u => 
+        u.status === 'pending' && u.timestamp > lastTimeoutTimestamp
+      );
+      
+      if (!hasNewUtterances) {
+        return res.json({
+          success: true,
+          utterances: [],
+          message: 'No new utterances since last timeout. Returning immediately.',
+          waited: false,
+        });
+      }
+    }
+    
+    // Wait for utterances with polling
+    while (Date.now() - startTime < maxWaitMs) {
+      const pendingUtterances = queue.utterances
+        .filter(u => u.status === 'pending')
+        .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+      
+      if (pendingUtterances.length > 0) {
+        // Found utterances - dequeue them
+        pendingUtterances.forEach(u => queue.markDelivered(u.id));
+        
+        // Clear last timeout since we found utterances
+        lastTimeoutTimestamp = null;
+        
+        return res.json({
+          success: true,
+          utterances: pendingUtterances.map(u => ({
+            id: u.id,
+            text: u.text,
+            timestamp: u.timestamp,
+            status: 'delivered',
+          })),
+          count: pendingUtterances.length,
+          waitTime: Date.now() - startTime,
+        });
+      }
+      
+      // Wait 100ms before checking again
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    // Timeout reached - no utterances found
+    lastTimeoutTimestamp = new Date();
+    
+    res.json({
+      success: true,
+      utterances: [],
+      message: `No utterances found after waiting ${secondsToWait} seconds.`,
+      waitTime: maxWaitMs,
+    });
+  });
+
   // Mark utterance as delivered (kept for backwards compatibility)
   app.patch('/api/utterances/:id/delivered', (req, res) => {
     const { id } = req.params;
@@ -194,6 +260,20 @@ function setupMcpServer() {
             },
           },
         },
+        {
+          name: 'wait_for_utterance',
+          description: 'Wait for an utterance to be available or until timeout. Returns immediately if no utterances since last timeout.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              seconds_to_wait: {
+                type: 'number',
+                description: 'Maximum seconds to wait for an utterance (default: 10)',
+                default: 10,
+              },
+            },
+          },
+        },
       ],
     };
   });
@@ -222,6 +302,71 @@ function setupMcpServer() {
                   `[${u.timestamp.toISOString()}] "${u.text}"`
                 ).join('\n')}`
                 : 'No recent utterances found.',
+            },
+          ],
+        };
+      }
+
+      case 'wait_for_utterance': {
+        const secondsToWait = args?.seconds_to_wait || 10;
+        const maxWaitMs = secondsToWait * 1000;
+        const startTime = Date.now();
+        
+        // Check if we should return immediately (no utterances since last timeout)
+        if (lastTimeoutTimestamp) {
+          const hasNewUtterances = queue.utterances.some(u => 
+            u.status === 'pending' && u.timestamp > lastTimeoutTimestamp
+          );
+          
+          if (!hasNewUtterances) {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: 'No new utterances since last timeout. Returning immediately.',
+                },
+              ],
+            };
+          }
+        }
+        
+        // Wait for utterances with polling
+        while (Date.now() - startTime < maxWaitMs) {
+          const pendingUtterances = queue.utterances
+            .filter(u => u.status === 'pending')
+            .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+          
+          if (pendingUtterances.length > 0) {
+            // Found utterances - dequeue them
+            pendingUtterances.forEach(u => queue.markDelivered(u.id));
+            
+            // Clear last timeout since we found utterances
+            lastTimeoutTimestamp = null;
+            
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Found ${pendingUtterances.length} utterance(s):\n\n${pendingUtterances.map(u => 
+                    `[${u.timestamp.toISOString()}] "${u.text}"`
+                  ).join('\n')}`,
+                },
+              ],
+            };
+          }
+          
+          // Wait 100ms before checking again
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        // Timeout reached - no utterances found
+        lastTimeoutTimestamp = new Date();
+        
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No utterances found after waiting ${secondsToWait} seconds.`,
             },
           ],
         };

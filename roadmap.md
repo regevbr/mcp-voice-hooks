@@ -63,7 +63,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] Test MCP server with Claude Code client
 - [x] Verify `get_recent_utterances` tool works in Claude Code
 - [x] Basic MCP integration working - utterances visible to Claude Code
-- [ ] Configure PostToolUse hooks to check for utterances automatically
+- [x] Configure PostToolUse hooks to check for utterances automatically
 
 ### Wait for utterance
 
@@ -121,37 +121,6 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - **Cons**: Connection management complexity, harder to debug
   - **Events**: `utterance`, `utterance_queued`, `utterance_delivered`
 - **Decision**: Start with HTTP for rapid POC development, migrate to WebSockets when real-time features become critical
-
-## Next Steps
-
-1. **Set up basic MCP server structure** with TypeScript and MCP SDK
-2. **Implement core utterance queue functionality** with essential tools
-3. **Create minimal browser client** with text input and server connection
-4. **Test hook integration** with Claude Code to verify real-time interaction
-5. **Iterate on user experience** before adding speech capabilities
-
-## ✅ **POC SUCCESS METRICS ACHIEVED**
-
-- [x] **Claude Code Integration** - Can see browser utterances via MCP proxy
-- [x] **Utterance Queue** - Browser to Claude Code communication working
-- [x] **Real-time Sharing** - Typing in browser visible immediately to Claude Code
-- [x] **Development Workflow** - Terminal-managed server with fast iteration
-- [ ] **Proper Delivery** - Fix duplicate utterance delivery (in progress)
-
-## 🔧 **Current Task: Fix Utterance Delivery**
-
-**Problem:** MCP calls return same utterances multiple times  
-**Solution:** Create atomic dequeue endpoint  
-**Status:** About to implement simpler approach  
-
-## **Next Development Phases**
-
-1. **✅ Complete Delivery Fix** - Atomic dequeue endpoint  
-2. **Hook Integration** - Configure PostToolUse hooks for interruption  
-3. **Speech Recognition** - Add Web Speech API for voice input  
-4. **Text-to-Speech** - Mac `say` command integration  
-5. **LLM Classification** - Smart utterance completion detection  
-6. **Production Ready** - Error handling, logging, deployment  
 
 ## **Architecture Achieved**
 
