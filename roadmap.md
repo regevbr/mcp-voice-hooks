@@ -1,5 +1,13 @@
 # MCP Voice Hooks - Roadmap
 
+## Completed Phases
+
+✅ **Text-Based POC** - Core MCP server with utterance queue  
+✅ **Wait for utterance** - Intelligent stop hook with voice input detection  
+✅ **Pre-Tool Use Hooks** - Force utterance processing before tool execution  
+✅ **Front-End Utterance Segmentation** - Web Speech API with automatic pause detection  
+✅ **Speech Recognition** - Full voice input with continuous listening  
+
 ## Vision
 
 Create an MCP server that enables real-time voice interaction with Claude Code and other MCP clients. The system will:
@@ -74,6 +82,16 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [x] `/api/should-wait` returns `{ shouldWait: boolean }` based on utterances since last timeout
   - [x] Stop hook calls this endpoint to decide whether to block or approve
 - [x] Stop hook now provides clear feedback messages when blocking or approving
+
+### Pre-Tool Use Hooks ✅ **COMPLETED**
+
+- [x] Create API endpoint to check for pending utterances
+  - [x] `/api/has-pending-utterances` returns `{ hasPending: boolean, pendingCount: number }`
+- [x] Implement pre-tool use hook script
+  - [x] Checks for pending utterances before allowing tool execution
+  - [x] Blocks tool execution if utterances are pending
+  - [x] Forces Claude to use `dequeue_utterances` tool first
+- [x] Hook provides clear feedback about pending utterance count
 
 ### Front-End Utterance Segmentation ✅ **COMPLETED**
 
@@ -153,9 +171,15 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 │   Browser UI    │    │ Unified Server  │    │  Claude Code    │
 │                 │    │                 │    │                 │
 │ • Text Input    │◄──►│ • HTTP Server   │    │ • MCP Proxy     │
-│ • Status View   │    │ • Shared Queue  │◄──►│ • Tool Calls    │
-│ • Auto Refresh  │    │ • Dequeue API   │    │ • Interruption  │
+│ • Voice Input   │    │ • Shared Queue  │◄──►│ • Tool Calls    │
+│ • Status View   │    │ • Hook APIs     │    │ • Pre-Tool Hook │
+│ • Auto Refresh  │    │ • Dequeue API   │    │ • Stop Hook     │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-**Key Innovation:** MCP proxy architecture enabling shared state between browser and Claude Code while maintaining development flexibility.
+**Key Innovations:**
+
+- MCP proxy architecture enabling shared state between browser and Claude Code
+- Web Speech API integration for automatic utterance segmentation
+- Intelligent hook system that ensures voice input is processed before actions
+- Pre-tool hooks that force utterance processing before tool execution

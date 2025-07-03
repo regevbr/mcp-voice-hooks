@@ -236,6 +236,17 @@ app.get('/api/should-wait', (req: Request, res: Response) => {
   res.json({ shouldWait });
 });
 
+// API for pre-tool hook to check for pending utterances
+app.get('/api/has-pending-utterances', (req: Request, res: Response) => {
+  const pendingCount = queue.utterances.filter(u => u.status === 'pending').length;
+  const hasPending = pendingCount > 0;
+  
+  res.json({ 
+    hasPending,
+    pendingCount
+  });
+});
+
 app.get('/', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
