@@ -46,6 +46,17 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^mcp__voice-hooks__",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./post-tool-voice-hook.sh"
+          }
+        ]
+      }
     ]
   }
 }
