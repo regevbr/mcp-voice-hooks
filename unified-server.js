@@ -36,7 +36,7 @@ class UtteranceQueue {
 
   getRecent(limit = 10) {
     return this.utterances
-      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, limit);
   }
 

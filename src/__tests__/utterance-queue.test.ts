@@ -41,9 +41,9 @@ describe('InMemoryUtteranceQueue', () => {
 
     it('should return utterances in reverse chronological order', async () => {
       const utterance1 = queue.add('First');
-      await new Promise(resolve => setTimeout(resolve, 1));
+      await new Promise(resolve => setTimeout(resolve, 10));
       const utterance2 = queue.add('Second');
-      await new Promise(resolve => setTimeout(resolve, 1));
+      await new Promise(resolve => setTimeout(resolve, 10));
       const utterance3 = queue.add('Third');
       
       const recent = queue.getRecent();
@@ -56,9 +56,9 @@ describe('InMemoryUtteranceQueue', () => {
 
     it('should respect the limit parameter', async () => {
       queue.add('First');
-      await new Promise(resolve => setTimeout(resolve, 1));
+      await new Promise(resolve => setTimeout(resolve, 10));
       queue.add('Second');
-      await new Promise(resolve => setTimeout(resolve, 1));
+      await new Promise(resolve => setTimeout(resolve, 10));
       queue.add('Third');
       
       const recent = queue.getRecent(2);
