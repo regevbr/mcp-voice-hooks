@@ -20,7 +20,7 @@ class UtteranceQueue {
   constructor() {
     this.utterances = [];
   }
-  
+
   add(text, timestamp) {
     const utterance = {
       id: randomUUID(),
@@ -28,18 +28,18 @@ class UtteranceQueue {
       timestamp: timestamp || new Date(),
       status: 'pending'
     };
-    
+
     this.utterances.push(utterance);
     console.log(`[Queue] Added utterance: "${utterance.text}" (${utterance.id})`);
     return utterance;
   }
-  
+
   getRecent(limit = 10) {
     return this.utterances
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
       .slice(0, limit);
   }
-  
+
   markDelivered(id) {
     const utterance = this.utterances.find(u => u.id === id);
     if (utterance) {
@@ -47,7 +47,7 @@ class UtteranceQueue {
       console.log(`[Queue] Marked utterance as delivered: ${id}`);
     }
   }
-  
+
   clear() {
     const count = this.utterances.length;
     this.utterances = [];
@@ -60,15 +60,15 @@ const queue = new UtteranceQueue();
 
 // Parse command line arguments
 const args = process.argv.slice(2);
-const mode = args.includes('--mcp-connect') ? 'connect' : 
-             args.includes('--mcp-managed') ? 'managed' : 'development';
+const mode = args.includes('--mcp-connect') ? 'connect' :
+  args.includes('--mcp-managed') ? 'managed' : 'development';
 
 console.log(`Starting Voice Hooks server in ${mode} mode...`);
 
 // HTTP Server Setup
 function setupHttpServer() {
   const app = express();
-  
+
   app.use(cors());
   app.use(express.json());
   app.use(express.static(path.join(__dirname, 'public')));
@@ -76,14 +76,14 @@ function setupHttpServer() {
   // API Routes
   app.post('/api/potential-utterances', (req, res) => {
     const { text, timestamp } = req.body;
-    
+
     if (!text || !text.trim()) {
       return res.status(400).json({ error: 'Text is required' });
     }
-    
+
     const parsedTimestamp = timestamp ? new Date(timestamp) : undefined;
     const utterance = queue.add(text, parsedTimestamp);
-    
+
     res.json({
       success: true,
       utterance: {
@@ -98,7 +98,7 @@ function setupHttpServer() {
   app.get('/api/utterances', (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const utterances = queue.getRecent(limit);
-    
+
     res.json({
       utterances: utterances.map(u => ({
         id: u.id,
@@ -126,14 +126,14 @@ function setupHttpServer() {
     const limit = parseInt(req.body?.limit) || 10;
     const pendingUtterances = queue.utterances
       .filter(u => u.status === 'pending')
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
       .slice(0, limit);
-    
+
     // Mark them as delivered atomically
     pendingUtterances.forEach(u => {
       queue.markDelivered(u.id);
     });
-    
+
     res.json({
       success: true,
       utterances: pendingUtterances.map(u => ({
@@ -205,7 +205,7 @@ function setupMcpServer() {
       case 'get_recent_utterances': {
         const limit = args?.limit || 10;
         const utterances = queue.getRecent(limit);
-        
+
         // Mark retrieved utterances as delivered
         utterances.forEach(u => {
           if (u.status === 'pending') {
@@ -217,10 +217,10 @@ function setupMcpServer() {
           content: [
             {
               type: 'text',
-              text: utterances.length > 0 
-                ? `Found ${utterances.length} recent utterances:\n\n${utterances.map(u => 
-                    `[${u.timestamp.toISOString()}] "${u.text}"`
-                  ).join('\n')}`
+              text: utterances.length > 0
+                ? `Found ${utterances.length} recent utterances:\n\n${utterances.map(u =>
+                  `[${u.timestamp.toISOString()}] "${u.text}"`
+                ).join('\n')}`
                 : 'No recent utterances found.',
             },
           ],
@@ -245,14 +245,14 @@ async function main() {
       const transport = new StdioServerTransport();
       await mcpServer.connect(transport);
       console.error('Voice Hooks MCP Server connected');
-      
+
     } else {
       // Development or managed mode - start both servers
       console.log('Starting unified server (HTTP + MCP)...');
-      
+
       // Start HTTP server
       setupHttpServer();
-      
+
       // Start MCP server
       const mcpServer = setupMcpServer();
       const transport = new StdioServerTransport();

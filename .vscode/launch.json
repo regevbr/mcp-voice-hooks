@@ -5,14 +5,20 @@
       "name": "Unified Server (HTTP + MCP)",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/unified-server.js",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "nodemon"
+      ],
+      "args": [
+        "${workspaceFolder}/unified-server.js"
+      ],
       "console": "integratedTerminal",
-      "restart": true,
-      "runtimeExecutable": "node",
       "env": {
         "NODE_ENV": "development"
       },
-      "skipFiles": ["<node_internals>/**"]
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
     }
   ]
 }
