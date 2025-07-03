@@ -20,43 +20,5 @@
       "Bash(ls:*)"
     ],
     "deny": []
-  },
-  "enabledMcpjsonServers": [
-    "voice-hooks"
-  ],
-  "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "./stop-hook.sh"
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "^(?!mcp__voice-hooks__).*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "./pre-tool-hook.sh"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "^mcp__voice-hooks__",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "./post-tool-voice-hook.sh"
-          }
-        ]
-      }
-    ]
   }
 }

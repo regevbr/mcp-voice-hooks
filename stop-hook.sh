@@ -20,7 +20,7 @@ if [ "$shouldWait" = "true" ]; then
     cat <<EOF
 {
   "decision": "block",
-  "reason": "Please use wait_for_utterance to check for voice input before stopping"
+  "reason": "Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input"
 }
 EOF
 else
