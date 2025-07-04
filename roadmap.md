@@ -7,6 +7,8 @@
 ✅ **Pre-Tool Use Hooks** - Force utterance processing before tool execution
 ✅ **Front-End Utterance Segmentation** - Web Speech API with automatic pause detection
 ✅ **Speech Recognition** - Full voice input with continuous listening
+✅ **NPM Package Published** - v1.0.0 published with npx support
+🔧 **Bug Fix v1.0.1** - Fixed CLI to use compiled JavaScript instead of TypeScript source
 
 ## Vision
 
