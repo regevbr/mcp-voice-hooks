@@ -37,11 +37,45 @@ npm run build
 
 ## Quick Start to experiment with the voice interface
 
-```bash
-# Start the development server
-npm run dev-unified
+The server runs automatically when you start Claude Code from this directory:
 
-# In another terminal, start claude code from the root of the project
+```bash
+cd mcp-voice-hooks
+claude
+```
+
+Then open http://localhost:3000 in your browser to use the voice interface.
+
+### Development Mode
+
+For development/debugging, you can run the server separately:
+
+**Terminal 1 - Start the development server:**
+
+```bash
+npm run dev-unified
+```
+
+**Terminal 2 - Configure and start Claude Code:**
+
+First, update `.mcp.json` to use proxy mode:
+
+```json
+{
+  "mcpServers": {
+    "voice-hooks": {
+      "type": "stdio",
+      "command": "npm",
+      "args": ["run", "mcp-proxy"],
+      "env": {}
+    }
+  }
+}
+```
+
+Then start Claude Code:
+
+```bash
 cd mcp-voice-hooks
 claude
 ```
