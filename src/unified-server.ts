@@ -143,10 +143,8 @@ app.post('/api/dequeue-utterances', (req: Request, res: Response) => {
   res.json({
     success: true,
     utterances: pendingUtterances.map(u => ({
-      id: u.id,
       text: u.text,
       timestamp: u.timestamp,
-      status: 'delivered',
     })),
   });
 });
@@ -343,7 +341,7 @@ if (IS_MCP_MANAGED) {
             {
               type: 'text',
               text: `Dequeued ${data.utterances.length} utterance(s):\n\n${
-                data.utterances.reverse().map((u: any) => `delivered:\t"${u.text}"\t[id: ${u.id}, time: ${new Date(u.timestamp).toISOString()}]`).join('\n')
+                data.utterances.reverse().map((u: any) => `"${u.text}"\t[time: ${new Date(u.timestamp).toISOString()}]`).join('\n')
               }`,
             },
           ],
