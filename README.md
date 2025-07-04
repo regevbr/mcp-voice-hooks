@@ -111,7 +111,7 @@ and then configure claude to use the mcp proxy like so:
 }
 ```
 
-## Voice responses (Work in progress)
+## Voice responses (Mac only)
 
 Add the post tool hook to your claude settings:
 
@@ -153,3 +153,23 @@ Add to your Claude Code settings JSON:
 ```
 
 To disable voice responses, set the value to `false` or remove the setting entirely.
+
+### High quality voice responses
+
+These voice responses are spoken by your Mac's system voice.
+
+Configure in `System Settings > Accessibility > Spoken Content > System Voice`
+
+I recommend using a Siri voice, as they are much higher quality.
+
+Click the info icon next to the system voice dropdown. Search for "Siri" to find the highest quality voices. You'll have to trigger a download of the voice.
+
+It may take a while to download.
+
+Once it's downloaded, you can select it in the system voice dropdown.
+
+Test it with the bash command:
+
+```bash
+say "Hi, this is your mac system voice"
+```
