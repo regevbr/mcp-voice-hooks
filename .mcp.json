@@ -2,10 +2,9 @@
   "mcpServers": {
     "voice-hooks": {
       "type": "stdio",
-      "command": "npm",
+      "command": "npx",
       "args": [
-        "run",
-        "mcp-unified"
+        "mcp-voice-hooks"
       ],
       "env": {}
     }

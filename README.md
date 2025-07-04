@@ -23,6 +23,35 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
 
 ## Installation
 
+### For Users (NPX - Recommended)
+
+The easiest way to use mcp-voice-hooks is via npx:
+
+```bash
+# Add to your project's .mcp.json
+{
+  "mcpServers": {
+    "voice-hooks": {
+      "type": "stdio", 
+      "command": "npx",
+      "args": ["mcp-voice-hooks"],
+      "env": {}
+    }
+  }
+}
+
+# Start Claude Code in your project
+claude
+```
+
+The first run will automatically:
+- Install hooks to `~/.mcp-voice-hooks/hooks/`
+- Configure your project's `.claude/settings.json`
+- Start the voice hooks server
+- Open http://localhost:3000 for the voice interface
+
+### For Development
+
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/mcp-voice-hooks.git
@@ -31,16 +60,18 @@ cd mcp-voice-hooks
 # Install dependencies
 npm install
 
-# Build the project
-npm run build
+# Link for local testing
+npm link
+
+# Test the NPX command
+npx mcp-voice-hooks
 ```
 
-## Quick Start to experiment with the voice interface
+## Quick Start
 
-The server runs automatically when you start Claude Code from this directory:
+Once installed, simply start Claude Code in any project with mcp-voice-hooks configured:
 
 ```bash
-cd mcp-voice-hooks
 claude
 ```
 
@@ -80,48 +111,56 @@ cd mcp-voice-hooks
 claude
 ```
 
-## To use in your own project
+## Manual Setup (Alternative)
 
-Disclaimer: This just a proof of concept. It is not really user friendly or ready for distribution. But you should be able to get it working if you're interested.
+If you prefer manual setup instead of NPX:
 
-1. **Copy the hooks to your project**:
+1. **Add MCP server to your project's `.mcp.json`**:
 
-   ```bash
-   # Copy the hooks directory to your project
-   cp -r /path/to/mcp-voice-hooks/.claude/hooks /path/to/your-project/.claude/
-
-   # Make the hook files executable
-   chmod +x /path/to/your-project/.claude/hooks/*.sh
+   ```json
+   {
+     "mcpServers": {
+       "voice-hooks": {
+         "type": "stdio",
+         "command": "npx",
+         "args": ["mcp-voice-hooks"],
+         "env": {}
+       }
+     }
+   }
    ```
 
-2. **Configure Claude Code**:
+2. **The NPX command will automatically**:
+   - Install hooks to `~/.mcp-voice-hooks/hooks/`
+   - Configure your project's `.claude/settings.json` with:
 
-   copy the mcp settings from `.mcp.json` to your own project
-
-3. **Configure hooks** in your claude settings:
-
-```json
-{
+   ```json
    {
      "hooks": {
        "PreToolUse": [{
          "matcher": "^(?!mcp__voice-hooks__).*",
          "hooks": [{
            "type": "command",
-           "command": "./.claude/hooks/pre-tool-hook.sh"
+           "command": "sh ~/.mcp-voice-hooks/hooks/pre-tool-hook.sh"
          }]
        }],
        "Stop": [{
          "matcher": "",
          "hooks": [{
            "type": "command",
-           "command": "./.claude/hooks/stop-hook.sh"
+           "command": "sh ~/.mcp-voice-hooks/hooks/stop-hook.sh"
+         }]
+       }],
+       "PostToolUse": [{
+         "matcher": "^mcp__voice-hooks__",
+         "hooks": [{
+           "type": "command", 
+           "command": "sh ~/.mcp-voice-hooks/hooks/post-tool-voice-hook.sh"
          }]
        }]
      }
    }
-}
-```
+   ```
 
 ## WIP voice responses
 
