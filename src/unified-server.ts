@@ -195,8 +195,7 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
     }
   }
 
-  // Play notification sound since we're about to start waiting
-  await playNotificationSound();
+  let firstTime = true;
 
   // Poll for utterances
   while (Date.now() - startTime < maxWaitMs) {
@@ -230,6 +229,12 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
         waitTime: Date.now() - startTime,
       });
       return;
+    }
+
+    if (firstTime) {
+      firstTime = false;
+      // Play notification sound since we're about to start waiting
+      await playNotificationSound();
     }
 
     // Wait 100ms before checking again
@@ -270,7 +275,7 @@ app.get('/api/has-pending-utterances', (req: Request, res: Response) => {
 app.delete('/api/utterances', (req: Request, res: Response) => {
   const clearedCount = queue.utterances.length;
   queue.clear();
-  
+
   res.json({
     success: true,
     message: `Cleared ${clearedCount} utterances`,

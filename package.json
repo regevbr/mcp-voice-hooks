@@ -22,7 +22,8 @@
     "mcp-proxy": "ts-node --esm src/mcp-server-proxy.ts",
     "start": "node dist/index.js",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
@@ -39,6 +40,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.10",
     "@types/supertest": "^6.0.3",
+    "husky": "^9.1.7",
     "jest": "^29.7.0",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.1",
