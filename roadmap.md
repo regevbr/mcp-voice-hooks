@@ -132,16 +132,71 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [ ] Expose a `speak_text` MCP tool to speak text
 - [ ] Update the `wait_for_utterance` tool to include a `text_to_speak_before_listening` parameter
 
+### Tool Description Improvements
+
+- [ ] Improve MCP tool descriptions for better standalone usage (without hooks)
+  - [ ] Add clear, detailed descriptions for `dequeue_utterances`
+  - [ ] Add comprehensive description for `wait_for_utterance`
+  - [ ] Include usage examples in tool descriptions
+  - [ ] Explain the voice interaction workflow in descriptions
+- [ ] Test server usability without hooks installed
+- [ ] Document standalone usage patterns
+
+### Audio Feedback
+
+- [ ] Add sound notification when `wait_for_utterance` starts listening
+  - [ ] Implement simple sound playback (ding/beep)
+  - [ ] Use system sounds or generate simple tone
+  - [ ] Make sound optional via configuration
+  - [ ] Play sound before starting to wait for utterances
+
+### UI Enhancements
+
+- [ ] Add delete button for pending utterances in web interface
+  - [ ] Implement DELETE endpoint on server (`DELETE /api/utterances/:id`)
+  - [ ] Add delete button to each pending utterance in UI
+  - [ ] Update UI to handle deletion response
+  - [ ] Ensure proper queue state management after deletion
+- [ ] Add a "Clear All" button to the UI
+
 ### NPX Integration
 
 - [ ] Create CLI entry point (`bin/cli.js`) for npx support
 - [ ] Implement `npx mcp-voice-hooks` main command
-  - [ ] Auto-install/update hook files to user directory (`~/.mcp-voice-hooks/hooks/`)
-  - [ ] Automatically configure project-specific Claude Code settings (`./.claude/settings.json`)
-  - [ ] Run MCP server after setup
+  - [ ] Default behavior: Start the MCP server without hook installation
+  - [ ] Add `--install-hooks` flag for hook installation
+  - [ ] When `--install-hooks` is used:
+    - [ ] Auto-install/update hook files to user directory (`~/.mcp-voice-hooks/hooks/`)
+    - [ ] Automatically configure project-specific Claude Code settings (`./.claude/settings.json`)
   - [ ] Handle first-time setup and updates seamlessly
+- [ ] Create separate hook installation script (`npx mcp-voice-hooks install-hooks`)
 - [ ] Create comprehensive documentation for npx installation
 - [ ] Test npx integration across different environments
+
+### NPM Publishing
+
+- [ ] Prepare package for npm publication
+  - [ ] Update package.json with proper metadata (description, keywords, repository, author)
+  - [ ] Add `"bin"` field to package.json pointing to CLI entry point
+  - [ ] Ensure all necessary files are included in the published package
+  - [ ] Add `.npmignore` if needed to exclude development files
+- [ ] Create npm account and configure authentication
+- [ ] Test package locally with `npm pack` and `npm install *.tgz`
+- [ ] Publish to npm registry with `npm publish`
+- [ ] Test npx execution from npm: `npx mcp-voice-hooks`
+- [ ] Set up automated publishing workflow (GitHub Actions)
+
+### Claude MCP Integration
+
+- [ ] Research `claude mcp add` command
+- [ ] Make server compatible with standard MCP discovery/installation
+- [ ] Create `.mcp.json` template for easy manual configuration
+- [ ] Document installation methods:
+  - [ ] Manual `.mcp.json` configuration
+  - [ ] NPX with automatic setup
+  - [ ] Future: `claude mcp add` command (when available)
+- [ ] Ensure server metadata is properly exposed for MCP clients
+- [ ] Test compatibility with Claude Desktop and other MCP clients
 
 **Automatic Hook Configuration** (added to `~/.claude/settings.json`):
 

@@ -6,8 +6,10 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { randomUUID } from 'crypto';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { debugLog } from './debug.ts';
+import { debugLog } from './debug.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   CallToolRequestSchema,
@@ -21,6 +23,21 @@ const __dirname = path.dirname(__filename);
 const DEFAULT_WAIT_TIMEOUT_SECONDS = 30;
 const MIN_WAIT_TIMEOUT_SECONDS = 30;
 const MAX_WAIT_TIMEOUT_SECONDS = 60;
+
+// Promisified exec for async/await
+const execAsync = promisify(exec);
+
+// Function to play a sound notification
+async function playNotificationSound() {
+  try {
+    // Use macOS system sound
+    await execAsync('afplay /System/Library/Sounds/Tink.aiff');
+    debugLog('[Sound] Played notification sound');
+  } catch (error) {
+    debugLog(`[Sound] Failed to play sound: ${error}`);
+    // Don't throw - sound is not critical
+  }
+}
 
 // Shared utterance queue
 interface Utterance {
@@ -177,6 +194,9 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
       return;
     }
   }
+  
+  // Play notification sound since we're about to start waiting
+  await playNotificationSound();
   
   // Poll for utterances
   while (Date.now() - startTime < maxWaitMs) {
