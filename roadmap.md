@@ -168,10 +168,6 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [x] Handle first-time setup and updates seamlessly
 - [x] Create comprehensive documentation for npx installation
 - [ ] Test npx integration across different environments
-- [ ] consider making the install script do more:
-  - [ ] add the mcp configuration to .mcp.json
-  - [ ] add permissions to claude settings for the mcp server
-  - [ ] add permissions for the mcp server tools "mcp__voice-hooks__dequeue_utterances" and "mcp__voice-hooks__wait_for_utterance"
 - [ ] use a custom localhost url instead of localhost:3000
 
 ### NPM Publishing
