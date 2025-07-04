@@ -1,15 +1,5 @@
 # MCP Voice Hooks - Roadmap
 
-## Completed Phases
-
-✅ **Text-Based POC** - Core MCP server with utterance queue
-✅ **Wait for utterance** - Intelligent stop hook with voice input detection
-✅ **Pre-Tool Use Hooks** - Force utterance processing before tool execution
-✅ **Front-End Utterance Segmentation** - Web Speech API with automatic pause detection
-✅ **Speech Recognition** - Full voice input with continuous listening
-✅ **NPM Package Published** - v1.0.0 published with npx support
-🔧 **Bug Fix v1.0.1** - Fixed CLI to use compiled JavaScript instead of TypeScript source
-
 ## Vision
 
 Create an MCP server that enables real-time voice interaction with Claude Code and other MCP clients. The system will:
@@ -239,15 +229,6 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - **Events**: `utterance`, `utterance_queued`, `utterance_delivered`
 - **Decision**: Start with HTTP for rapid POC development, migrate to WebSockets when real-time features become critical
 
-## Recent Updates
-
-### Build System Improvements (2025-01-04)
-
-- Switched from TypeScript compiler (tsc) to tsup bundler
-- Resolved module resolution issues between development and build
-- Now supports .ts imports everywhere (both MCP runtime and builds)
-- Fixed TypeScript return statement errors in Express handlers
-
 ## **Architecture Achieved**
 
 ```text
@@ -265,5 +246,4 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 - MCP proxy architecture enabling shared state between browser and Claude Code
 - Web Speech API integration for automatic utterance segmentation
-- Intelligent hook system that ensures voice input is processed before actions
-- Pre-tool hooks that force utterance processing before tool execution
+- Hook system that ensures voice input is processed before actions
