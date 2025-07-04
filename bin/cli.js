@@ -149,10 +149,10 @@ async function configureClaudeCodeSettings() {
 
 // Run the MCP server
 async function runMCPServer() {
-  const serverPath = path.join(__dirname, '..', 'src', 'unified-server.ts');
+  const serverPath = path.join(__dirname, '..', 'dist', 'unified-server.js');
   
-  // Use ts-node to run the TypeScript server
-  const child = spawn('npx', ['ts-node', '--esm', serverPath, '--mcp-managed'], {
+  // Run the compiled JavaScript server
+  const child = spawn('node', [serverPath, '--mcp-managed'], {
     stdio: 'inherit',
     cwd: path.join(__dirname, '..')
   });

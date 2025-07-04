@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "mcp-voice-hooks": "./bin/cli.js"
+    "mcp-voice-hooks": "bin/cli.js"
   },
   "directories": {
     "doc": "docs"
@@ -26,7 +26,7 @@
   "keywords": [
     "mcp",
     "claude",
-    "claude-code", 
+    "claude-code",
     "voice",
     "speech-recognition",
     "model-context-protocol",
@@ -37,7 +37,7 @@
   "license": "UNLICENSED",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/mcp-voice-hooks.git"
+    "url": "git+https://github.com/johnmatthewtennant/mcp-voice-hooks.git"
   },
   "bugs": {
     "url": "https://github.com/yourusername/mcp-voice-hooks/issues"

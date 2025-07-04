@@ -174,7 +174,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [x] Add `"bin"` field to package.json pointing to CLI entry point
   - [x] Ensure all necessary files are included in the published package
   - [x] Add `.npmignore` if needed to exclude development files
-- [ ] Create npm account and configure authentication
+- [x] Create npm account and configure authentication
 - [ ] Test package locally with `npm pack` and `npm install *.tgz`
 - [ ] Publish to npm registry with `npm publish`
 - [ ] Test npx execution from npm: `npx mcp-voice-hooks`
