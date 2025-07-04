@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "type": "module",
+  "bin": {
+    "mcp-voice-hooks": "./bin/cli.js"
+  },
   "directories": {
     "doc": "docs"
   },

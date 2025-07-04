@@ -2,11 +2,11 @@
 
 ## Completed Phases
 
-✅ **Text-Based POC** - Core MCP server with utterance queue  
-✅ **Wait for utterance** - Intelligent stop hook with voice input detection  
-✅ **Pre-Tool Use Hooks** - Force utterance processing before tool execution  
-✅ **Front-End Utterance Segmentation** - Web Speech API with automatic pause detection  
-✅ **Speech Recognition** - Full voice input with continuous listening  
+✅ **Text-Based POC** - Core MCP server with utterance queue
+✅ **Wait for utterance** - Intelligent stop hook with voice input detection
+✅ **Pre-Tool Use Hooks** - Force utterance processing before tool execution
+✅ **Front-End Utterance Segmentation** - Web Speech API with automatic pause detection
+✅ **Speech Recognition** - Full voice input with continuous listening
 
 ## Vision
 
@@ -131,6 +131,29 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [ ] Implement TTS using Mac's `say` command on the server
 - [ ] Expose a `speak_text` MCP tool to speak text
 - [ ] Update the `wait_for_utterance` tool to include a `text_to_speak_before_listening` parameter
+
+### NPX Integration
+
+- [ ] Create CLI entry point (`bin/cli.js`) for npx support
+- [ ] Implement `npx mcp-voice-hooks` main command
+  - [ ] Auto-install/update hook files to user directory (`~/.mcp-voice-hooks/hooks/`)
+  - [ ] Automatically configure project-specific Claude Code settings (`./.claude/settings.json`)
+  - [ ] Run MCP server after setup
+  - [ ] Handle first-time setup and updates seamlessly
+- [ ] Create comprehensive documentation for npx installation
+- [ ] Test npx integration across different environments
+
+**Automatic Hook Configuration** (added to `~/.claude/settings.json`):
+
+   ```json
+   {
+     "hooks": {
+       "Stop": [{"matcher": "", "hooks": [{"type": "command", "command": "sh ~/.mcp-voice-hooks/hooks/stop-hook.sh"}]}],
+       "PreToolUse": [{"matcher": "^(?!mcp__voice-hooks__).*", "hooks": [{"type": "command", "command": "sh ~/.mcp-voice-hooks/hooks/pre-tool-hook.sh"}]}],
+       "PostToolUse": [{"matcher": "^mcp__voice-hooks__", "hooks": [{"type": "command", "command": "sh ~/.mcp-voice-hooks/hooks/post-tool-voice-hook.sh"}]}]
+     }
+   }
+   ```
 
 ## Technical Decisions
 
