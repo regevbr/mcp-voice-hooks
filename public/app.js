@@ -5,6 +5,7 @@ class VoiceHooksClient {
         this.utteranceInput = document.getElementById('utteranceInput');
         this.sendBtn = document.getElementById('sendBtn');
         this.refreshBtn = document.getElementById('refreshBtn');
+        this.clearAllBtn = document.getElementById('clearAllBtn');
         this.utterancesList = document.getElementById('utterancesList');
         this.totalCount = document.getElementById('totalCount');
         this.pendingCount = document.getElementById('pendingCount');
@@ -104,6 +105,7 @@ class VoiceHooksClient {
     setupEventListeners() {
         this.sendBtn.addEventListener('click', () => this.sendUtterance());
         this.refreshBtn.addEventListener('click', () => this.loadData());
+        this.clearAllBtn.addEventListener('click', () => this.clearAllUtterances());
         this.listenBtn.addEventListener('click', () => this.toggleListening());
         
         this.utteranceInput.addEventListener('keypress', (e) => {
@@ -270,6 +272,39 @@ class VoiceHooksClient {
             }
         } catch (error) {
             console.error('Failed to send voice utterance:', error);
+        }
+    }
+    
+    async clearAllUtterances() {
+        if (!confirm('Are you sure you want to clear all utterances?')) {
+            return;
+        }
+        
+        this.clearAllBtn.disabled = true;
+        this.clearAllBtn.textContent = 'Clearing...';
+        
+        try {
+            const response = await fetch(`${this.baseUrl}/api/utterances`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                this.loadData(); // Refresh the list
+                this.debugLog('Cleared all utterances:', result);
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.error || 'Failed to clear utterances'}`);
+            }
+        } catch (error) {
+            console.error('Failed to clear utterances:', error);
+            alert('Failed to clear utterances. Make sure the server is running.');
+        } finally {
+            this.clearAllBtn.disabled = false;
+            this.clearAllBtn.textContent = 'Clear All';
         }
     }
     

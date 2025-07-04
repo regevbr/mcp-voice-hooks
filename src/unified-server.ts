@@ -266,6 +266,18 @@ app.get('/api/has-pending-utterances', (req: Request, res: Response) => {
   });
 });
 
+// API to clear all utterances
+app.delete('/api/utterances', (req: Request, res: Response) => {
+  const clearedCount = queue.utterances.length;
+  queue.clear();
+  
+  res.json({
+    success: true,
+    message: `Cleared ${clearedCount} utterances`,
+    clearedCount
+  });
+});
+
 app.get('/', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
