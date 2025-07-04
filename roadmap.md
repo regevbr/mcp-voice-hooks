@@ -1,6 +1,6 @@
 # MCP Voice Hooks - Roadmap
 
-_Last updated: 2025-07-04_
+_Last updated: 2025-01-04_
 
 ## Completed Phases
 
