@@ -1,0 +1,17 @@
+{
+  "entry": [
+    "src/unified-server.ts",
+    "src/index.ts"
+  ],
+  "project": [
+    "src/**/*.ts"
+  ],
+  "ignore": [
+    "src/__tests__/**",
+    "public/**"
+  ],
+  "ignoreBinaries": [
+    "knip",
+    "ts-prune"
+  ]
+}

@@ -198,14 +198,15 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [ ] Ensure server metadata is properly exposed for MCP clients
 - [ ] Test compatibility with Claude Desktop and other MCP clients
 
-### Development Quality
+### Development Quality ✅ **COMPLETED**
 
-- [ ] Add pre-commit hooks to run tests automatically
-  - [ ] Install and configure pre-commit framework
-  - [ ] Set up hooks to run unit tests before commits
-  - [ ] Configure hooks to run linting and formatting
-  - [ ] Add hooks for TypeScript type checking
-  - [ ] Ensure tests pass before allowing commits
+- [x] Add pre-commit hooks to run tests automatically
+  - [x] Install and configure husky pre-commit framework
+  - [x] Set up hooks to run unit tests before commits
+  - [x] Configure hooks to run knip and ts-prune for unused code detection
+  - [x] Add hooks for TypeScript type checking
+  - [x] Ensure tests pass before allowing commits
+  - [x] Require roadmap.md updates in every commit
 
 **Automatic Hook Configuration** (added to `~/.claude/settings.json`):
 

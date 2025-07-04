@@ -5,13 +5,3 @@ export function debugLog(...args: any[]): void {
     console.log(...args);
   }
 }
-
-export function debugError(...args: any[]): void {
-  if (DEBUG) {
-    console.error(...args);
-  }
-}
-
-export function isDebugEnabled(): boolean {
-  return DEBUG;
-}
