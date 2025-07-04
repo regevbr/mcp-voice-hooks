@@ -11,19 +11,28 @@ const __dirname = path.dirname(__filename);
 
 // Main entry point for npx mcp-voice-hooks
 async function main() {
+  const args = process.argv.slice(2);
+  const command = args[0];
+
   try {
-    console.log('🎤 MCP Voice Hooks - Starting...');
-    
-    // Step 1: Ensure user directory exists and install/update hooks
-    await ensureUserDirectorySetup();
-    
-    // Step 2: Configure Claude Code settings automatically
-    await configureClaudeCodeSettings();
-    
-    // Step 3: Run the MCP server
-    console.log('🚀 Starting MCP server...');
-    await runMCPServer();
-    
+    if (command === 'install-hooks') {
+      console.log('🔧 Installing MCP Voice Hooks...');
+      
+      // Step 1: Ensure user directory exists and install/update hooks
+      await ensureUserDirectorySetup();
+      
+      // Step 2: Configure Claude Code settings automatically
+      await configureClaudeCodeSettings();
+      
+      console.log('\n✅ Installation complete!');
+      console.log('📝 To start the server, run: npx mcp-voice-hooks');
+    } else {
+      // Default behavior: just run the MCP server
+      console.log('🎤 MCP Voice Hooks - Starting server...');
+      console.log('💡 Note: If hooks are not installed, run: npx mcp-voice-hooks install-hooks');
+      console.log('');
+      await runMCPServer();
+    }
   } catch (error) {
     console.error('❌ Error:', error.message);
     process.exit(1);

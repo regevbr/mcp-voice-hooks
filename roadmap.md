@@ -152,25 +152,19 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 ### UI Enhancements
 
-- [ ] Add delete button for pending utterances in web interface
-  - [ ] Implement DELETE endpoint on server (`DELETE /api/utterances/:id`)
-  - [ ] Add delete button to each pending utterance in UI
-  - [ ] Update UI to handle deletion response
-  - [ ] Ensure proper queue state management after deletion
-- [ ] Add a "Clear All" button to the UI
+- [x] Add a "Clear All" button to the UI
 
 ### NPX Integration
 
-- [ ] Create CLI entry point (`bin/cli.js`) for npx support
-- [ ] Implement `npx mcp-voice-hooks` main command
-  - [ ] Default behavior: Start the MCP server without hook installation
-  - [ ] Add `--install-hooks` flag for hook installation
-  - [ ] When `--install-hooks` is used:
-    - [ ] Auto-install/update hook files to user directory (`~/.mcp-voice-hooks/hooks/`)
-    - [ ] Automatically configure project-specific Claude Code settings (`./.claude/settings.json`)
-  - [ ] Handle first-time setup and updates seamlessly
-- [ ] Create separate hook installation script (`npx mcp-voice-hooks install-hooks`)
-- [ ] Create comprehensive documentation for npx installation
+- [x] Create CLI entry point (`bin/cli.js`) for npx support
+- [x] Implement `npx mcp-voice-hooks` main command
+  - [x] Default behavior: Start the MCP server
+  - [x] Handle server startup and configuration
+- [x] Implement `npx mcp-voice-hooks install-hooks` subcommand
+  - [x] Auto-install/update hook files to user directory (`~/.mcp-voice-hooks/hooks/`)
+  - [x] Automatically configure project-specific Claude Code settings (`./.claude/settings.json`)
+  - [x] Handle first-time setup and updates seamlessly
+- [x] Create comprehensive documentation for npx installation
 - [ ] Test npx integration across different environments
 
 ### NPM Publishing

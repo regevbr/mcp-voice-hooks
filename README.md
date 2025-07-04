@@ -21,101 +21,19 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
 - 🔄 **Continuous Interaction**: Keep talking while Claude works - no need to stop between commands
 - 🪝 **Smart Hook System**: Pre-tool and stop hooks ensure Claude always checks for your input
 
-## Installation
+## Installation in Your Own Project
 
-### For Users (NPX - Recommended)
+1. **Install the hooks** (first time only):
 
-The easiest way to use mcp-voice-hooks is via npx:
+   ```bash
+   npx mcp-voice-hooks install-hooks
+   ```
 
-```bash
-# Add to your project's .mcp.json
-{
-  "mcpServers": {
-    "voice-hooks": {
-      "type": "stdio", 
-      "command": "npx",
-      "args": ["mcp-voice-hooks"],
-      "env": {}
-    }
-  }
-}
+   This will:
+   - Install hook scripts to `~/.mcp-voice-hooks/hooks/`
+   - Configure your project's `.claude/settings.json`
 
-# Start Claude Code in your project
-claude
-```
-
-The first run will automatically:
-- Install hooks to `~/.mcp-voice-hooks/hooks/`
-- Configure your project's `.claude/settings.json`
-- Start the voice hooks server
-- Open http://localhost:3000 for the voice interface
-
-### For Development
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/mcp-voice-hooks.git
-cd mcp-voice-hooks
-
-# Install dependencies
-npm install
-
-# Link for local testing
-npm link
-
-# Test the NPX command
-npx mcp-voice-hooks
-```
-
-## Quick Start
-
-Once installed, simply start Claude Code in any project with mcp-voice-hooks configured:
-
-```bash
-claude
-```
-
-Then open http://localhost:3000 in your browser to use the voice interface.
-
-### Development Mode
-
-For development/debugging, you can run the server separately:
-
-**Terminal 1 - Start the development server:**
-
-```bash
-npm run dev-unified
-```
-
-**Terminal 2 - Configure and start Claude Code:**
-
-First, update `.mcp.json` to use proxy mode:
-
-```json
-{
-  "mcpServers": {
-    "voice-hooks": {
-      "type": "stdio",
-      "command": "npm",
-      "args": ["run", "mcp-proxy"],
-      "env": {}
-    }
-  }
-}
-```
-
-Then start Claude Code:
-
-```bash
-cd mcp-voice-hooks
-claude
-```
-
-## Manual Setup (Alternative)
-
-If you prefer manual setup instead of NPX:
-
-1. **Add MCP server to your project's `.mcp.json`**:
+2. **Add the MCP server** to your project's `.mcp.json`:
 
    ```json
    {
@@ -130,37 +48,60 @@ If you prefer manual setup instead of NPX:
    }
    ```
 
-2. **The NPX command will automatically**:
-   - Install hooks to `~/.mcp-voice-hooks/hooks/`
-   - Configure your project's `.claude/settings.json` with:
+3. **Start Claude Code**:
 
-   ```json
-   {
-     "hooks": {
-       "PreToolUse": [{
-         "matcher": "^(?!mcp__voice-hooks__).*",
-         "hooks": [{
-           "type": "command",
-           "command": "sh ~/.mcp-voice-hooks/hooks/pre-tool-hook.sh"
-         }]
-       }],
-       "Stop": [{
-         "matcher": "",
-         "hooks": [{
-           "type": "command",
-           "command": "sh ~/.mcp-voice-hooks/hooks/stop-hook.sh"
-         }]
-       }],
-       "PostToolUse": [{
-         "matcher": "^mcp__voice-hooks__",
-         "hooks": [{
-           "type": "command", 
-           "command": "sh ~/.mcp-voice-hooks/hooks/post-tool-voice-hook.sh"
-         }]
-       }]
-     }
-   }
+   ```bash
+   claude
    ```
+
+4. **Open the voice interface** at <http://localhost:3000> and start speaking! Note: you need to send one text message to Claude to trigger the voice hooks.
+
+## Development Mode
+
+If you're developing mcp-voice-hooks itself:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/yourusername/mcp-voice-hooks.git
+cd mcp-voice-hooks
+
+# 2. Install dependencies
+npm install
+
+# 3. Link the package locally
+npm link
+
+# 4. Install hooks (one time)
+npx mcp-voice-hooks install-hooks
+
+# 5. Start Claude Code
+claude
+```
+
+NOTE: You need to restart Claude Code each time you make changes.
+
+### Hot Reload
+
+For hot reload during development, you can run the development server with
+
+```bash
+npm run dev-unified
+```
+
+and then configure claude to use the mcp proxy like so:
+
+```json
+{
+  "mcpServers": {
+    "voice-hooks": {
+      "type": "stdio",
+      "command": "npm",
+      "args": ["run", "mcp-proxy"],
+      "env": {}
+    }
+  }
+}
+```
 
 ## WIP voice responses
 
