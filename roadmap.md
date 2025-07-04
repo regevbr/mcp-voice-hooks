@@ -169,11 +169,11 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 ### NPM Publishing
 
-- [ ] Prepare package for npm publication
-  - [ ] Update package.json with proper metadata (description, keywords, repository, author)
-  - [ ] Add `"bin"` field to package.json pointing to CLI entry point
-  - [ ] Ensure all necessary files are included in the published package
-  - [ ] Add `.npmignore` if needed to exclude development files
+- [x] Prepare package for npm publication
+  - [x] Update package.json with proper metadata (description, keywords, repository, author)
+  - [x] Add `"bin"` field to package.json pointing to CLI entry point
+  - [x] Ensure all necessary files are included in the published package
+  - [x] Add `.npmignore` if needed to exclude development files
 - [ ] Create npm account and configure authentication
 - [ ] Test package locally with `npm pack` and `npm install *.tgz`
 - [ ] Publish to npm registry with `npm publish`

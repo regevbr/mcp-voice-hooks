@@ -22,10 +22,27 @@
     "test:watch": "jest --watch",
     "prepare": "husky"
   },
-  "keywords": [],
+  "description": "Real-time voice interaction for Claude Code. Speak naturally while Claude works - interrupt, redirect, or provide continuous feedback without stopping.",
+  "keywords": [
+    "mcp",
+    "claude",
+    "claude-code", 
+    "voice",
+    "speech-recognition",
+    "model-context-protocol",
+    "ai-assistant",
+    "voice-control"
+  ],
   "author": "",
-  "license": "ISC",
-  "description": "",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/mcp-voice-hooks.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/mcp-voice-hooks/issues"
+  },
+  "homepage": "https://github.com/yourusername/mcp-voice-hooks#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.13.3",
     "cors": "^2.8.5",
