@@ -142,13 +142,13 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [ ] Test server usability without hooks installed
 - [ ] Document standalone usage patterns
 
-### Audio Feedback
+### Audio Feedback ✅ **COMPLETED**
 
-- [ ] Add sound notification when `wait_for_utterance` starts listening
-  - [ ] Implement simple sound playback (ding/beep)
-  - [ ] Use system sounds or generate simple tone
-  - [ ] Make sound optional via configuration
-  - [ ] Play sound before starting to wait for utterances
+- [x] Add sound notification when `wait_for_utterance` starts listening
+  - [x] Implement simple sound playbook (ding/beep)
+  - [x] Use system sounds or generate simple tone
+  - [x] Make sound optional via configuration
+  - [x] Play sound before starting to wait for utterances
 
 ### UI Enhancements
 
@@ -197,6 +197,15 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [ ] Future: `claude mcp add` command (when available)
 - [ ] Ensure server metadata is properly exposed for MCP clients
 - [ ] Test compatibility with Claude Desktop and other MCP clients
+
+### Development Quality
+
+- [ ] Add pre-commit hooks to run tests automatically
+  - [ ] Install and configure pre-commit framework
+  - [ ] Set up hooks to run unit tests before commits
+  - [ ] Configure hooks to run linting and formatting
+  - [ ] Add hooks for TypeScript type checking
+  - [ ] Ensure tests pass before allowing commits
 
 **Automatic Hook Configuration** (added to `~/.claude/settings.json`):
 

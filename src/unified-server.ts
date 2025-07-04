@@ -9,7 +9,7 @@ import { randomUUID } from 'crypto';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { debugLog } from './debug.js';
+import { debugLog } from './debug.ts';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   CallToolRequestSchema,
@@ -100,7 +100,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 // API Routes
 app.post('/api/potential-utterances', (req: Request, res: Response) => {
   const { text, timestamp } = req.body;
-  
+
   if (!text || !text.trim()) {
     return res.status(400).json({ error: 'Text is required' });
   }
@@ -175,9 +175,9 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
   );
   const maxWaitMs = secondsToWait * 1000;
   const startTime = Date.now();
-  
+
   debugLog(`[Server] Starting wait_for_utterance (${secondsToWait}s)`);
-  
+
   // Check if we should return immediately
   if (lastTimeoutTimestamp) {
     const hasNewUtterances = queue.utterances.some(
@@ -194,30 +194,30 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
       return;
     }
   }
-  
+
   // Play notification sound since we're about to start waiting
   await playNotificationSound();
-  
+
   // Poll for utterances
   while (Date.now() - startTime < maxWaitMs) {
     const pendingUtterances = queue.utterances.filter(
       u => u.status === 'pending' &&
-      (!lastTimeoutTimestamp || u.timestamp > lastTimeoutTimestamp)
+        (!lastTimeoutTimestamp || u.timestamp > lastTimeoutTimestamp)
     );
-    
+
     if (pendingUtterances.length > 0) {
       // Found utterances - clear lastTimeoutTimestamp
       lastTimeoutTimestamp = null;
-      
+
       // Sort by timestamp (oldest first)
       const sortedUtterances = pendingUtterances
         .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-      
+
       // Mark utterances as delivered
       sortedUtterances.forEach(u => {
         queue.markDelivered(u.id);
       });
-      
+
       res.json({
         success: true,
         utterances: sortedUtterances.map(u => ({
@@ -231,14 +231,14 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
       });
       return;
     }
-    
+
     // Wait 100ms before checking again
     await new Promise(resolve => setTimeout(resolve, 100));
   }
-  
+
   // Timeout reached - no utterances found
   lastTimeoutTimestamp = new Date();
-  
+
   res.json({
     success: true,
     utterances: [],
@@ -249,9 +249,9 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
 
 // API for the stop hook to check if it should wait
 app.get('/api/should-wait', (req: Request, res: Response) => {
-  const shouldWait = !lastTimeoutTimestamp || 
+  const shouldWait = !lastTimeoutTimestamp ||
     queue.utterances.some(u => u.timestamp > lastTimeoutTimestamp!);
-  
+
   res.json({ shouldWait });
 });
 
@@ -259,8 +259,8 @@ app.get('/api/should-wait', (req: Request, res: Response) => {
 app.get('/api/has-pending-utterances', (req: Request, res: Response) => {
   const pendingCount = queue.utterances.filter(u => u.status === 'pending').length;
   const hasPending = pendingCount > 0;
-  
-  res.json({ 
+
+  res.json({
     hasPending,
     pendingCount
   });
@@ -280,7 +280,7 @@ app.listen(HTTP_PORT, () => {
 // MCP Server Setup (only if MCP-managed)
 if (IS_MCP_MANAGED) {
   console.log('[MCP] Initializing MCP server...');
-  
+
   const mcpServer = new Server(
     {
       name: 'voice-hooks',
@@ -333,7 +333,7 @@ if (IS_MCP_MANAGED) {
 
   mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
-    
+
     try {
       if (name === 'dequeue_utterances') {
         const limit = (args?.limit as number) ?? 10;
@@ -342,9 +342,9 @@ if (IS_MCP_MANAGED) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ limit }),
         });
-        
+
         const data = await response.json() as any;
-        
+
         if (data.utterances.length === 0) {
           return {
             content: [
@@ -355,19 +355,18 @@ if (IS_MCP_MANAGED) {
             ],
           };
         }
-        
+
         return {
           content: [
             {
               type: 'text',
-              text: `Dequeued ${data.utterances.length} utterance(s):\n\n${
-                data.utterances.reverse().map((u: any) => `"${u.text}"\t[time: ${new Date(u.timestamp).toISOString()}]`).join('\n')
-              }`,
+              text: `Dequeued ${data.utterances.length} utterance(s):\n\n${data.utterances.reverse().map((u: any) => `"${u.text}"\t[time: ${new Date(u.timestamp).toISOString()}]`).join('\n')
+                }`,
             },
           ],
         };
       }
-      
+
       if (name === 'wait_for_utterance') {
         const requestedSeconds = (args?.seconds_to_wait as number) ?? DEFAULT_WAIT_TIMEOUT_SECONDS;
         const secondsToWait = Math.max(
@@ -375,20 +374,20 @@ if (IS_MCP_MANAGED) {
           Math.min(MAX_WAIT_TIMEOUT_SECONDS, requestedSeconds)
         );
         debugLog(`[MCP] Calling wait_for_utterance with ${secondsToWait}s timeout`);
-        
+
         const response = await fetch('http://localhost:3000/api/wait-for-utterances', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ seconds_to_wait: secondsToWait }),
         });
-        
+
         const data = await response.json() as any;
-        
+
         if (data.utterances && data.utterances.length > 0) {
           const utteranceTexts = data.utterances
             .map((u: any) => `[${u.timestamp}] "${u.text}"`)
             .join('\n');
-          
+
           return {
             content: [
               {
@@ -408,7 +407,7 @@ if (IS_MCP_MANAGED) {
           };
         }
       }
-      
+
       throw new Error(`Unknown tool: ${name}`);
     } catch (error) {
       return {
