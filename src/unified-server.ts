@@ -7,6 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { randomUUID } from 'crypto';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { debugLog } from './debug.ts';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   CallToolRequestSchema,
@@ -41,7 +42,7 @@ class UtteranceQueue {
     };
 
     this.utterances.push(utterance);
-    console.log(`[Queue] queued: "${utterance.text}"	[id: ${utterance.id}]`);
+    debugLog(`[Queue] queued: "${utterance.text}"	[id: ${utterance.id}]`);
     return utterance;
   }
 
@@ -55,14 +56,14 @@ class UtteranceQueue {
     const utterance = this.utterances.find(u => u.id === id);
     if (utterance) {
       utterance.status = 'delivered';
-      console.log(`[Queue] delivered: "${utterance.text}"	[id: ${id}]`);
+      debugLog(`[Queue] delivered: "${utterance.text}"	[id: ${id}]`);
     }
   }
 
   clear(): void {
     const count = this.utterances.length;
     this.utterances = [];
-    console.log(`[Queue] Cleared ${count} utterances`);
+    debugLog(`[Queue] Cleared ${count} utterances`);
   }
 }
 
@@ -160,7 +161,7 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
   const maxWaitMs = secondsToWait * 1000;
   const startTime = Date.now();
   
-  console.log(`[Server] Starting wait_for_utterance (${secondsToWait}s)`);
+  debugLog(`[Server] Starting wait_for_utterance (${secondsToWait}s)`);
   
   // Check if we should return immediately
   if (lastTimeoutTimestamp) {
@@ -168,7 +169,7 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
       u => u.timestamp > lastTimeoutTimestamp!
     );
     if (!hasNewUtterances) {
-      console.log('[Server] No new utterances since last timeout, returning immediately');
+      debugLog('[Server] No new utterances since last timeout, returning immediately');
       res.json({
         success: true,
         utterances: [],
@@ -355,7 +356,7 @@ if (IS_MCP_MANAGED) {
           MIN_WAIT_TIMEOUT_SECONDS,
           Math.min(MAX_WAIT_TIMEOUT_SECONDS, requestedSeconds)
         );
-        console.log(`[MCP] Calling wait_for_utterance with ${secondsToWait}s timeout`);
+        debugLog(`[MCP] Calling wait_for_utterance with ${secondsToWait}s timeout`);
         
         const response = await fetch('http://localhost:3000/api/wait-for-utterances', {
           method: 'POST',

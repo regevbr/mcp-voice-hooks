@@ -1,5 +1,6 @@
 import { Utterance, UtteranceQueue } from './types.js';
 import { randomUUID } from 'crypto';
+import { debugLog } from './debug.js';
 
 export class InMemoryUtteranceQueue implements UtteranceQueue {
   public utterances: Utterance[] = [];
@@ -13,7 +14,7 @@ export class InMemoryUtteranceQueue implements UtteranceQueue {
     };
     
     this.utterances.push(utterance);
-    console.log(`[Queue] queued:	"${utterance.text}"	[id: ${utterance.id}]`);
+    debugLog(`[Queue] queued:	"${utterance.text}"	[id: ${utterance.id}]`);
     return utterance;
   }
 
@@ -27,13 +28,13 @@ export class InMemoryUtteranceQueue implements UtteranceQueue {
     const utterance = this.utterances.find(u => u.id === id);
     if (utterance) {
       utterance.status = 'delivered';
-      console.log(`[Queue] delivered:	"${utterance.text}"	[id: ${id}]`);
+      debugLog(`[Queue] delivered:	"${utterance.text}"	[id: ${id}]`);
     }
   }
 
   clear(): void {
     const count = this.utterances.length;
     this.utterances = [];
-    console.log(`[Queue] Cleared ${count} utterances`);
+    debugLog(`[Queue] Cleared ${count} utterances`);
   }
 }

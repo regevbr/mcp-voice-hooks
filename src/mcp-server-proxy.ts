@@ -6,6 +6,7 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
+import { debugLog } from './debug.js';
 
 const HTTP_SERVER_URL = 'http://localhost:3000';
 
@@ -80,7 +81,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const data: any = await response.json();
         const utterances = data.utterances || [];
         
-        console.error(`[MCP Proxy] Dequeued ${utterances.length} utterances`);
+        debugLog(`[MCP Proxy] Dequeued ${utterances.length} utterances`);
 
         return {
           content: [

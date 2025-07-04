@@ -1,6 +1,7 @@
 class VoiceHooksClient {
     constructor() {
         this.baseUrl = 'http://localhost:3000';
+        this.debug = localStorage.getItem('voiceHooksDebug') === 'true';
         this.utteranceInput = document.getElementById('utteranceInput');
         this.sendBtn = document.getElementById('sendBtn');
         this.refreshBtn = document.getElementById('refreshBtn');
@@ -223,7 +224,7 @@ class VoiceHooksClient {
             this.listenBtn.classList.add('listening');
             this.listenBtnText.textContent = 'Stop Listening';
             this.listeningIndicator.classList.add('active');
-            console.log('Started listening');
+            this.debugLog('Started listening');
         } catch (e) {
             console.error('Failed to start recognition:', e);
             alert('Failed to start speech recognition. Please try again.');
@@ -239,7 +240,7 @@ class VoiceHooksClient {
             this.listeningIndicator.classList.remove('active');
             this.interimText.textContent = '';
             this.interimText.classList.remove('active');
-            console.log('Stopped listening');
+            this.debugLog('Stopped listening');
         }
     }
     
@@ -247,7 +248,7 @@ class VoiceHooksClient {
         const trimmedText = text.trim();
         if (!trimmedText) return;
         
-        console.log('Sending voice utterance:', trimmedText);
+        this.debugLog('Sending voice utterance:', trimmedText);
         
         try {
             const response = await fetch(`${this.baseUrl}/api/potential-utterances`, {
@@ -269,6 +270,12 @@ class VoiceHooksClient {
             }
         } catch (error) {
             console.error('Failed to send voice utterance:', error);
+        }
+    }
+    
+    debugLog(...args) {
+        if (this.debug) {
+            console.log(...args);
         }
     }
 }
