@@ -103,7 +103,7 @@ and then configure claude to use the mcp proxy like so:
 }
 ```
 
-## WIP voice responses
+## Voice responses (Work in progress)
 
 Add the post tool hook to your claude settings:
 
