@@ -35,6 +35,14 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
 
 2. **Add the MCP server** to your project's `.mcp.json`:
 
+   Run the following command to automatically add the MCP server to your current project in `~/.claude.json`:
+
+    ```bash
+    claude mcp add voice-hooks npx mcp-voice-hooks
+    ```
+
+   or manually add the following to your project's `.mcp.json`:
+
    ```json
    {
      "mcpServers": {

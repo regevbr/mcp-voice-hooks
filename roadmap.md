@@ -186,19 +186,8 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [ ] set up pre commit hooks to make sure this can run locally
 - [x] Publish to npm registry with `npm publish`
 - [x] Test npx execution from npm: `npx mcp-voice-hooks`
+- [x] test claude mcp add voice-hooks npx mcp-voice-hooks
 - [ ] Set up automated publishing workflow (GitHub Actions)
-
-### Claude MCP Integration
-
-- [ ] Research `claude mcp add` command
-- [ ] Make server compatible with standard MCP discovery/installation
-- [ ] Create `.mcp.json` template for easy manual configuration
-- [ ] Document installation methods:
-  - [ ] Manual `.mcp.json` configuration
-  - [ ] NPX with automatic setup
-  - [ ] Future: `claude mcp add` command (when available)
-- [ ] Ensure server metadata is properly exposed for MCP clients
-- [ ] Test compatibility with Claude Desktop and other MCP clients
 
 ### Development Quality ✅ **COMPLETED**
 
