@@ -31,7 +31,7 @@ const execAsync = promisify(exec);
 async function playNotificationSound() {
   try {
     // Use macOS system sound
-    await execAsync('afplay /System/Library/Sounds/Tink.aiff');
+    await execAsync('afplay /System/Library/Sounds/Funk.aiff');
     debugLog('[Sound] Played notification sound');
   } catch (error) {
     debugLog(`[Sound] Failed to play sound: ${error}`);
@@ -102,7 +102,8 @@ app.post('/api/potential-utterances', (req: Request, res: Response) => {
   const { text, timestamp } = req.body;
 
   if (!text || !text.trim()) {
-    return res.status(400).json({ error: 'Text is required' });
+    res.status(400).json({ error: 'Text is required' });
+    return;
   }
 
   const parsedTimestamp = timestamp ? new Date(timestamp) : undefined;

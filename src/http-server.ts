@@ -32,7 +32,8 @@ export class HttpServer {
       const { text, timestamp } = req.body;
       
       if (!text || !text.trim()) {
-        return res.status(400).json({ error: 'Text is required' });
+        res.status(400).json({ error: 'Text is required' });
+        return;
       }
 
       const parsedTimestamp = timestamp ? new Date(timestamp) : undefined;

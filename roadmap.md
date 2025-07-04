@@ -252,6 +252,15 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - **Events**: `utterance`, `utterance_queued`, `utterance_delivered`
 - **Decision**: Start with HTTP for rapid POC development, migrate to WebSockets when real-time features become critical
 
+## Recent Updates
+
+### Build System Improvements (2025-01-04)
+
+- Switched from TypeScript compiler (tsc) to tsup bundler
+- Resolved module resolution issues between development and build
+- Now supports .ts imports everywhere (both MCP runtime and builds)
+- Fixed TypeScript return statement errors in Express handlers
+
 ## **Architecture Achieved**
 
 ```text

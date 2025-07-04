@@ -10,7 +10,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsup",
     "dev": "nodemon --exec ts-node --esm src/index.ts",
     "dev-unified": "ts-node --esm src/unified-server.ts",
     "dev-debug": "DEBUG=true nodemon --exec ts-node --esm src/index.ts",
@@ -43,6 +43,7 @@
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "ts-prune": "^0.10.3",
+    "tsup": "^8.5.0",
     "typescript": "^5.8.3"
   }
 }
