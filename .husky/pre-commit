@@ -25,5 +25,12 @@ npx ts-prune --error || {
   exit 1
 }
 
+# Run the build to ensure it compiles successfully
+echo "Running build to ensure code compiles..."
+npm run build || {
+  echo "Error: Build failed. Please fix compilation errors before committing." >&2
+  exit 1
+}
+
 # Run tests silently
 npm test -- --silent

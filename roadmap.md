@@ -1,7 +1,5 @@
 # MCP Voice Hooks - Roadmap
 
-_Last updated: 2025-01-04_
-
 ## Completed Phases
 
 ✅ **Text-Based POC** - Core MCP server with utterance queue
