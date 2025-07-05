@@ -63,17 +63,15 @@ async function ensureUserDirectorySetup() {
       console.log('✅ Cleaned up old hooks');
     }
     
-    // Remove any other files except README.md
+    // Remove any other files
     const files = fs.readdirSync(userDir);
     for (const file of files) {
-      if (file !== 'README.md') {
-        const filePath = path.join(userDir, file);
-        const stat = fs.statSync(filePath);
-        if (stat.isDirectory()) {
-          fs.rmSync(filePath, { recursive: true, force: true });
-        } else {
-          fs.unlinkSync(filePath);
-        }
+      const filePath = path.join(userDir, file);
+      const stat = fs.statSync(filePath);
+      if (stat.isDirectory()) {
+        fs.rmSync(filePath, { recursive: true, force: true });
+      } else {
+        fs.unlinkSync(filePath);
       }
     }
   }

@@ -37,8 +37,8 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 - [ ] bug: microsoft edge speech recognition is not working
 - [ ] clean up completed tasks in roadmap.md
-- [x] remove the warning when clicking clear all
 - [ ] experiment with having the server remind the assistant to use voice responses instead of having a post tool hook
+- [ ] Set up automated publishing workflow (GitHub Actions)
 
 ### Text-Based POC ✅ **COMPLETED**
 
