@@ -40,6 +40,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [ ] experiment with having the server remind the assistant to use voice responses instead of having a post tool hook
 - [ ] Set up automated publishing workflow (GitHub Actions)
 - [x] ensure hooks and settings are updated on every server startup
+- [x] bump version to 1.0.7
 
 ### Text-Based POC ✅ **COMPLETED**
 

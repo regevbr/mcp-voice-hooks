@@ -1,6 +1,6 @@
 {
   "name": "mcp-voice-hooks",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "main": "dist/index.js",
   "type": "module",
   "bin": {
@@ -40,9 +40,9 @@
     "url": "git+https://github.com/johnmatthewtennant/mcp-voice-hooks.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/mcp-voice-hooks/issues"
+    "url": "https://github.com/johnmatthewtennant/mcp-voice-hooks/issues"
   },
-  "homepage": "https://github.com/yourusername/mcp-voice-hooks#readme",
+  "homepage": "https://github.com/johnmatthewtennant/mcp-voice-hooks#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.13.3",
     "cors": "^2.8.5",
