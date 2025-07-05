@@ -327,6 +327,82 @@ app.post('/api/validate-action', (req: Request, res: Response) => {
   });
 });
 
+// Dedicated hook endpoints that return in Claude's expected format
+app.post('/api/hooks/pre-tool', (req: Request, res: Response) => {
+  const voiceResponsesEnabled = process.env.VOICE_RESPONSES_ENABLED === 'true';
+
+  // Check for pending utterances
+  const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
+  if (pendingUtterances.length > 0) {
+    res.json({
+      decision: 'block',
+      reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first. Please use dequeue_utterances to process them.`
+    });
+    return;
+  }
+
+  // Check for delivered but unresponded utterances (when voice enabled)
+  if (voiceResponsesEnabled) {
+    const deliveredUtterances = queue.utterances.filter(u => u.status === 'delivered');
+    if (deliveredUtterances.length > 0) {
+      res.json({
+        decision: 'block',
+        reason: `${deliveredUtterances.length} delivered utterance(s) require voice response. Please use the speak tool to respond before proceeding.`
+      });
+      return;
+    }
+  }
+
+  // All checks passed - allow tool use
+  res.json({
+    decision: 'approve'
+  });
+});
+
+app.post('/api/hooks/stop', (req: Request, res: Response) => {
+  const voiceResponsesEnabled = process.env.VOICE_RESPONSES_ENABLED === 'true';
+
+  // Check for pending utterances
+  const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
+  if (pendingUtterances.length > 0) {
+    res.json({
+      decision: 'block',
+      reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first. Please use dequeue_utterances to process them.`
+    });
+    return;
+  }
+
+  // Check for delivered but unresponded utterances (when voice enabled)
+  if (voiceResponsesEnabled) {
+    const deliveredUtterances = queue.utterances.filter(u => u.status === 'delivered');
+    if (deliveredUtterances.length > 0) {
+      res.json({
+        decision: 'block',
+        reason: `${deliveredUtterances.length} delivered utterance(s) require voice response. Please use the speak tool to respond before proceeding.`
+      });
+      return;
+    }
+  }
+
+  // Check if we should wait for utterances
+  const shouldWait = !lastTimeoutTimestamp ||
+    queue.utterances.some(u => u.timestamp > lastTimeoutTimestamp!);
+  
+  if (shouldWait) {
+    res.json({
+      decision: 'block',
+      reason: 'Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
+    });
+    return;
+  }
+
+  // All checks passed - allow stop
+  res.json({
+    decision: 'approve',
+    reason: 'No utterances since last timeout'
+  });
+});
+
 // API to clear all utterances
 app.delete('/api/utterances', (req: Request, res: Response) => {
   const clearedCount = queue.utterances.length;

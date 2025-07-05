@@ -54,7 +54,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] Create new speak/say endpoint for text-to-speech
   - [x] `/api/speak` endpoint
   - [x] Takes `text` parameter to speak
-  - [x] Executes text-to-speech using macOS `say` command  
+  - [x] Executes text-to-speech using macOS `say` command
   - [x] Marks all "delivered" utterances as "responded"
   - [x] Returns success/error status
 - [x] Add MCP tool 'speak' that calls the endpoint
@@ -77,7 +77,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
       - Block if delivered but unresponded utterances exist (when voice enabled) → require speak
       - Allow if all utterances are responded
     - **stop**:
-      - Block if pending utterances exist → require dequeue_utterances  
+      - Block if pending utterances exist → require dequeue_utterances
       - Block if delivered but unresponded utterances exist (when voice enabled) → require speak
       - Block if all responded but no timeout since last utterance → require wait_for_utterance
       - Allow only after timeout with no new utterances
@@ -93,6 +93,10 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] Created comprehensive unit tests for validate-action endpoint
 - [x] Created unit tests for utterance state transitions
 - [x] All tests passing (58 total)
+- [ ] create dedicated endpoints for each hook
+  - [ ] pre-tool hook
+  - [ ] stop hook
+- [ ] have the server respond in the exact format that can be passed directly to claude. e.g. echo "{\"decision\": \"block\", \"reason\": \"$reason\"}"
 
 ### Text-Based POC ✅ **COMPLETED**
 
