@@ -177,7 +177,6 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] Test npx execution from npm: `npx mcp-voice-hooks`
 - [x] test claude mcp add voice-hooks npx mcp-voice-hooks
 - [x] document system voice settings
-- [ ] can we put the tgz files somewhere else?
 - [ ] Set up automated publishing workflow (GitHub Actions)
 
 ### Development Quality ✅ **COMPLETED**
@@ -201,6 +200,13 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
      }
    }
    ```
+
+- [ ] make sure we don't clobber the user's claude settings
+- [ ] clean up anything in `~/.mcp-voice-hooks` before installing
+- [ ] add a readme to `~/.mcp-voice-hooks` with instructions for how to uninstall (`rm -rf ~/.mcp-voice-hooks`, and remove the hooks from the claude settings)
+- [ ] add a script to uninstall
+  - [ ] `rm -rf ~/.mcp-voice-hooks`
+  - [ ] and remove the hooks from the claude settings
 
 ## Technical Decisions
 
