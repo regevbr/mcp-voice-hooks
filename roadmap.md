@@ -114,6 +114,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] Updated hook scripts to use configurable port
 - [x] Auto-install/update hooks on MCP server startup
 - [x] Remove confirmation dialog from clear all button
+- [x] Clarify development docs: TypeScript needs building, browser files don't
 
 ### Utterance classification
 

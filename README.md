@@ -106,8 +106,9 @@ claude
 **Important**: When developing with `npm link`:
 
 - Claude runs the compiled JavaScript from the `dist` folder, not your TypeScript source
-- After making changes to the TypeScript code, you must run `npm run build`
-- Then restart Claude Code to use the updated compiled code
+- After making changes to **TypeScript files** (`src/*.ts`), you must run `npm run build`
+- For changes to **browser files** (`public/*`), just restart Claude Code
+- Then restart Claude Code to use the updated code
 
 ### Hot Reload
 
