@@ -39,13 +39,26 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [ ] clean up completed tasks in roadmap.md
 - [x] experiment with having the server remind the assistant to use voice responses instead of having a post tool hook
 - [ ] Set up automated publishing workflow (GitHub Actions)
+- [ ] Clean up speak endpoint response to reduce window clutter
+  - [ ] Remove or simplify the "Spoke: [text]" output
+  - [ ] Remove or simplify the "Marked X utterance(s) as responded" message
+  - [ ] Make the response more concise while maintaining necessary functionality
 - [x] ensure hooks and settings are updated on every server startup
 - [x] bump version to 1.0.7
 - [x] refactor: replace post-tool hook with inline voice response reminders
-- [ ] Add text_to_speak parameter to wait_for_utterance tool
-  - [ ] Optional parameter that speaks text before waiting
-  - [ ] Ensures assistant always provides voice response before waiting for user input
-  - [ ] Could also enforce speak before wait_for_utterance in validate-action endpoint
+- [ ] Improve speaking flow
+  - [ ] Add new speak_and_then_wait_for_utterance tool
+  - [ ] Make both speak and speak_and_then_wait_for_utterance fail if there are pending utterances
+    - [ ] Create a separate pre-speak hook that runs before speak and speak_and_then_wait_for_utterance tools. It should only block for pending utterances, otherwise approve.
+    - [ ] Hook matches only speak and speak_and_then_wait_for_utterance tools
+    - [ ] Only validates that no pending utterances exist (first step of validation)
+    - [ ] Forces dequeue_utterances to be called before any speaking/waiting.
+    - [ ] This ensures clean conversation flow: dequeue → speak → wait
+    - [ ] if voice responses are enabled, require speak_and_then_wait_for_utterance in the stop hook, otherwise require wait_for_utterance
+- [ ] add a CLI argument --speak to the server to enable voice responses
+  - [ ] remove the MCP_VOICE_RESPONSES_ENABLED environment variable and switch all references to it to --speak
+- [ ] Investigate hiding the speak mcp tools when voice responses are disabled
+- [ ] Investigate consolidating the pre-tool hook and the pre-speak hook into a single hook that runs before all tools and checks which tool is being used and switches logic based on that
 
 ### Voice Response Tracking & Conversation Flow Enforcement
 
