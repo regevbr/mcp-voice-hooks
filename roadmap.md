@@ -42,21 +42,27 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] ensure hooks and settings are updated on every server startup
 - [x] bump version to 1.0.7
 - [x] refactor: replace post-tool hook with inline voice response reminders
+- [ ] Add text_to_speak parameter to wait_for_utterance tool
+  - [ ] Optional parameter that speaks text before waiting
+  - [ ] Ensures assistant always provides voice response before waiting for user input
+  - [ ] Could also enforce speak before wait_for_utterance in validate-action endpoint
 
 ### Voice Response Tracking & Conversation Flow Enforcement
 
-#### Step 1: Create speak/say endpoint (can be tested independently)
+#### Step 1: Create speak/say endpoint (can be tested independently) ✅ **COMPLETED**
 
-- [ ] Create new speak/say endpoint for text-to-speech
-  - [ ] `/api/speak` endpoint
-  - [ ] Takes `text` parameter to speak
-  - [ ] Executes text-to-speech using macOS `say` command  
-  - [ ] Marks all "delivered" utterances as "responded"
-  - [ ] Returns success/error status
+- [x] Create new speak/say endpoint for text-to-speech
+  - [x] `/api/speak` endpoint
+  - [x] Takes `text` parameter to speak
+  - [x] Executes text-to-speech using macOS `say` command  
+  - [x] Marks all "delivered" utterances as "responded"
+  - [x] Returns success/error status
+- [x] Add MCP tool 'speak' that calls the endpoint
+- [x] Test endpoint independently - works correctly!
 
 #### Step 2: Implement conversation flow enforcement
 
-- [ ] Add third utterance state: "responded" (in addition to "pending" and "delivered")
+- [x] Add third utterance state: "responded" (in addition to "pending" and "delivered")
 - [ ] Create unified action validation endpoint: `/api/validate-action`
   - [ ] Combines and extends functionality from `/api/should-wait` and `/api/has-pending-utterances`
   - [ ] Takes an `action` parameter (e.g., "tool-use", "stop")

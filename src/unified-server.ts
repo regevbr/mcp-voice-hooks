@@ -44,7 +44,7 @@ interface Utterance {
   id: string;
   text: string;
   timestamp: Date;
-  status: 'pending' | 'delivered';
+  status: 'pending' | 'delivered' | 'responded';
 }
 
 class UtteranceQueue {
@@ -284,7 +284,42 @@ app.delete('/api/utterances', (req: Request, res: Response) => {
   });
 });
 
-app.get('/', (req: Request, res: Response) => {
+// API for text-to-speech
+app.post('/api/speak', async (req: Request, res: Response) => {
+  const { text } = req.body;
+
+  if (!text || !text.trim()) {
+    res.status(400).json({ error: 'Text is required' });
+    return;
+  }
+
+  try {
+    // Execute text-to-speech using macOS say command
+    await execAsync(`say -r 100 "${text.replace(/"/g, '\\"')}"`);
+    debugLog(`[Speak] Spoke text: "${text}"`);
+
+    // Mark all delivered utterances as responded
+    const deliveredUtterances = queue.utterances.filter(u => u.status === 'delivered');
+    deliveredUtterances.forEach(u => {
+      u.status = 'responded';
+      debugLog(`[Queue] marked as responded: "${u.text}"	[id: ${u.id}]`);
+    });
+
+    res.json({
+      success: true,
+      message: 'Text spoken successfully',
+      respondedCount: deliveredUtterances.length
+    });
+  } catch (error) {
+    debugLog(`[Speak] Failed to speak text: ${error}`);
+    res.status(500).json({
+      error: 'Failed to speak text',
+      details: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
+app.get('/', (_req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
@@ -351,6 +386,20 @@ if (IS_MCP_MANAGED) {
                 maximum: MAX_WAIT_TIMEOUT_SECONDS,
               },
             },
+          },
+        },
+        {
+          name: 'speak',
+          description: 'Speak text using text-to-speech and mark delivered utterances as responded',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              text: {
+                type: 'string',
+                description: 'The text to speak',
+              },
+            },
+            required: ['text'],
           },
         },
       ],
@@ -430,6 +479,51 @@ if (IS_MCP_MANAGED) {
                 text: data.message || `No utterances found after waiting ${secondsToWait} seconds.`,
               },
             ],
+          };
+        }
+      }
+
+      if (name === 'speak') {
+        const text = args?.text as string;
+
+        if (!text || !text.trim()) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: 'Error: Text is required for speak tool',
+              },
+            ],
+            isError: true,
+          };
+        }
+
+        const response = await fetch(`http://localhost:${HTTP_PORT}/api/speak`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+        });
+
+        const data = await response.json() as any;
+
+        if (response.ok) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Spoke: "${text}"\n${data.respondedCount > 0 ? `Marked ${data.respondedCount} utterance(s) as responded.` : 'No delivered utterances to mark as responded.'}`,
+              },
+            ],
+          };
+        } else {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Error speaking text: ${data.error || 'Unknown error'}`,
+              },
+            ],
+            isError: true,
           };
         }
       }
