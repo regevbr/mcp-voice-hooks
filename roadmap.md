@@ -37,10 +37,11 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 - [ ] bug: microsoft edge speech recognition is not working
 - [ ] clean up completed tasks in roadmap.md
-- [ ] experiment with having the server remind the assistant to use voice responses instead of having a post tool hook
+- [x] experiment with having the server remind the assistant to use voice responses instead of having a post tool hook
 - [ ] Set up automated publishing workflow (GitHub Actions)
 - [x] ensure hooks and settings are updated on every server startup
 - [x] bump version to 1.0.7
+- [x] refactor: replace post-tool hook with inline voice response reminders
 
 ### Text-Based POC ✅ **COMPLETED**
 
@@ -208,8 +209,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
    {
      "hooks": {
        "Stop": [{"matcher": "", "hooks": [{"type": "command", "command": "sh ~/.mcp-voice-hooks/hooks/stop-hook.sh"}]}],
-       "PreToolUse": [{"matcher": "^(?!mcp__voice-hooks__).*", "hooks": [{"type": "command", "command": "sh ~/.mcp-voice-hooks/hooks/pre-tool-hook.sh"}]}],
-       "PostToolUse": [{"matcher": "^mcp__voice-hooks__", "hooks": [{"type": "command", "command": "sh ~/.mcp-voice-hooks/hooks/post-tool-voice-hook.sh"}]}]
+       "PreToolUse": [{"matcher": "^(?!mcp__voice-hooks__).*", "hooks": [{"type": "command", "command": "sh ~/.mcp-voice-hooks/hooks/pre-tool-hook.sh"}]}]
      }
    }
    ```

@@ -164,17 +164,6 @@ async function configureClaudeCodeSettings() {
           }
         ]
       }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "^mcp__voice-hooks__",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh ~/.mcp-voice-hooks/hooks/post-tool-voice-hook.sh"
-          }
-        ]
-      }
     ]
   };
   
@@ -199,49 +188,19 @@ async function configureClaudeCodeSettings() {
 async function ensureHooksInstalled() {
   const userDir = path.join(os.homedir(), '.mcp-voice-hooks');
   const hooksDir = path.join(userDir, 'hooks');
-  const packageHooksDir = path.join(__dirname, '..', '.claude', 'hooks');
   
   try {
-    // Only create directories if they don't exist
-    if (!fs.existsSync(hooksDir)) {
-      fs.mkdirSync(hooksDir, { recursive: true });
-      console.log('🔧 Installing hooks for first time...');
+    console.log('🔄 Updating hooks to latest version...');
+    
+    // Always remove and recreate the hooks directory to ensure clean state
+    if (fs.existsSync(hooksDir)) {
+      fs.rmSync(hooksDir, { recursive: true, force: true });
     }
     
-    // Check if hooks need updating
-    let needsUpdate = false;
-    if (fs.existsSync(packageHooksDir)) {
-      const hookFiles = fs.readdirSync(packageHooksDir).filter(file => file.endsWith('.sh'));
-      
-      for (const hookFile of hookFiles) {
-        const sourcePath = path.join(packageHooksDir, hookFile);
-        const destPath = path.join(hooksDir, hookFile);
-        
-        // Check if hook doesn't exist or is different
-        if (!fs.existsSync(destPath)) {
-          needsUpdate = true;
-          break;
-        }
-        
-        const sourceContent = fs.readFileSync(sourcePath, 'utf8');
-        const destContent = fs.readFileSync(destPath, 'utf8');
-        
-        if (sourceContent !== destContent) {
-          needsUpdate = true;
-          break;
-        }
-      }
-    }
-    
-    if (needsUpdate) {
-      console.log('🔄 Updating hooks to latest version...');
-      await ensureUserDirectorySetup();
-      await configureClaudeCodeSettings();
-      console.log('✅ Hooks and settings updated');
-    } else {
-      // Even if hooks are up to date, ensure settings are correct
-      await configureClaudeCodeSettings();
-    }
+    // Recreate with latest hooks
+    await ensureUserDirectorySetup();
+    await configureClaudeCodeSettings();
+    console.log('✅ Hooks and settings updated');
   } catch (error) {
     // Silently continue if hooks can't be updated
     console.warn('⚠️  Could not auto-update hooks:', error.message);

@@ -21,17 +21,6 @@
           }
         ]
       }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "^mcp__voice-hooks__",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh ~/.mcp-voice-hooks/hooks/post-tool-voice-hook.sh"
-          }
-        ]
-      }
     ]
   }
 }

@@ -295,6 +295,14 @@ app.listen(HTTP_PORT, () => {
   console.log(`[Mode] Running in ${IS_MCP_MANAGED ? 'MCP-managed' : 'standalone'} mode`);
 });
 
+// Helper function to get voice response reminder
+function getVoiceResponseReminder(): string {
+  const voiceResponsesEnabled = process.env.VOICE_RESPONSES_ENABLED === 'true';
+  return voiceResponsesEnabled
+    ? '\n\nThe user has enabled voice responses, so use the \'say\' command to respond to the user\'s voice input before proceeding.\nExample: bash -c \'say -r 300 "I understand your request. I\'ll start working on..."\''
+    : '';
+}
+
 // MCP Server Setup (only if MCP-managed)
 if (IS_MCP_MANAGED) {
   console.log('[MCP] Initializing MCP server...');
@@ -379,7 +387,7 @@ if (IS_MCP_MANAGED) {
             {
               type: 'text',
               text: `Dequeued ${data.utterances.length} utterance(s):\n\n${data.utterances.reverse().map((u: any) => `"${u.text}"\t[time: ${new Date(u.timestamp).toISOString()}]`).join('\n')
-                }`,
+                }${getVoiceResponseReminder()}`,
             },
           ],
         };
@@ -410,7 +418,7 @@ if (IS_MCP_MANAGED) {
             content: [
               {
                 type: 'text',
-                text: `Found ${data.count} utterance(s):\n\n${utteranceTexts}`,
+                text: `Found ${data.count} utterance(s):\n\n${utteranceTexts}${getVoiceResponseReminder()}`,
               },
             ],
           };
