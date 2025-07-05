@@ -7,7 +7,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 1. **Continuously listen** for voice input (or typed input during POC)
 2. **Detect complete utterances** using LLM-based analysis
 3. **Queue utterances** for consumption by MCP clients
-4. **Provide hooks** for clients to check for new utterances before and after tool execution
+4. **Use hooks** to force clients to check for new utterances before and after tool execution
 5. **Enable voice feedback** with text-to-speech responses
 
 ## Architecture
@@ -174,6 +174,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] Test npx execution from npm: `npx mcp-voice-hooks`
 - [x] test claude mcp add voice-hooks npx mcp-voice-hooks
 - [x] document system voice settings
+- [ ] can we put the tgz files somewhere else?
 - [ ] Set up automated publishing workflow (GitHub Actions)
 
 ### Development Quality ✅ **COMPLETED**
