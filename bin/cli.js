@@ -5,6 +5,7 @@ import path from 'path';
 import os from 'os';
 import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
+import { replaceVoiceHooks, areHooksEqual } from '../dist/hook-merger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -142,8 +143,17 @@ async function configureClaudeCodeSettings() {
     ]
   };
   
-  // Update settings
-  settings.hooks = hookConfig;
+  // Replace voice hooks intelligently
+  const updatedHooks = replaceVoiceHooks(settings.hooks || {}, hookConfig);
+  
+  // Check if hooks actually changed (ignoring order)
+  if (areHooksEqual(settings.hooks || {}, updatedHooks)) {
+    console.log('✅ Claude settings already up to date');
+    return;
+  }
+  
+  // Update settings with new hooks
+  settings.hooks = updatedHooks;
   
   // Write settings back
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));

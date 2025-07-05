@@ -38,6 +38,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [ ] bug: microsoft edge speech recognition is not working
 - [ ] clean up completed tasks in roadmap.md
 - [x] remove the warning when clicking clear all
+- [ ] experiment with having the server remind the assistant to use voice responses instead of having a post tool hook
 
 ### Text-Based POC ✅ **COMPLETED**
 
@@ -211,9 +212,12 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
    }
    ```
 
-- [ ] make sure we don't clobber the user's claude settings
+- [x] make sure we don't clobber the user's claude settings
+  - [x] Implement intelligent hook merging that preserves existing hooks
+  - [x] Only updates voice-hooks related hooks
+  - [x] Avoids unnecessary writes when hooks are only reordered
 - [ ] clean up anything in `~/.mcp-voice-hooks` before installing
-- [ ] add a readme to `~/.mcp-voice-hooks` with instructions for how to uninstall (`rm -rf ~/.mcp-voice-hooks`, and remove the hooks from the claude settings)
+- [x] add a readme to `~/.mcp-voice-hooks` with instructions for how to uninstall (`rm -rf ~/.mcp-voice-hooks`, and remove the hooks from the claude settings)
 - [ ] add a script to uninstall
   - [ ] `rm -rf ~/.mcp-voice-hooks`
   - [ ] and remove the hooks from the claude settings
