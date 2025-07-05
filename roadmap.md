@@ -163,6 +163,8 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 ### NPM Publishing
 
+- [x] Version 1.0.2 - Port configuration feature
+
 - [x] Prepare package for npm publication
   - [x] Update package.json with proper metadata (description, keywords, repository, author)
   - [x] Add `"bin"` field to package.json pointing to CLI entry point
