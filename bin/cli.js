@@ -236,8 +236,11 @@ async function ensureHooksInstalled() {
     if (needsUpdate) {
       console.log('🔄 Updating hooks to latest version...');
       await ensureUserDirectorySetup();
-      // Don't reconfigure Claude settings on auto-update
-      console.log('✅ Hooks updated');
+      await configureClaudeCodeSettings();
+      console.log('✅ Hooks and settings updated');
+    } else {
+      // Even if hooks are up to date, ensure settings are correct
+      await configureClaudeCodeSettings();
     }
   } catch (error) {
     // Silently continue if hooks can't be updated
