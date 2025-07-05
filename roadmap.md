@@ -46,15 +46,15 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] ensure hooks and settings are updated on every server startup
 - [x] bump version to 1.0.7
 - [x] refactor: replace post-tool hook with inline voice response reminders
-- [ ] Improve speaking flow
-  - [ ] Add new speak_and_then_wait_for_utterance tool
-  - [ ] Make both speak and speak_and_then_wait_for_utterance fail if there are pending utterances
-    - [ ] Create a separate pre-speak hook that runs before speak and speak_and_then_wait_for_utterance tools. It should only block for pending utterances, otherwise approve.
-    - [ ] Hook matches only speak and speak_and_then_wait_for_utterance tools
-    - [ ] Only validates that no pending utterances exist (first step of validation)
-    - [ ] Forces dequeue_utterances to be called before any speaking/waiting.
-    - [ ] This ensures clean conversation flow: dequeue → speak → wait
-    - [ ] if voice responses are enabled, require speak_and_then_wait_for_utterance in the stop hook, otherwise require wait_for_utterance
+- [x] Improve speaking flow ✅ **COMPLETED**
+  - [x] Add new speak_and_then_wait_for_utterance tool
+  - [x] Make both speak and speak_and_then_wait_for_utterance fail if there are pending utterances
+    - [x] Create a separate pre-speak hook that runs before speak and speak_and_then_wait_for_utterance tools. It should only block for pending utterances, otherwise approve.
+    - [x] Hook matches only speak and speak_and_then_wait_for_utterance tools
+    - [x] Only validates that no pending utterances exist (first step of validation)
+    - [x] Forces dequeue_utterances to be called before any speaking/waiting.
+    - [x] This ensures clean conversation flow: dequeue → speak → wait
+    - [x] if voice responses are enabled, require speak_and_then_wait_for_utterance in the stop hook, otherwise require wait_for_utterance
 - [ ] add a CLI argument --speak to the server to enable voice responses
   - [ ] remove the MCP_VOICE_RESPONSES_ENABLED environment variable and switch all references to it to --speak
 - [ ] Investigate hiding the speak mcp tools when voice responses are disabled

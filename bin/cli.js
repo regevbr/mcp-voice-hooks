@@ -163,6 +163,15 @@ async function configureClaudeCodeSettings() {
             "command": "sh ~/.mcp-voice-hooks/hooks/pre-tool-hook.sh"
           }
         ]
+      },
+      {
+        "matcher": "^mcp__voice-hooks__(speak|speak_and_then_wait_for_utterance)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh ~/.mcp-voice-hooks/hooks/pre-speak-hook.sh"
+          }
+        ]
       }
     ]
   };
