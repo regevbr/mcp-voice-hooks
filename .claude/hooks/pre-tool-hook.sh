@@ -1,13 +1,14 @@
 #!/bin/bash
 
-# Pre-Tool Hook - Checks for pending utterances before allowing tool execution
-# Forces Claude to use dequeue_utterances tool if there are pending utterances
+# Pre-Tool Hook - Validates tool execution using unified action validation
 
 # Get port from environment variable or use default
 PORT="${MCP_VOICE_HOOKS_PORT:-5111}"
 
-# Check has-pending-utterances endpoint
-response=$(curl -s http://localhost:${PORT}/api/has-pending-utterances 2>/dev/null)
+# Call validate-action endpoint
+response=$(curl -s -X POST http://localhost:${PORT}/api/validate-action \
+  -H "Content-Type: application/json" \
+  -d '{"action": "tool-use"}' 2>/dev/null)
 
 if [ $? -ne 0 ]; then
     # Server not available, allow tool execution
@@ -15,19 +16,13 @@ if [ $? -ne 0 ]; then
     exit 0
 fi
 
-# Extract pending status
-hasPending=$(echo "$response" | jq -r '.hasPending')
-pendingCount=$(echo "$response" | jq -r '.pendingCount')
+# Extract validation result
+allowed=$(echo "$response" | jq -r '.allowed')
 
-if [ "$hasPending" = "true" ]; then
-    # There are pending utterances, block tool execution
-    cat <<EOF
-{
-  "decision": "block",
-  "reason": "There are $pendingCount pending voice utterances. Please use dequeue_utterances to process them first."
-}
-EOF
-else
-    # No pending utterances, allow tool execution
+if [ "$allowed" = "true" ]; then
     echo '{"decision": "approve"}'
+else
+    # Pass through the server's reason directly
+    reason=$(echo "$response" | jq -r '.reason // "Action not allowed"')
+    echo "{\"decision\": \"block\", \"reason\": \"$reason\"}"
 fi

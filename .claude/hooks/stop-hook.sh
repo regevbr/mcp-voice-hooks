@@ -1,13 +1,14 @@
 #!/bin/bash
 
-# Stop Hook - Intelligently decides whether to wait for voice input
-# Checks if there have been any utterances since the last timeout
+# Stop Hook - Validates stopping using unified action validation
 
 # Get port from environment variable or use default
 PORT="${MCP_VOICE_HOOKS_PORT:-5111}"
 
-# Check should-wait endpoint
-response=$(curl -s http://localhost:${PORT}/api/should-wait 2>/dev/null)
+# Call validate-action endpoint
+response=$(curl -s -X POST http://localhost:${PORT}/api/validate-action \
+  -H "Content-Type: application/json" \
+  -d '{"action": "stop"}' 2>/dev/null)
 
 if [ $? -ne 0 ]; then
     # Server not available, allow stop
@@ -15,18 +16,13 @@ if [ $? -ne 0 ]; then
     exit 0
 fi
 
-# Extract shouldWait boolean
-shouldWait=$(echo "$response" | jq -r '.shouldWait')
+# Extract validation result
+allowed=$(echo "$response" | jq -r '.allowed')
 
-if [ "$shouldWait" = "true" ]; then
-    # There have been utterances since last timeout, block and ask to wait
-    cat <<EOF
-{
-  "decision": "block",
-  "reason": "Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input"
-}
-EOF
-else
-    # No utterances since last timeout, allow stop
+if [ "$allowed" = "true" ]; then
     echo '{"decision": "approve", "reason": "No utterances since last timeout"}'
+else
+    # Pass through the server's reason directly
+    reason=$(echo "$response" | jq -r '.reason // "Action not allowed"')
+    echo "{\"decision\": \"block\", \"reason\": \"$reason\"}"
 fi

@@ -60,18 +60,18 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] Add MCP tool 'speak' that calls the endpoint
 - [x] Test endpoint independently - works correctly!
 
-#### Step 2: Implement conversation flow enforcement
+#### Step 2: Implement conversation flow enforcement ✅ **COMPLETED**
 
 - [x] Add third utterance state: "responded" (in addition to "pending" and "delivered")
-- [ ] Create unified action validation endpoint: `/api/validate-action`
-  - [ ] Combines and extends functionality from `/api/should-wait` and `/api/has-pending-utterances`
-  - [ ] Takes an `action` parameter (e.g., "tool-use", "stop")
-  - [ ] Returns either:
+- [x] Create unified action validation endpoint: `/api/validate-action`
+  - [x] Combines and extends functionality from `/api/should-wait` and `/api/has-pending-utterances`
+  - [x] Takes an `action` parameter (e.g., "tool-use", "stop")
+  - [x] Returns either:
     - `{ allowed: true }` - Action can proceed
     - `{ allowed: false, requiredAction: "dequeue_utterances" }` - Has pending utterances
     - `{ allowed: false, requiredAction: "speak" }` - Has delivered but unresponded utterances (when VOICE_RESPONSES_ENABLED=true)
     - `{ allowed: false, requiredAction: "wait_for_utterance" }` - For stop action only, when all responded but no timeout yet
-  - [ ] Logic by action type:
+  - [x] Logic by action type:
     - **tool-use**:
       - Block if pending utterances exist → require dequeue_utterances
       - Block if delivered but unresponded utterances exist (when voice enabled) → require speak
@@ -81,15 +81,18 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
       - Block if delivered but unresponded utterances exist (when voice enabled) → require speak
       - Block if all responded but no timeout since last utterance → require wait_for_utterance
       - Allow only after timeout with no new utterances
-- [ ] Update hooks to use unified endpoint:
-  - [ ] Pre-tool hook calls with action="tool-use"
-  - [ ] Stop hook calls with action="stop"
-  - [ ] Both hooks check response and provide appropriate feedback
-- [ ] This ensures proper conversational flow:
+- [x] Update hooks to use unified endpoint:
+  - [x] Pre-tool hook calls with action="tool-use"
+  - [x] Stop hook calls with action="stop"
+  - [x] Both hooks check response and provide appropriate feedback
+- [x] This ensures proper conversational flow:
   1. User speaks (utterance created as "pending")
   2. Assistant receives utterances (marked as "delivered")
   3. Assistant must speak response via speak endpoint (marks utterances as "responded")
   4. Only then can assistant proceed with tool use or stopping
+- [x] Created comprehensive unit tests for validate-action endpoint
+- [x] Created unit tests for utterance state transitions
+- [x] All tests passing (58 total)
 
 ### Text-Based POC ✅ **COMPLETED**
 
