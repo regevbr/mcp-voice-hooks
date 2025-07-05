@@ -81,13 +81,30 @@ This will:
 - Install/update hook scripts to `~/.mcp-voice-hooks/hooks/`
 - Configure your project's `.claude/settings.json`
 
+## Uninstallation
+
+To completely remove MCP Voice Hooks:
+
+```bash
+# Remove hooks and settings
+npx mcp-voice-hooks uninstall
+
+# Also remove from Claude MCP servers
+claude mcp remove voice-hooks
+```
+
+This will:
+- Remove the `~/.mcp-voice-hooks` directory
+- Clean up voice hooks from your project's `.claude/settings.json`
+- Preserve any custom hooks you've added
+
 ## Development Mode
 
 If you're developing mcp-voice-hooks itself:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/mcp-voice-hooks.git
+git clone https://github.com/johnmatthewtennant/mcp-voice-hooks.git
 cd mcp-voice-hooks
 
 # 2. Install dependencies

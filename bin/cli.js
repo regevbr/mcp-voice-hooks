@@ -27,6 +27,9 @@ async function main() {
       
       console.log('\n✅ Installation complete!');
       console.log('📝 To start the server, run: npx mcp-voice-hooks');
+    } else if (command === 'uninstall') {
+      console.log('🗑️  Uninstalling MCP Voice Hooks...');
+      await uninstall();
     } else {
       // Default behavior: ensure hooks are installed/updated, then run the MCP server
       console.log('🎤 MCP Voice Hooks - Starting server...');
@@ -50,7 +53,32 @@ async function ensureUserDirectorySetup() {
   
   console.log('📁 Setting up user directory:', userDir);
   
-  // Create directories if they don't exist
+  // Clean up existing directory contents (except README.md if it exists)
+  if (fs.existsSync(userDir)) {
+    console.log('🧹 Cleaning up existing directory...');
+    
+    // Remove hooks directory if it exists
+    if (fs.existsSync(hooksDir)) {
+      fs.rmSync(hooksDir, { recursive: true, force: true });
+      console.log('✅ Cleaned up old hooks');
+    }
+    
+    // Remove any other files except README.md
+    const files = fs.readdirSync(userDir);
+    for (const file of files) {
+      if (file !== 'README.md') {
+        const filePath = path.join(userDir, file);
+        const stat = fs.statSync(filePath);
+        if (stat.isDirectory()) {
+          fs.rmSync(filePath, { recursive: true, force: true });
+        } else {
+          fs.unlinkSync(filePath);
+        }
+      }
+    }
+  }
+  
+  // Create directories
   if (!fs.existsSync(userDir)) {
     fs.mkdirSync(userDir, { recursive: true });
     console.log('✅ Created user directory');
@@ -77,6 +105,15 @@ async function ensureUserDirectorySetup() {
     }
   } else {
     console.log('⚠️  Package hooks directory not found, skipping hook installation');
+  }
+  
+  // Copy README.md from project root to user directory
+  const projectReadmePath = path.join(__dirname, '..', 'README.md');
+  const userReadmePath = path.join(userDir, 'README.md');
+  
+  if (fs.existsSync(projectReadmePath)) {
+    fs.copyFileSync(projectReadmePath, userReadmePath);
+    console.log('✅ Copied README.md');
   }
 }
 
@@ -240,6 +277,56 @@ async function runMCPServer() {
     console.log('\n🛑 Shutting down...');
     child.kill('SIGTERM');
   });
+}
+
+// Uninstall MCP Voice Hooks
+async function uninstall() {
+  const userDir = path.join(os.homedir(), '.mcp-voice-hooks');
+  const claudeSettingsPath = path.join(process.cwd(), '.claude', 'settings.json');
+  
+  // Step 1: Remove ~/.mcp-voice-hooks directory
+  if (fs.existsSync(userDir)) {
+    console.log('📁 Removing user directory:', userDir);
+    fs.rmSync(userDir, { recursive: true, force: true });
+    console.log('✅ Removed ~/.mcp-voice-hooks');
+  } else {
+    console.log('ℹ️  ~/.mcp-voice-hooks directory not found');
+  }
+  
+  // Step 2: Remove voice hooks from Claude settings
+  if (fs.existsSync(claudeSettingsPath)) {
+    try {
+      console.log('⚙️  Removing voice hooks from Claude settings...');
+      
+      const settingsContent = fs.readFileSync(claudeSettingsPath, 'utf8');
+      const settings = JSON.parse(settingsContent);
+      
+      if (settings.hooks) {
+        // Remove voice hooks
+        const cleanedHooks = removeVoiceHooks(settings.hooks);
+        
+        if (Object.keys(cleanedHooks).length === 0) {
+          // If no hooks remain, remove the hooks property entirely
+          delete settings.hooks;
+        } else {
+          settings.hooks = cleanedHooks;
+        }
+        
+        // Write updated settings
+        fs.writeFileSync(claudeSettingsPath, JSON.stringify(settings, null, 2));
+        console.log('✅ Removed voice hooks from Claude settings');
+      } else {
+        console.log('ℹ️  No hooks found in Claude settings');
+      }
+    } catch (error) {
+      console.log('⚠️  Could not update Claude settings:', error.message);
+    }
+  } else {
+    console.log('ℹ️  No Claude settings file found in current project');
+  }
+  
+  console.log('\n✅ Uninstallation complete!');
+  console.log('👋 MCP Voice Hooks has been removed.');
 }
 
 // Run the main function

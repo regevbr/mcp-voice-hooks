@@ -216,11 +216,11 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [x] Implement intelligent hook merging that preserves existing hooks
   - [x] Only updates voice-hooks related hooks
   - [x] Avoids unnecessary writes when hooks are only reordered
-- [ ] clean up anything in `~/.mcp-voice-hooks` before installing
 - [x] add a readme to `~/.mcp-voice-hooks` with instructions for how to uninstall (`rm -rf ~/.mcp-voice-hooks`, and remove the hooks from the claude settings)
-- [ ] add a script to uninstall
-  - [ ] `rm -rf ~/.mcp-voice-hooks`
-  - [ ] and remove the hooks from the claude settings
+- [x] clean up anything in `~/.mcp-voice-hooks` before installing
+- [x] add a script to uninstall
+  - [x] `rm -rf ~/.mcp-voice-hooks`
+  - [x] and remove the hooks from the claude settings
 
 ## Technical Decisions
 
