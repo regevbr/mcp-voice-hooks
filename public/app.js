@@ -276,9 +276,6 @@ class VoiceHooksClient {
     }
     
     async clearAllUtterances() {
-        if (!confirm('Are you sure you want to clear all utterances?')) {
-            return;
-        }
         
         this.clearAllBtn.disabled = true;
         this.clearAllBtn.textContent = 'Clearing...';
