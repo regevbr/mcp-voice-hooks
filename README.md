@@ -187,3 +187,39 @@ Test it with the bash command:
 ```bash
 say "Hi, this is your mac system voice"
 ```
+
+## Uninstallation
+
+To completely remove mcp-voice-hooks from your system:
+
+1. **Remove the hook files**:
+
+   ```bash
+   rm -rf ~/.mcp-voice-hooks
+   ```
+
+2. **Remove the hooks from your Claude settings**:
+
+   Edit your project's `.claude/settings.json` file and remove the entire `"hooks"` section that contains references to mcp-voice-hooks:
+
+   ```json
+   {
+     "hooks": {
+       "Stop": [...],
+       "PreToolUse": [...],
+       "PostToolUse": [...]
+     }
+   }
+   ```
+
+3. **Remove the MCP server configuration**:
+
+   Using Claude CLI:
+
+   ```bash
+   claude mcp remove voice-hooks
+   ```
+
+   Or manually edit your project's `.mcp.json` file and remove the `"voice-hooks"` server configuration.
+
+4. **Restart Claude Code** to apply the changes.

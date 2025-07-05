@@ -33,6 +33,11 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 ## Project Phases & Roadmap
 
+### Next tasks
+
+- [ ] bug: microsoft edge speech recognition is not working
+- [ ] clean up completed tasks in roadmap.md
+
 ### Text-Based POC ✅ **COMPLETED**
 
 #### Core MCP Server
