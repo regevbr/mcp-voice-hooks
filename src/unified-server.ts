@@ -289,7 +289,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // Start HTTP server
-const HTTP_PORT = 3000;
+const HTTP_PORT = process.env.MCP_VOICE_HOOKS_PORT ? parseInt(process.env.MCP_VOICE_HOOKS_PORT) : 5111;
 app.listen(HTTP_PORT, () => {
   console.log(`[HTTP] Server listening on http://localhost:${HTTP_PORT}`);
   console.log(`[Mode] Running in ${IS_MCP_MANAGED ? 'MCP-managed' : 'standalone'} mode`);
@@ -355,7 +355,7 @@ if (IS_MCP_MANAGED) {
     try {
       if (name === 'dequeue_utterances') {
         const limit = (args?.limit as number) ?? 10;
-        const response = await fetch('http://localhost:3000/api/dequeue-utterances', {
+        const response = await fetch(`http://localhost:${HTTP_PORT}/api/dequeue-utterances`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ limit }),
@@ -393,7 +393,7 @@ if (IS_MCP_MANAGED) {
         );
         debugLog(`[MCP] Calling wait_for_utterance with ${secondsToWait}s timeout`);
 
-        const response = await fetch('http://localhost:3000/api/wait-for-utterances', {
+        const response = await fetch(`http://localhost:${HTTP_PORT}/api/wait-for-utterances`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ seconds_to_wait: secondsToWait }),

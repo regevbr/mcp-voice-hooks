@@ -12,7 +12,7 @@ export class HttpServer {
   private utteranceQueue: InMemoryUtteranceQueue;
   private port: number;
 
-  constructor(utteranceQueue: InMemoryUtteranceQueue, port: number = 3000) {
+  constructor(utteranceQueue: InMemoryUtteranceQueue, port: number = 5111) {
     this.utteranceQueue = utteranceQueue;
     this.port = port;
     this.app = express();

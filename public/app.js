@@ -1,6 +1,6 @@
 class VoiceHooksClient {
     constructor() {
-        this.baseUrl = 'http://localhost:3000';
+        this.baseUrl = window.location.origin;
         this.debug = localStorage.getItem('voiceHooksDebug') === 'true';
         this.utteranceInput = document.getElementById('utteranceInput');
         this.sendBtn = document.getElementById('sendBtn');

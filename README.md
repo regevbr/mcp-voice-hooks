@@ -62,7 +62,17 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
    claude
    ```
 
-4. **Open the voice interface** at <http://localhost:3000> and start speaking! Note: you need to send one text message to Claude to trigger the voice hooks.
+4. **Open the voice interface** at <http://localhost:5111> and start speaking! Note: you need to send one text message to Claude to trigger the voice hooks.
+
+   The default port is 5111. To use a different port, add to your project's `.claude/settings.json`:
+
+   ```json
+   {
+     "env": {
+       "MCP_VOICE_HOOKS_PORT": "8080"
+     }
+   }
+   ```
 
 ## Development Mode
 
@@ -86,7 +96,10 @@ npx mcp-voice-hooks install-hooks
 claude
 ```
 
-NOTE: You need to restart Claude Code each time you make changes.
+**Important**: When developing with `npm link`:
+- Claude runs the compiled JavaScript from the `dist` folder, not your TypeScript source
+- After making changes to the TypeScript code, you must run `npm run build` 
+- Then restart Claude Code to use the updated compiled code
 
 ### Hot Reload
 
