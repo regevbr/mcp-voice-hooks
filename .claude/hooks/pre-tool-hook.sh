@@ -3,8 +3,11 @@
 # Pre-Tool Hook - Checks for pending utterances before allowing tool execution
 # Forces Claude to use dequeue_utterances tool if there are pending utterances
 
+# Get port from environment variable or use default
+PORT="${MCP_VOICE_HOOKS_PORT:-5111}"
+
 # Check has-pending-utterances endpoint
-response=$(curl -s http://localhost:3000/api/has-pending-utterances 2>/dev/null)
+response=$(curl -s http://localhost:${PORT}/api/has-pending-utterances 2>/dev/null)
 
 if [ $? -ne 0 ]; then
     # Server not available, allow tool execution

@@ -110,6 +110,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [x] Browser compatibility checks
 - [x] Tested utterance segmentation behavior successfully
 - [x] Made HTTP server port configurable via MCP_VOICE_HOOKS_PORT environment variable (default: 5111)
+- [x] Updated hook scripts to use configurable port
 
 ### Utterance classification
 

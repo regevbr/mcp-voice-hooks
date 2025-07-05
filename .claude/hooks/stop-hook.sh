@@ -3,8 +3,11 @@
 # Stop Hook - Intelligently decides whether to wait for voice input
 # Checks if there have been any utterances since the last timeout
 
+# Get port from environment variable or use default
+PORT="${MCP_VOICE_HOOKS_PORT:-5111}"
+
 # Check should-wait endpoint
-response=$(curl -s http://localhost:3000/api/should-wait 2>/dev/null)
+response=$(curl -s http://localhost:${PORT}/api/should-wait 2>/dev/null)
 
 if [ $? -ne 0 ]; then
     # Server not available, allow stop
