@@ -159,7 +159,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [x] Handle first-time setup and updates seamlessly
 - [x] Create comprehensive documentation for npx installation
 - [ ] Test npx integration across different environments
-- [ ] use a custom localhost url instead of localhost:3000
+- [x] use a custom localhost url instead of localhost:3000
 
 ### NPM Publishing
 
