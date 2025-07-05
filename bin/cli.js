@@ -27,9 +27,12 @@ async function main() {
       console.log('\n✅ Installation complete!');
       console.log('📝 To start the server, run: npx mcp-voice-hooks');
     } else {
-      // Default behavior: just run the MCP server
+      // Default behavior: ensure hooks are installed/updated, then run the MCP server
       console.log('🎤 MCP Voice Hooks - Starting server...');
-      console.log('💡 Note: If hooks are not installed, run: npx mcp-voice-hooks install-hooks');
+      
+      // Auto-install/update hooks on every startup
+      await ensureHooksInstalled();
+      
       console.log('');
       await runMCPServer();
     }
@@ -145,6 +148,56 @@ async function configureClaudeCodeSettings() {
   // Write settings back
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
   console.log('✅ Updated project Claude Code settings');
+}
+
+// Silent hook installation check - runs on every startup
+async function ensureHooksInstalled() {
+  const userDir = path.join(os.homedir(), '.mcp-voice-hooks');
+  const hooksDir = path.join(userDir, 'hooks');
+  const packageHooksDir = path.join(__dirname, '..', '.claude', 'hooks');
+  
+  try {
+    // Only create directories if they don't exist
+    if (!fs.existsSync(hooksDir)) {
+      fs.mkdirSync(hooksDir, { recursive: true });
+      console.log('🔧 Installing hooks for first time...');
+    }
+    
+    // Check if hooks need updating
+    let needsUpdate = false;
+    if (fs.existsSync(packageHooksDir)) {
+      const hookFiles = fs.readdirSync(packageHooksDir).filter(file => file.endsWith('.sh'));
+      
+      for (const hookFile of hookFiles) {
+        const sourcePath = path.join(packageHooksDir, hookFile);
+        const destPath = path.join(hooksDir, hookFile);
+        
+        // Check if hook doesn't exist or is different
+        if (!fs.existsSync(destPath)) {
+          needsUpdate = true;
+          break;
+        }
+        
+        const sourceContent = fs.readFileSync(sourcePath, 'utf8');
+        const destContent = fs.readFileSync(destPath, 'utf8');
+        
+        if (sourceContent !== destContent) {
+          needsUpdate = true;
+          break;
+        }
+      }
+    }
+    
+    if (needsUpdate) {
+      console.log('🔄 Updating hooks to latest version...');
+      await ensureUserDirectorySetup();
+      // Don't reconfigure Claude settings on auto-update
+      console.log('✅ Hooks updated');
+    }
+  } catch (error) {
+    // Silently continue if hooks can't be updated
+    console.warn('⚠️  Could not auto-update hooks:', error.message);
+  }
 }
 
 // Run the MCP server

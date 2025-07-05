@@ -37,6 +37,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 - [ ] bug: microsoft edge speech recognition is not working
 - [ ] clean up completed tasks in roadmap.md
+- [ ] remove the warning when clicking clear all
 
 ### Text-Based POC ✅ **COMPLETED**
 
@@ -111,6 +112,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] Tested utterance segmentation behavior successfully
 - [x] Made HTTP server port configurable via MCP_VOICE_HOOKS_PORT environment variable (default: 5111)
 - [x] Updated hook scripts to use configurable port
+- [x] Auto-install/update hooks on MCP server startup
 
 ### Utterance classification
 

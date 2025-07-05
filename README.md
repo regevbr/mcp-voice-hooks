@@ -23,17 +23,7 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
 
 ## Installation in Your Own Project
 
-1. **Install the hooks** (first time only):
-
-   ```bash
-   npx mcp-voice-hooks install-hooks
-   ```
-
-   This will:
-   - Install hook scripts to `~/.mcp-voice-hooks/hooks/`
-   - Configure your project's `.claude/settings.json`
-
-2. **Add the MCP server**:
+1. **Add the MCP server**:
 
    Run the following command to automatically add the MCP server to your current project in `~/.claude.json`:
 
@@ -56,13 +46,17 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
    }
    ```
 
-3. **Start Claude Code**:
+2. **Start Claude Code**:
 
    ```bash
    claude
    ```
 
-4. **Open the voice interface** at <http://localhost:5111> and start speaking! Note: you need to send one text message to Claude to trigger the voice hooks.
+3. **Open the voice interface** at <http://localhost:5111> and start speaking! 
+
+   The hooks are automatically installed when the MCP server starts. You need to send one text message to Claude to trigger the voice hooks.
+
+   **Note**: After the first-time installation, you may need to restart Claude for the hooks to take effect.
 
    The default port is 5111. To use a different port, add to your project's `.claude/settings.json`:
 
@@ -73,6 +67,19 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
      }
    }
    ```
+
+## Manual Hook Installation
+
+The hooks are automatically installed/updated when the MCP server starts. However, if you need to manually install or reconfigure the hooks:
+
+```bash
+npx mcp-voice-hooks install-hooks
+```
+
+This will:
+
+- Install/update hook scripts to `~/.mcp-voice-hooks/hooks/`
+- Configure your project's `.claude/settings.json`
 
 ## Development Mode
 
