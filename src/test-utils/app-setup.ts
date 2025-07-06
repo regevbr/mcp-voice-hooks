@@ -76,22 +76,22 @@ export function setupApp() {
   const app = express();
   app.use(cors());
   app.use(express.json());
-  
+
   const queue = new UtteranceQueue();
-  
+
   // API for voice preferences
   app.post('/api/voice-preferences', (req: Request, res: Response) => {
     const { voiceResponsesEnabled } = req.body;
-    
+
     // Update preferences
     voicePreferences.voiceResponsesEnabled = !!voiceResponsesEnabled;
-    
+
     res.json({
       success: true,
       preferences: voicePreferences
     });
   });
-  
+
   // API for text-to-speech
   app.post('/api/speak', async (req: Request, res: Response) => {
     const { text } = req.body;
@@ -113,7 +113,7 @@ export function setupApp() {
     try {
       // Always notify browser clients - they decide how to speak
       notifyTTSClients(text);
-      
+
       // Mark all delivered utterances as responded
       const deliveredUtterances = queue.utterances.filter(u => u.status === 'delivered');
       deliveredUtterances.forEach(u => {
@@ -132,10 +132,10 @@ export function setupApp() {
       });
     }
   });
-  
+
   // API for system text-to-speech (always uses Mac say command)
   app.post('/api/speak-system', async (req: Request, res: Response) => {
-    const { text, rate = 250 } = req.body;
+    const { text, rate = 150 } = req.body;
 
     if (!text || !text.trim()) {
       res.status(400).json({ error: 'Text is required' });
@@ -158,7 +158,7 @@ export function setupApp() {
       });
     }
   });
-  
+
   // Server-Sent Events for TTS notifications
   app.get('/api/tts-events', (_req: Request, res: Response) => {
     res.writeHead(200, {
@@ -178,6 +178,6 @@ export function setupApp() {
       ttsClients.delete(res);
     });
   });
-  
+
   return app;
 }

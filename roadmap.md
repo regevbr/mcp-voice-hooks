@@ -36,8 +36,8 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 ### Next tasks
 
 - [ ] MVP
-  - [ ] add a warning when adjusting rate for google voices that the google voices don't work well with speech rate
-  - [ ] link to readme for info on system voice settings
+  - [x] add a warning when adjusting rate for google voices that the google voices don't work well with speech rate
+  - [x] link to readme for info on system voice settings
   - [x] hide, label, or separate low quality voices
   - [x] choose a good default voice
   - [x] if i leave the browser open and restart the server, then it thinks voice input is off but it's actually on in the frontend. The same thing can happen with voice responses on/off

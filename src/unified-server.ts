@@ -515,12 +515,12 @@ function notifyTTSClients(text: string) {
 // API for voice preferences
 app.post('/api/voice-preferences', (req: Request, res: Response) => {
   const { voiceResponsesEnabled } = req.body;
-  
+
   // Update preferences
   voicePreferences.voiceResponsesEnabled = !!voiceResponsesEnabled;
-  
+
   debugLog(`[Preferences] Updated: voiceResponses=${voicePreferences.voiceResponsesEnabled}`);
-  
+
   res.json({
     success: true,
     preferences: voicePreferences
@@ -530,12 +530,12 @@ app.post('/api/voice-preferences', (req: Request, res: Response) => {
 // API for voice input state
 app.post('/api/voice-input-state', (req: Request, res: Response) => {
   const { active } = req.body;
-  
+
   // Update voice input state
   voicePreferences.voiceInputActive = !!active;
-  
+
   debugLog(`[Voice Input] ${voicePreferences.voiceInputActive ? 'Started' : 'Stopped'} listening`);
-  
+
   res.json({
     success: true,
     voiceInputActive: voicePreferences.voiceInputActive
@@ -565,7 +565,7 @@ app.post('/api/speak', async (req: Request, res: Response) => {
     // Always notify browser clients - they decide how to speak
     notifyTTSClients(text);
     debugLog(`[Speak] Sent text to browser for TTS: "${text}"`);
-    
+
     // Note: The browser will decide whether to use system voice or browser voice
 
     // Mark all delivered utterances as responded
@@ -594,7 +594,7 @@ app.post('/api/speak', async (req: Request, res: Response) => {
 
 // API for system text-to-speech (always uses Mac say command)
 app.post('/api/speak-system', async (req: Request, res: Response) => {
-  const { text, rate = 250 } = req.body;
+  const { text, rate = 150 } = req.body;
 
   if (!text || !text.trim()) {
     res.status(400).json({ error: 'Text is required' });

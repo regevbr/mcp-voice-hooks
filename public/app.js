@@ -37,6 +37,8 @@ class VoiceHooksClient {
         this.voiceOptions = document.getElementById('voiceOptions');
         this.localVoicesGroup = document.getElementById('localVoicesGroup');
         this.cloudVoicesGroup = document.getElementById('cloudVoicesGroup');
+        this.rateWarning = document.getElementById('rateWarning');
+        this.systemVoiceInfo = document.getElementById('systemVoiceInfo');
 
         // Load saved preferences
         this.loadPreferences();
@@ -138,6 +140,7 @@ class VoiceHooksClient {
             // Save selected voice to localStorage
             localStorage.setItem('selectedVoice', this.selectedVoice);
             this.updateVoicePreferences();
+            this.updateVoiceWarnings();
         });
 
         this.speechRateSlider.addEventListener('input', (e) => {
@@ -497,6 +500,9 @@ class VoiceHooksClient {
         } else {
             this.selectedVoice = 'system';
         }
+
+        // Update warnings based on selected voice
+        this.updateVoiceWarnings();
     }
 
     async speakText(text) {
@@ -511,7 +517,7 @@ class VoiceHooksClient {
                     },
                     body: JSON.stringify({
                         text: text,
-                        rate: Math.round(this.speechRate * 250) // Convert rate to words per minute
+                        rate: Math.round(this.speechRate * 150) // Convert rate to words per minute
                     }),
                 });
 
@@ -598,6 +604,9 @@ class VoiceHooksClient {
 
         // Send preferences to server
         this.updateVoicePreferences();
+
+        // Update warnings after preferences are loaded
+        this.updateVoiceWarnings();
     }
 
     updateVoiceOptionsVisibility() {
@@ -652,6 +661,33 @@ class VoiceHooksClient {
         // Sync voice input state if currently listening
         if (this.isListening) {
             await this.updateVoiceInputState(true);
+        }
+    }
+
+    updateVoiceWarnings() {
+        // Show/hide warnings based on selected voice
+        if (this.selectedVoice === 'system') {
+            // Show system voice info, hide rate warning
+            this.systemVoiceInfo.style.display = 'flex';
+            this.rateWarning.style.display = 'none';
+        } else if (this.selectedVoice && this.selectedVoice.startsWith('browser:')) {
+            // Check if it's a Google voice
+            const voiceIndex = parseInt(this.selectedVoice.substring(8));
+            const voice = this.voices[voiceIndex];
+
+            if (voice && voice.name.toLowerCase().includes('google')) {
+                // Show rate warning for Google voices
+                this.rateWarning.style.display = 'flex';
+                this.systemVoiceInfo.style.display = 'none';
+            } else {
+                // Hide both warnings for other browser voices
+                this.rateWarning.style.display = 'none';
+                this.systemVoiceInfo.style.display = 'none';
+            }
+        } else {
+            // Hide both warnings if no voice selected
+            this.rateWarning.style.display = 'none';
+            this.systemVoiceInfo.style.display = 'none';
         }
     }
 }
