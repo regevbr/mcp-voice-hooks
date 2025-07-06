@@ -21,6 +21,12 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
 - 🔄 **Continuous Interaction**: Keep talking while Claude works - no need to stop between commands
 - 🪝 **Smart Hook System**: Pre-tool and stop hooks ensure Claude always checks for your input
 
+## Browser Compatibility
+
+- ✅ **Chrome**: Full support for speech recognition and text-to-speech
+- ✅ **Safari**: Full support for speech recognition and text-to-speech
+- ❌ **Edge**: Speech recognition not working on Apple Silicon (language-not-supported error)
+
 ## Installation in Your Own Project
 
 1. **Add the MCP server**:

@@ -62,7 +62,6 @@ class VoiceHooksClient {
         this.recognition = new SpeechRecognition();
         this.recognition.continuous = true;
         this.recognition.interimResults = true;
-        this.recognition.lang = 'en-US';
 
         // Handle results
         this.recognition.onresult = (event) => {

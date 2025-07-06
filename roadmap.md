@@ -36,10 +36,12 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 ### Next tasks
 
 - [ ] MVP
-  - [ ] add an info icon for the rate slider that warns that the google voices don't work well with speech rate
+  - [ ] add a warning when adjusting rate for google voices that the google voices don't work well with speech rate
   - [x] hide, label, or separate low quality voices
   - [ ] choose a good default voice
   - [x] if i leave the browser open and restart the server, then it thinks voice input is off but it's actually on in the frontend. The same thing can happen with voice responses on/off
+- [x] Known issue: Microsoft Edge speech recognition not working - shows "language-not-supported" error
+  - Safari and Chrome work fine for speech recognition
 - [x] Reject speak requests when voice responses is disabled
   - [x] Server should return an error when voice responses is off
 - [x] add a voice-input-is-active state tracker on the server and only block tool calls etc if "start listening" is active in the browser
