@@ -36,8 +36,9 @@ class VoiceHooksClient {
         this.speechVolumeInput = document.getElementById('speechVolumeInput');
         this.testTTSBtn = document.getElementById('testTTSBtn');
         this.voiceResponsesToggle = document.getElementById('voiceResponsesToggle');
-        this.browserTTSToggle = document.getElementById('browserTTSToggle');
         this.voiceOptions = document.getElementById('voiceOptions');
+        this.localVoicesGroup = document.getElementById('localVoicesGroup');
+        this.cloudVoicesGroup = document.getElementById('cloudVoicesGroup');
         
         // Load saved preferences
         this.loadPreferences();
@@ -136,13 +137,10 @@ class VoiceHooksClient {
         
         // TTS controls
         this.voiceSelect.addEventListener('change', (e) => {
-            this.selectedVoiceIndex = e.target.value ? parseInt(e.target.value) : null;
+            this.selectedVoice = e.target.value;
             // Save selected voice to localStorage
-            if (this.selectedVoiceIndex !== null && this.voices[this.selectedVoiceIndex]) {
-                localStorage.setItem('selectedVoiceName', this.voices[this.selectedVoiceIndex].name);
-            } else {
-                localStorage.removeItem('selectedVoiceName');
-            }
+            localStorage.setItem('selectedVoice', this.selectedVoice);
+            this.updateVoicePreferences();
         });
         
         this.speechRateSlider.addEventListener('input', (e) => {
@@ -191,12 +189,6 @@ class VoiceHooksClient {
         this.voiceResponsesToggle.addEventListener('change', (e) => {
             const enabled = e.target.checked;
             localStorage.setItem('voiceResponsesEnabled', enabled);
-            this.updateVoicePreferences();
-        });
-        
-        this.browserTTSToggle.addEventListener('change', (e) => {
-            const enabled = e.target.checked;
-            localStorage.setItem('browserTTSEnabled', enabled);
             this.updateVoicePreferences();
             this.updateVoiceOptionsVisibility();
         });
@@ -423,7 +415,7 @@ class VoiceHooksClient {
         this.speechRate = 1.0;
         this.speechPitch = 1.0;
         this.speechVolume = 1.0;
-        this.selectedVoiceIndex = null;
+        this.selectedVoice = 'system';
     }
     
     initializeTTSEvents() {
@@ -454,39 +446,49 @@ class VoiceHooksClient {
     }
     
     populateVoiceList() {
-        if (!this.voiceSelect) return;
+        if (!this.voiceSelect || !this.localVoicesGroup || !this.cloudVoicesGroup) return;
         
-        // Clear existing options except default
-        this.voiceSelect.innerHTML = '<option value="">Browser Default</option>';
-        
-        let selectedIndex = null;
+        // Clear existing browser voice options
+        this.localVoicesGroup.innerHTML = '';
+        this.cloudVoicesGroup.innerHTML = '';
         
         // Filter and add only en-US voices
         this.voices.forEach((voice, index) => {
             // Only include English US voices
             if (voice.lang.toLowerCase().startsWith('en-us')) {
                 const option = document.createElement('option');
-                option.value = index.toString();
+                option.value = `browser:${index}`;
                 option.textContent = voice.name;
                 
-                // Mark local voices
+                // Categorize voices
                 if (voice.localService) {
-                    option.textContent += ' [Local]';
+                    this.localVoicesGroup.appendChild(option);
+                } else {
+                    this.cloudVoicesGroup.appendChild(option);
                 }
-                
-                // Check if this is the saved voice
-                if (this.savedVoiceName && voice.name === this.savedVoiceName) {
-                    selectedIndex = index;
-                }
-                
-                this.voiceSelect.appendChild(option);
             }
         });
         
+        // Hide empty groups
+        if (this.localVoicesGroup.children.length === 0) {
+            this.localVoicesGroup.style.display = 'none';
+        } else {
+            this.localVoicesGroup.style.display = '';
+        }
+        
+        if (this.cloudVoicesGroup.children.length === 0) {
+            this.cloudVoicesGroup.style.display = 'none';
+        } else {
+            this.cloudVoicesGroup.style.display = '';
+        }
+        
         // Restore saved selection
-        if (selectedIndex !== null) {
-            this.voiceSelect.value = selectedIndex.toString();
-            this.selectedVoiceIndex = selectedIndex;
+        const savedVoice = localStorage.getItem('selectedVoice');
+        if (savedVoice) {
+            this.voiceSelect.value = savedVoice;
+            this.selectedVoice = savedVoice;
+        } else {
+            this.selectedVoice = 'system';
         }
     }
     
@@ -502,9 +504,12 @@ class VoiceHooksClient {
         // Create utterance
         const utterance = new SpeechSynthesisUtterance(text);
         
-        // Set voice if selected
-        if (this.selectedVoiceIndex !== null && this.voices[this.selectedVoiceIndex]) {
-            utterance.voice = this.voices[this.selectedVoiceIndex];
+        // Set voice if using browser voice
+        if (this.selectedVoice && this.selectedVoice.startsWith('browser:')) {
+            const voiceIndex = parseInt(this.selectedVoice.substring(8));
+            if (this.voices[voiceIndex]) {
+                utterance.voice = this.voices[voiceIndex];
+            }
         }
         
         // Set speech properties
@@ -534,27 +539,18 @@ class VoiceHooksClient {
     loadPreferences() {
         // Simple localStorage with defaults to true
         const storedVoiceResponses = localStorage.getItem('voiceResponsesEnabled');
-        const storedBrowserTTS = localStorage.getItem('browserTTSEnabled');
         
         // Default to true if not stored
         const voiceResponsesEnabled = storedVoiceResponses !== null 
             ? storedVoiceResponses === 'true'
             : true;
-            
-        const browserTTSEnabled = storedBrowserTTS !== null
-            ? storedBrowserTTS === 'true'
-            : true;
         
-        // Set the checkboxes
+        // Set the checkbox
         this.voiceResponsesToggle.checked = voiceResponsesEnabled;
-        this.browserTTSToggle.checked = browserTTSEnabled;
         
         // Save to localStorage if this is first time
         if (storedVoiceResponses === null) {
             localStorage.setItem('voiceResponsesEnabled', 'true');
-        }
-        if (storedBrowserTTS === null) {
-            localStorage.setItem('browserTTSEnabled', 'true');
         }
         
         // Load voice settings
@@ -572,8 +568,8 @@ class VoiceHooksClient {
             this.speechVolumeInput.value = this.speechVolume.toFixed(1);
         }
         
-        // Load selected voice name (will be applied after voices load)
-        this.savedVoiceName = localStorage.getItem('selectedVoiceName');
+        // Load selected voice (will be applied after voices load)
+        this.selectedVoice = localStorage.getItem('selectedVoice') || 'system';
         
         // Update UI visibility
         this.updateVoiceOptionsVisibility();
@@ -583,13 +579,13 @@ class VoiceHooksClient {
     }
     
     updateVoiceOptionsVisibility() {
-        const browserTTSEnabled = this.browserTTSToggle.checked;
-        this.voiceOptions.style.display = browserTTSEnabled ? 'flex' : 'none';
+        const voiceResponsesEnabled = this.voiceResponsesToggle.checked;
+        this.voiceOptions.style.display = voiceResponsesEnabled ? 'flex' : 'none';
     }
     
     async updateVoicePreferences() {
         const voiceResponsesEnabled = this.voiceResponsesToggle.checked;
-        const browserTTSEnabled = this.browserTTSToggle.checked;
+        const useBrowserTTS = this.selectedVoice && this.selectedVoice.startsWith('browser:');
         
         try {
             // Send preferences to server
@@ -600,11 +596,11 @@ class VoiceHooksClient {
                 },
                 body: JSON.stringify({
                     voiceResponsesEnabled,
-                    browserTTSEnabled
+                    browserTTSEnabled: useBrowserTTS
                 }),
             });
             
-            this.debugLog('Voice preferences updated:', { voiceResponsesEnabled, browserTTSEnabled });
+            this.debugLog('Voice preferences updated:', { voiceResponsesEnabled, browserTTSEnabled: useBrowserTTS, selectedVoice: this.selectedVoice });
         } catch (error) {
             console.error('Failed to update voice preferences:', error);
         }

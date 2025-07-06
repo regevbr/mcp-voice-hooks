@@ -512,6 +512,17 @@ app.post('/api/speak', async (req: Request, res: Response) => {
     return;
   }
 
+  // Check if voice responses are enabled
+  if (!voicePreferences.voiceResponsesEnabled) {
+    debugLog(`[Speak] Voice responses disabled, silently succeeding`);
+    res.json({
+      success: true,
+      message: 'Voice responses are disabled',
+      respondedCount: 0
+    });
+    return;
+  }
+
   try {
     // Check if browser TTS is enabled
     const useBrowserTTS = voicePreferences.browserTTSEnabled;

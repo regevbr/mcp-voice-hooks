@@ -35,14 +35,14 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 ### Next tasks
 
-- [ ] Reject speak requests when voice responses is disabled
-  - [ ] Server should return an error or silent success when voice responses is off
-  - [ ] Prevent unnecessary TTS processing when user has disabled voice
-- [ ] Replace "Use Browser TTS" checkbox with voice selection dropdown
-  - [ ] First option: "Mac System Voice" (uses macOS `say` command)
-  - [ ] Remaining options: Browser voices from speechSynthesis.getVoices()
-  - [ ] Show dropdown only when voice responses is enabled
-  - [ ] Group options into sections (e.g., System TTS, Browser TTS using local voices, Browser TTS using cloud voices)
+- [x] Reject speak requests when voice responses is disabled
+  - [x] Server should return an error or silent success when voice responses is off
+  - [x] Prevent unnecessary TTS processing when user has disabled voice
+- [x] Replace "Use Browser TTS" checkbox with voice selection dropdown
+  - [x] First option: "Mac System Voice" (uses macOS `say` command)
+  - [x] Remaining options: Browser voices from speechSynthesis.getVoices()
+  - [x] Show dropdown only when voice responses is enabled
+  - [x] Group options into three sections (e.g., System TTS, Browser TTS using local voices, Browser TTS using cloud voices)
   - [ ] Show rate and volume options for System TTS as well
 - [x] Add text input field next to rate slider
   - [x] Allow users to type exact rate values
