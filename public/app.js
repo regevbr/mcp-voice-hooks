@@ -22,6 +22,26 @@ class VoiceHooksClient {
         this.isListening = false;
         this.initializeSpeechRecognition();
         
+        // Speech synthesis
+        this.initializeSpeechSynthesis();
+        
+        // Server-Sent Events for TTS
+        this.initializeTTSEvents();
+        
+        // TTS controls
+        this.voiceSelect = document.getElementById('voiceSelect');
+        this.speechRateSlider = document.getElementById('speechRate');
+        this.speechRateValue = document.getElementById('speechRateValue');
+        this.speechVolumeSlider = document.getElementById('speechVolume');
+        this.speechVolumeValue = document.getElementById('speechVolumeValue');
+        this.testTTSBtn = document.getElementById('testTTSBtn');
+        this.voiceResponsesToggle = document.getElementById('voiceResponsesToggle');
+        this.browserTTSToggle = document.getElementById('browserTTSToggle');
+        this.voiceOptions = document.getElementById('voiceOptions');
+        
+        // Load saved preferences
+        this.loadPreferences();
+        
         this.setupEventListeners();
         this.loadData();
         
@@ -112,6 +132,39 @@ class VoiceHooksClient {
             if (e.key === 'Enter') {
                 this.sendUtterance();
             }
+        });
+        
+        // TTS controls
+        this.voiceSelect.addEventListener('change', (e) => {
+            this.selectedVoiceIndex = e.target.value ? parseInt(e.target.value) : null;
+        });
+        
+        this.speechRateSlider.addEventListener('input', (e) => {
+            this.speechRate = parseFloat(e.target.value);
+            this.speechRateValue.textContent = this.speechRate.toFixed(1);
+        });
+        
+        this.speechVolumeSlider.addEventListener('input', (e) => {
+            this.speechVolume = parseFloat(e.target.value);
+            this.speechVolumeValue.textContent = this.speechVolume.toFixed(1);
+        });
+        
+        this.testTTSBtn.addEventListener('click', () => {
+            this.speakText('Hello! This is a test of the text-to-speech voice.');
+        });
+        
+        // Voice toggle listeners
+        this.voiceResponsesToggle.addEventListener('change', (e) => {
+            const enabled = e.target.checked;
+            localStorage.setItem('voiceResponsesEnabled', enabled);
+            this.updateVoicePreferences();
+        });
+        
+        this.browserTTSToggle.addEventListener('change', (e) => {
+            const enabled = e.target.checked;
+            localStorage.setItem('browserTTSEnabled', enabled);
+            this.updateVoicePreferences();
+            this.updateVoiceOptionsVisibility();
         });
     }
     
@@ -308,6 +361,184 @@ class VoiceHooksClient {
     debugLog(...args) {
         if (this.debug) {
             console.log(...args);
+        }
+    }
+    
+    initializeSpeechSynthesis() {
+        // Check for browser support
+        if (!window.speechSynthesis) {
+            console.warn('Speech synthesis not supported in this browser');
+            return;
+        }
+        
+        // Get available voices
+        this.voices = [];
+        const loadVoices = () => {
+            this.voices = window.speechSynthesis.getVoices();
+            this.debugLog('Available voices:', this.voices);
+            this.populateVoiceList();
+        };
+        
+        // Load voices initially and on change
+        loadVoices();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+        
+        // Set default voice preferences
+        this.speechRate = 1.0;
+        this.speechPitch = 1.0;
+        this.speechVolume = 1.0;
+        this.selectedVoiceIndex = null;
+    }
+    
+    initializeTTSEvents() {
+        // Connect to Server-Sent Events endpoint
+        this.eventSource = new EventSource(`${this.baseUrl}/api/tts-events`);
+        
+        this.eventSource.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                this.debugLog('TTS Event:', data);
+                
+                if (data.type === 'speak' && data.text) {
+                    this.speakText(data.text);
+                }
+            } catch (error) {
+                console.error('Failed to parse TTS event:', error);
+            }
+        };
+        
+        this.eventSource.onerror = (error) => {
+            console.error('SSE connection error:', error);
+            // Will automatically reconnect
+        };
+        
+        this.eventSource.onopen = () => {
+            this.debugLog('TTS Events connected');
+        };
+    }
+    
+    populateVoiceList() {
+        if (!this.voiceSelect) return;
+        
+        // Clear existing options except default
+        this.voiceSelect.innerHTML = '<option value="">Default</option>';
+        
+        // Add voice options
+        this.voices.forEach((voice, index) => {
+            const option = document.createElement('option');
+            option.value = index.toString();
+            option.textContent = `${voice.name} (${voice.lang})`;
+            
+            // Mark local voices
+            if (voice.localService) {
+                option.textContent += ' [Local]';
+            }
+            
+            this.voiceSelect.appendChild(option);
+        });
+    }
+    
+    speakText(text) {
+        if (!window.speechSynthesis) {
+            console.error('Speech synthesis not available');
+            return;
+        }
+        
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
+        
+        // Create utterance
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Set voice if selected
+        if (this.selectedVoiceIndex !== null && this.voices[this.selectedVoiceIndex]) {
+            utterance.voice = this.voices[this.selectedVoiceIndex];
+        }
+        
+        // Set speech properties
+        utterance.rate = this.speechRate;
+        utterance.pitch = this.speechPitch;
+        utterance.volume = this.speechVolume;
+        
+        // Event handlers
+        utterance.onstart = () => {
+            this.debugLog('Started speaking:', text);
+            // Could add visual indicator here
+        };
+        
+        utterance.onend = () => {
+            this.debugLog('Finished speaking');
+            // Could remove visual indicator here
+        };
+        
+        utterance.onerror = (event) => {
+            console.error('Speech synthesis error:', event);
+        };
+        
+        // Speak the text
+        window.speechSynthesis.speak(utterance);
+    }
+    
+    loadPreferences() {
+        // Simple localStorage with defaults to true
+        const storedVoiceResponses = localStorage.getItem('voiceResponsesEnabled');
+        const storedBrowserTTS = localStorage.getItem('browserTTSEnabled');
+        
+        // Default to true if not stored
+        const voiceResponsesEnabled = storedVoiceResponses !== null 
+            ? storedVoiceResponses === 'true'
+            : true;
+            
+        const browserTTSEnabled = storedBrowserTTS !== null
+            ? storedBrowserTTS === 'true'
+            : true;
+        
+        // Set the checkboxes
+        this.voiceResponsesToggle.checked = voiceResponsesEnabled;
+        this.browserTTSToggle.checked = browserTTSEnabled;
+        
+        // Save to localStorage if this is first time
+        if (storedVoiceResponses === null) {
+            localStorage.setItem('voiceResponsesEnabled', 'true');
+        }
+        if (storedBrowserTTS === null) {
+            localStorage.setItem('browserTTSEnabled', 'true');
+        }
+        
+        // Update UI visibility
+        this.updateVoiceOptionsVisibility();
+        
+        // Send preferences to server
+        this.updateVoicePreferences();
+    }
+    
+    updateVoiceOptionsVisibility() {
+        const browserTTSEnabled = this.browserTTSToggle.checked;
+        this.voiceOptions.style.display = browserTTSEnabled ? 'flex' : 'none';
+    }
+    
+    async updateVoicePreferences() {
+        const voiceResponsesEnabled = this.voiceResponsesToggle.checked;
+        const browserTTSEnabled = this.browserTTSToggle.checked;
+        
+        try {
+            // Send preferences to server
+            await fetch(`${this.baseUrl}/api/voice-preferences`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    voiceResponsesEnabled,
+                    browserTTSEnabled
+                }),
+            });
+            
+            this.debugLog('Voice preferences updated:', { voiceResponsesEnabled, browserTTSEnabled });
+        } catch (error) {
+            console.error('Failed to update voice preferences:', error);
         }
     }
 }

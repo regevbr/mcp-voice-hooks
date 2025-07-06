@@ -68,27 +68,29 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
    }
    ```
 
-## Voice responses (Mac only)
+## Voice responses
 
 Voice responses are disabled by default. To enable them:
 
-Add to your Claude Code settings JSON:
+1. Open the web interface at <http://localhost:5111>
+2. Check the "Enable Voice Responses" checkbox
+3. Optionally check "Use Browser TTS" for cross-platform text-to-speech
 
-```json
-{
-  "env": {
-    "VOICE_RESPONSES_ENABLED": "true"
-  }
-}
-```
+No configuration files or environment variables needed! The settings are saved in your browser and applied immediately.
 
-To disable voice responses, set the value to `false` or remove the setting entirely.
+### Browser Text-to-Speech (Cross-platform)
 
-### High quality voice responses
+When "Use Browser TTS" is enabled:
+- Voice selection dropdown appears
+- Adjustable speech rate slider
+- Test button to preview your selected voice
+- Works on all platforms (Windows, Mac, Linux)
 
-These voice responses are spoken by your Mac's system voice.
+### System Voice (Mac only)
 
-Configure in `System Settings > Accessibility > Spoken Content > System Voice`
+When "Use Browser TTS" is unchecked, the system uses macOS's built-in `say` command.
+
+Configure the system voice in `System Settings > Accessibility > Spoken Content > System Voice`
 
 I recommend using a Siri voice, as they are much higher quality.
 
@@ -103,6 +105,7 @@ Test it with the bash command:
 ```bash
 say "Hi, this is your mac system voice"
 ```
+
 
 ## Manual Hook Installation
 

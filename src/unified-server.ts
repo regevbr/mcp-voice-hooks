@@ -93,6 +93,12 @@ let lastTimeoutTimestamp: Date | null = null;
 let lastToolUseTimestamp: Date | null = null;
 let lastSpeakTimestamp: Date | null = null;
 
+// Voice preferences (controlled by browser)
+let voicePreferences = {
+  voiceResponsesEnabled: false,
+  browserTTSEnabled: false
+};
+
 // HTTP Server Setup (always created)
 const app = express();
 app.use(cors());
@@ -277,7 +283,7 @@ app.get('/api/has-pending-utterances', (_req: Request, res: Response) => {
 // Unified action validation endpoint
 app.post('/api/validate-action', (req: Request, res: Response) => {
   const { action } = req.body;
-  const voiceResponsesEnabled = process.env.VOICE_RESPONSES_ENABLED === 'true';
+  const voiceResponsesEnabled = voicePreferences.voiceResponsesEnabled;
 
   if (!action || !['tool-use', 'stop'].includes(action)) {
     res.status(400).json({ error: 'Invalid action. Must be "tool-use" or "stop"' });
@@ -331,8 +337,8 @@ app.post('/api/validate-action', (req: Request, res: Response) => {
 
 // Unified hook handler
 function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'): { decision: 'approve' | 'block', reason?: string } {
-  const voiceResponsesEnabled = process.env.VOICE_RESPONSES_ENABLED === 'true';
-  
+  const voiceResponsesEnabled = voicePreferences.voiceResponsesEnabled;
+
   // 1. Check for pending utterances
   const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
   if (pendingUtterances.length > 0) {
@@ -342,7 +348,7 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
       reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first. Please use dequeue_utterances to process them.`
     };
   }
-  
+
   // 2. Check for delivered utterances (when voice enabled)
   if (voiceResponsesEnabled) {
     const deliveredUtterances = queue.utterances.filter(u => u.status === 'delivered');
@@ -357,17 +363,17 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
       };
     }
   }
-  
+
   // 3. Handle tool action
   if (attemptedAction === 'tool') {
     lastToolUseTimestamp = new Date();
     return { decision: 'approve' };
   }
-  
+
   // 4. Handle wait for utterance
   if (attemptedAction === 'wait') {
-    if (voiceResponsesEnabled && lastToolUseTimestamp && 
-        (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
+    if (voiceResponsesEnabled && lastToolUseTimestamp &&
+      (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
       return {
         decision: 'block',
         reason: 'Assistant must speak after using tools. Please use the speak tool to respond before waiting for utterances.'
@@ -375,40 +381,40 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
     }
     return { decision: 'approve' };
   }
-  
+
   // 5. Handle speak
   if (attemptedAction === 'speak') {
     return { decision: 'approve' };
   }
-  
+
   // 6. Handle stop
   if (attemptedAction === 'stop') {
     // Check if must speak after tool use
-    if (voiceResponsesEnabled && lastToolUseTimestamp && 
-        (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
+    if (voiceResponsesEnabled && lastToolUseTimestamp &&
+      (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
       return {
         decision: 'block',
         reason: 'Assistant must speak after using tools. Please use the speak tool to respond before proceeding.'
       };
     }
-    
+
     // Check if should wait for utterances
     const shouldWait = !lastTimeoutTimestamp ||
       queue.utterances.some(u => u.timestamp > lastTimeoutTimestamp!);
-    
+
     if (shouldWait) {
       return {
         decision: 'block',
         reason: 'Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
       };
     }
-    
+
     return {
       decision: 'approve',
       reason: 'No utterances since last timeout'
     };
   }
-  
+
   // Default to approve (shouldn't reach here)
   return { decision: 'approve' };
 }
@@ -440,7 +446,7 @@ app.post('/api/hooks/pre-wait', (_req: Request, res: Response) => {
 app.delete('/api/utterances', (_req: Request, res: Response) => {
   const clearedCount = queue.utterances.length;
   queue.clear();
-  
+
   // Reset timeout timestamp when clearing queue to avoid stop hook issues
   lastTimeoutTimestamp = null;
 
@@ -448,6 +454,52 @@ app.delete('/api/utterances', (_req: Request, res: Response) => {
     success: true,
     message: `Cleared ${clearedCount} utterances`,
     clearedCount
+  });
+});
+
+// Server-Sent Events for TTS notifications
+const ttsClients = new Set<Response>();
+
+app.get('/api/tts-events', (_req: Request, res: Response) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+  });
+
+  // Send initial connection message
+  res.write('data: {"type":"connected"}\n\n');
+
+  // Add client to set
+  ttsClients.add(res);
+
+  // Remove client on disconnect
+  res.on('close', () => {
+    ttsClients.delete(res);
+  });
+});
+
+// Helper function to notify all connected TTS clients
+function notifyTTSClients(text: string) {
+  const message = JSON.stringify({ type: 'speak', text });
+  ttsClients.forEach(client => {
+    client.write(`data: ${message}\n\n`);
+  });
+}
+
+// API for voice preferences
+app.post('/api/voice-preferences', (req: Request, res: Response) => {
+  const { voiceResponsesEnabled, browserTTSEnabled } = req.body;
+  
+  // Update preferences
+  voicePreferences.voiceResponsesEnabled = !!voiceResponsesEnabled;
+  voicePreferences.browserTTSEnabled = !!browserTTSEnabled;
+  
+  debugLog(`[Preferences] Updated: voiceResponses=${voicePreferences.voiceResponsesEnabled}, browserTTS=${voicePreferences.browserTTSEnabled}`);
+  
+  res.json({
+    success: true,
+    preferences: voicePreferences
   });
 });
 
@@ -461,9 +513,18 @@ app.post('/api/speak', async (req: Request, res: Response) => {
   }
 
   try {
-    // Execute text-to-speech using macOS say command
-    await execAsync(`say -r 350 "${text.replace(/"/g, '\\"')}"`);
-    debugLog(`[Speak] Spoke text: "${text}"`);
+    // Check if browser TTS is enabled
+    const useBrowserTTS = voicePreferences.browserTTSEnabled;
+
+    if (useBrowserTTS) {
+      // Send text to browser for TTS
+      notifyTTSClients(text);
+      debugLog(`[Speak] Sent text to browser for TTS: "${text}"`);
+    } else {
+      // Execute text-to-speech using macOS say command
+      await execAsync(`say -r 250 "${text.replace(/"/g, '\\"')}"`);
+      debugLog(`[Speak] Spoke text using macOS say: "${text}"`);
+    }
 
     // Mark all delivered utterances as responded
     const deliveredUtterances = queue.utterances.filter(u => u.status === 'delivered');
@@ -502,7 +563,7 @@ app.listen(HTTP_PORT, () => {
 
 // Helper function to get voice response reminder
 function getVoiceResponseReminder(): string {
-  const voiceResponsesEnabled = process.env.VOICE_RESPONSES_ENABLED === 'true';
+  const voiceResponsesEnabled = voicePreferences.voiceResponsesEnabled;
   return voiceResponsesEnabled
     ? '\n\nThe user has enabled voice responses, so use the \'speak\' tool to respond to the user\'s voice input before proceeding.'
     : '';

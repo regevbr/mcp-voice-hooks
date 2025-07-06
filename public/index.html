@@ -256,12 +256,102 @@
             height: 16px;
             fill: currentColor;
         }
+        
+        .tts-settings {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .tts-settings h4 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        
+        .tts-controls {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .tts-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tts-control label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .tts-control select,
+        .tts-control input {
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .tts-test-btn {
+            background: #6C757D;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .tts-test-btn:hover {
+            background: #545B62;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Voice Hooks - MCP POC</h1>
         <p class="subtitle">Speak or type utterances to test the MCP voice interaction system</p>
+        
+        <div class="tts-settings">
+            <h4>Voice Settings</h4>
+            <div class="tts-controls" style="margin-bottom: 12px;">
+                <div class="tts-control">
+                    <label>
+                        <input type="checkbox" id="voiceResponsesToggle" style="margin-right: 8px;">
+                        Enable Voice Responses
+                    </label>
+                </div>
+                <div class="tts-control">
+                    <label>
+                        <input type="checkbox" id="browserTTSToggle" style="margin-right: 8px;">
+                        Use Browser TTS
+                    </label>
+                </div>
+            </div>
+            <div class="tts-controls" id="voiceOptions" style="display: none;">
+                <div class="tts-control">
+                    <label for="voiceSelect">Voice:</label>
+                    <select id="voiceSelect">
+                        <option value="">Default</option>
+                    </select>
+                </div>
+                <div class="tts-control">
+                    <label for="speechRate">Rate:</label>
+                    <input type="range" id="speechRate" min="0.5" max="2" step="0.1" value="1">
+                    <span id="speechRateValue">1.0</span>
+                </div>
+                <div class="tts-control">
+                    <label for="speechVolume">Volume:</label>
+                    <input type="range" id="speechVolume" min="0" max="1" step="0.1" value="1">
+                    <span id="speechVolumeValue">1.0</span>
+                </div>
+                <button class="tts-test-btn" id="testTTSBtn">Test Voice</button>
+            </div>
+        </div>
         
         <div class="input-section">
             <div class="voice-controls">
