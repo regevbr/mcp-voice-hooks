@@ -45,6 +45,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [ ] Make the response more concise while maintaining necessary functionality
 - [x] ensure hooks and settings are updated on every server startup
 - [x] bump version to 1.0.7
+- [x] bump version to 1.0.8
 - [x] refactor: replace post-tool hook with inline voice response reminders
 - [x] refactor: implement unified hook handler for cleaner control flow
   - [x] Consolidate all hook logic into single handleHookRequest function
