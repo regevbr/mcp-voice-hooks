@@ -43,11 +43,11 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [ ] Remaining options: Browser voices from speechSynthesis.getVoices()
   - [ ] Show dropdown only when voice responses is enabled
   - [ ] Group browser voices into sections (e.g., Local vs Cloud voices)
-- [ ] Add text input field next to rate slider
-  - [ ] Allow users to type exact rate values
-  - [ ] Sync with slider position
-  - [ ] Validate input (0.5 to 2.0 range)
-  - [ ] Apply same to volume slider for consistency
+- [x] Add text input field next to rate slider
+  - [x] Allow users to type exact rate values
+  - [x] Sync with slider position
+  - [x] Validate input (extended to 0.5 to 5.0 range)
+  - [x] Apply same to volume slider for consistency
 - [ ] bug: microsoft edge speech recognition is not working
 - [ ] clean up completed tasks in roadmap.md
 - [x] experiment with having the server remind the assistant to use voice responses instead of having a post tool hook
