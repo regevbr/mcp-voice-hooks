@@ -85,6 +85,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [ ] Optimization:
   - [ ] auto dequeue when that is the only valid action
   - [ ] auto wait for utterance when that is the only valid action
+- [x] investigate why the stop hook is not being executed consistently
 
 ### Voice Response Tracking & Conversation Flow Enforcement
 

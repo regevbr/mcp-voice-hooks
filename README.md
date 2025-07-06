@@ -136,6 +136,10 @@ This will:
 - Clean up voice hooks from your project's `.claude/settings.json`
 - Preserve any custom hooks you've added
 
+## Known Limitations
+
+- **Intermittent Stop Hook Execution**: Claude Code's Stop hooks are not triggered consistently. Sometimes the assistant can end responses without the Stop hook being executed. I believe this is an issue with Claude Code's hook system, not with mcp-voice-hooks. When working correctly, the Stop hook should prevent the assistant from stopping without first checking for voice input.
+
 ## Development Mode
 
 If you're developing mcp-voice-hooks itself:
