@@ -440,6 +440,9 @@ app.post('/api/hooks/pre-wait', (_req: Request, res: Response) => {
 app.delete('/api/utterances', (req: Request, res: Response) => {
   const clearedCount = queue.utterances.length;
   queue.clear();
+  
+  // Reset timeout timestamp when clearing queue to avoid stop hook issues
+  lastTimeoutTimestamp = null;
 
   res.json({
     success: true,

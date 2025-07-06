@@ -50,6 +50,8 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] refactor: implement unified hook handler for cleaner control flow
   - [x] Consolidate all hook logic into single handleHookRequest function
   - [x] Each hook endpoint now calls unified handler with action type
+- [x] fix: reset lastTimeoutTimestamp when clearing utterance queue
+  - [x] Prevents stop hook from incorrectly allowing stops after queue clear
 - [x] Improve speaking flow ✅ **COMPLETED**
   - [x] Add new speak_and_then_wait_for_utterance tool
   - [x] Make both speak and speak_and_then_wait_for_utterance fail if there are pending utterances
