@@ -329,151 +329,111 @@ app.post('/api/validate-action', (req: Request, res: Response) => {
   });
 });
 
+// Unified hook handler
+function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'): { decision: 'approve' | 'block', reason?: string } {
+  const voiceResponsesEnabled = process.env.VOICE_RESPONSES_ENABLED === 'true';
+  
+  // 1. Check for pending utterances
+  const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
+  if (pendingUtterances.length > 0) {
+    // Allow dequeue to proceed (dequeue doesn't go through hooks)
+    return {
+      decision: 'block',
+      reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first. Please use dequeue_utterances to process them.`
+    };
+  }
+  
+  // 2. Check for delivered utterances (when voice enabled)
+  if (voiceResponsesEnabled) {
+    const deliveredUtterances = queue.utterances.filter(u => u.status === 'delivered');
+    if (deliveredUtterances.length > 0) {
+      // Only allow speak to proceed
+      if (attemptedAction === 'speak') {
+        return { decision: 'approve' };
+      }
+      return {
+        decision: 'block',
+        reason: `${deliveredUtterances.length} delivered utterance(s) require voice response. Please use the speak tool to respond before proceeding.`
+      };
+    }
+  }
+  
+  // 3. Handle tool action
+  if (attemptedAction === 'tool') {
+    lastToolUseTimestamp = new Date();
+    return { decision: 'approve' };
+  }
+  
+  // 4. Handle wait for utterance
+  if (attemptedAction === 'wait') {
+    if (voiceResponsesEnabled && lastToolUseTimestamp && 
+        (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
+      return {
+        decision: 'block',
+        reason: 'Assistant must speak after using tools. Please use the speak tool to respond before waiting for utterances.'
+      };
+    }
+    return { decision: 'approve' };
+  }
+  
+  // 5. Handle speak
+  if (attemptedAction === 'speak') {
+    return { decision: 'approve' };
+  }
+  
+  // 6. Handle stop
+  if (attemptedAction === 'stop') {
+    // Check if must speak after tool use
+    if (voiceResponsesEnabled && lastToolUseTimestamp && 
+        (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
+      return {
+        decision: 'block',
+        reason: 'Assistant must speak after using tools. Please use the speak tool to respond before proceeding.'
+      };
+    }
+    
+    // Check if should wait for utterances
+    const shouldWait = !lastTimeoutTimestamp ||
+      queue.utterances.some(u => u.timestamp > lastTimeoutTimestamp!);
+    
+    if (shouldWait) {
+      return {
+        decision: 'block',
+        reason: 'Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
+      };
+    }
+    
+    return {
+      decision: 'approve',
+      reason: 'No utterances since last timeout'
+    };
+  }
+  
+  // Default to approve (shouldn't reach here)
+  return { decision: 'approve' };
+}
+
 // Dedicated hook endpoints that return in Claude's expected format
-app.post('/api/hooks/pre-tool', (req: Request, res: Response) => {
-  const voiceResponsesEnabled = process.env.VOICE_RESPONSES_ENABLED === 'true';
-
-  // Check for pending utterances
-  const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
-  if (pendingUtterances.length > 0) {
-    res.json({
-      decision: 'block',
-      reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first. Please use dequeue_utterances to process them.`
-    });
-    return;
-  }
-
-  // Check for delivered but unresponded utterances (when voice enabled)
-  if (voiceResponsesEnabled) {
-    const deliveredUtterances = queue.utterances.filter(u => u.status === 'delivered');
-    if (deliveredUtterances.length > 0) {
-      res.json({
-        decision: 'block',
-        reason: `${deliveredUtterances.length} delivered utterance(s) require voice response. Please use the speak tool to respond before proceeding.`
-      });
-      return;
-    }
-  }
-
-  // All checks passed - allow tool use
-  lastToolUseTimestamp = new Date();
-  res.json({
-    decision: 'approve'
-  });
+app.post('/api/hooks/pre-tool', (_req: Request, res: Response) => {
+  const result = handleHookRequest('tool');
+  res.json(result);
 });
 
-app.post('/api/hooks/stop', (req: Request, res: Response) => {
-  const voiceResponsesEnabled = process.env.VOICE_RESPONSES_ENABLED === 'true';
-
-  // Check for pending utterances
-  const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
-  if (pendingUtterances.length > 0) {
-    res.json({
-      decision: 'block',
-      reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first. Please use dequeue_utterances to process them.`
-    });
-    return;
-  }
-
-  // Check for delivered but unresponded utterances (when voice enabled)
-  if (voiceResponsesEnabled) {
-    const deliveredUtterances = queue.utterances.filter(u => u.status === 'delivered');
-    if (deliveredUtterances.length > 0) {
-      res.json({
-        decision: 'block',
-        reason: `${deliveredUtterances.length} delivered utterance(s) require voice response. Please use the speak tool to respond before proceeding.`
-      });
-      return;
-    }
-  }
-
-  // Check if spoken since last tool use (when voice enabled)
-  if (voiceResponsesEnabled && lastToolUseTimestamp && 
-      (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
-    res.json({
-      decision: 'block',
-      reason: 'Assistant must speak after using tools. Please use the speak tool to respond before proceeding.'
-    });
-    return;
-  }
-
-  // Check if we should wait for utterances
-  const shouldWait = !lastTimeoutTimestamp ||
-    queue.utterances.some(u => u.timestamp > lastTimeoutTimestamp!);
-
-  if (shouldWait) {
-    res.json({
-      decision: 'block',
-      reason: 'Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
-    });
-    return;
-  }
-
-  // All checks passed - allow stop
-  res.json({
-    decision: 'approve',
-    reason: 'No utterances since last timeout'
-  });
+app.post('/api/hooks/stop', (_req: Request, res: Response) => {
+  const result = handleHookRequest('stop');
+  res.json(result);
 });
 
-// Pre-speak hook endpoint - only checks for pending utterances
+// Pre-speak hook endpoint
 app.post('/api/hooks/pre-speak', (_req: Request, res: Response) => {
-  // Check for pending utterances
-  const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
-  if (pendingUtterances.length > 0) {
-    res.json({
-      decision: 'block',
-      reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first. Please use dequeue_utterances to process them.`
-    });
-    return;
-  }
-
-  // All checks passed - allow speak/wait
-  res.json({
-    decision: 'approve'
-  });
+  const result = handleHookRequest('speak');
+  res.json(result);
 });
 
-// Pre-wait hook endpoint - validates wait_for_utterance calls
+// Pre-wait hook endpoint
 app.post('/api/hooks/pre-wait', (_req: Request, res: Response) => {
-  const voiceResponsesEnabled = process.env.VOICE_RESPONSES_ENABLED === 'true';
-
-  // Check for pending utterances
-  const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
-  if (pendingUtterances.length > 0) {
-    res.json({
-      decision: 'block',
-      reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first. Please use dequeue_utterances to process them.`
-    });
-    return;
-  }
-
-  // Check for delivered but unresponded utterances (when voice enabled)
-  if (voiceResponsesEnabled) {
-    const deliveredUtterances = queue.utterances.filter(u => u.status === 'delivered');
-    if (deliveredUtterances.length > 0) {
-      res.json({
-        decision: 'block',
-        reason: `${deliveredUtterances.length} delivered utterance(s) require voice response. Please use the speak tool to respond before proceeding.`
-      });
-      return;
-    }
-  }
-
-  // Check if spoken since last tool use (when voice enabled)
-  if (voiceResponsesEnabled && lastToolUseTimestamp && 
-      (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
-    res.json({
-      decision: 'block',
-      reason: 'Assistant must speak after using tools. Please use the speak tool to respond before waiting for utterances.'
-    });
-    return;
-  }
-
-  // All checks passed - allow wait_for_utterance
-  res.json({
-    decision: 'approve'
-  });
+  const result = handleHookRequest('wait');
+  res.json(result);
 });
 
 // API to clear all utterances
