@@ -49,7 +49,6 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] refactor: implement unified hook handler for cleaner control flow
   - [x] Consolidate all hook logic into single handleHookRequest function
   - [x] Each hook endpoint now calls unified handler with action type
-  - [x] Fix bug where pre-wait hook wasn't properly tracking non-MCP tool usage
 - [x] Improve speaking flow ✅ **COMPLETED**
   - [x] Add new speak_and_then_wait_for_utterance tool
   - [x] Make both speak and speak_and_then_wait_for_utterance fail if there are pending utterances
@@ -62,7 +61,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [ ] add a CLI argument --speak to the server to enable voice responses
   - [ ] remove the MCP_VOICE_RESPONSES_ENABLED environment variable and switch all references to it to --speak
 - [ ] Investigate hiding the speak mcp tools when voice responses are disabled
-- [ ] Investigate consolidating the pre-tool hook and the pre-speak hook into a single hook that runs before all tools and checks which tool is being used and switches logic based on that
+- [ ] Investigate consolidating the pre-tool hook, pre-speak hook, and pre-wait hook into a single hook that runs before all tools and checks which tool is being used and switches logic based on that
 - [x] Improve conversation flow by tracking tool usage ✅ **COMPLETED**
   - [x] Remove speak_and_then_wait_for_utterance tool (use separate speak and wait_for_utterance instead)
   - [x] Track timestamp of last approved tool use
@@ -78,6 +77,9 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
     - [x] Validates that speak was called after last tool use
   - [x] Update stop hook logic to check if spoken since last tool use
   - [x] Add comprehensive tests for conversation flow tracking
+- [ ] Optimization:
+  - [ ] auto dequeue when that is the only valid action
+  - [ ] auto wait for utterance when that is the only valid action
 
 ### Voice Response Tracking & Conversation Flow Enforcement
 
