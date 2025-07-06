@@ -37,8 +37,9 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 - [ ] MVP
   - [ ] add a warning when adjusting rate for google voices that the google voices don't work well with speech rate
+  - [ ] link to readme for info on system voice settings
   - [x] hide, label, or separate low quality voices
-  - [ ] choose a good default voice
+  - [x] choose a good default voice
   - [x] if i leave the browser open and restart the server, then it thinks voice input is off but it's actually on in the frontend. The same thing can happen with voice responses on/off
 - [x] Known issue: Microsoft Edge speech recognition not working - shows "language-not-supported" error
   - Safari and Chrome work fine for speech recognition
@@ -66,7 +67,6 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [x] Sync with slider position
   - [x] Validate input (extended to 0.5 to 5.0 range)
   - [x] Apply same to volume slider for consistency
-- [ ] bug: microsoft edge speech recognition is not working
 - [ ] clean up completed tasks in roadmap.md
 - [x] experiment with having the server remind the assistant to use voice responses instead of having a post tool hook
 - [ ] Set up automated publishing workflow (GitHub Actions)
@@ -97,7 +97,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] add a CLI argument --speak to the server to enable voice responses
   - [x] remove the MCP_VOICE_RESPONSES_ENABLED environment variable and switch all references to it to --speak
   - [x] update the readme to reflect the new CLI argument
-- [ ] Investigate hiding the speak mcp tools when voice responses are disabled
+- [x] Investigate hiding the speak mcp tools when voice responses are disabled
 - [ ] Investigate consolidating the pre-tool hook, pre-speak hook, and pre-wait hook into a single hook that runs before all tools and checks which tool is being used and switches logic based on that
 - [x] Improve conversation flow by tracking tool usage ✅ **COMPLETED**
   - [x] Remove speak_and_then_wait_for_utterance tool (use separate speak and wait_for_utterance instead)
@@ -118,8 +118,10 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [ ] auto dequeue when that is the only valid action
   - [ ] auto wait for utterance when that is the only valid action
   - [ ] automatically dequeue post tool use as well
+  - [ ] remove the dequeue mcp tool just dequeue in the hooks
 - [ ] investigate why the stop hook is not being executed consistently
   - [ ] experiment with using the notification hook as well as the stop hook. That might be a different kind of stopping that is bypassing the stop hook.
+  - [ ] alternatively: explore speak_and_then_wait_for_utterance tool for use when stopping only. (hard to know when we're stopping)
 
 ### Voice Response Tracking & Conversation Flow Enforcement
 
