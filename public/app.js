@@ -426,6 +426,8 @@ class VoiceHooksClient {
         
         this.eventSource.onopen = () => {
             this.debugLog('TTS Events connected');
+            // Sync state when connection is established (includes reconnections)
+            this.syncStateWithServer();
         };
     }
     
@@ -617,6 +619,18 @@ class VoiceHooksClient {
             this.debugLog('Voice input state updated:', { active });
         } catch (error) {
             console.error('Failed to update voice input state:', error);
+        }
+    }
+    
+    async syncStateWithServer() {
+        this.debugLog('Syncing state with server after reconnection');
+        
+        // Sync voice response preferences
+        await this.updateVoicePreferences();
+        
+        // Sync voice input state if currently listening
+        if (this.isListening) {
+            await this.updateVoiceInputState(true);
         }
     }
 }
