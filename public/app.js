@@ -457,7 +457,7 @@ class VoiceHooksClient {
         if (!this.voiceSelect) return;
         
         // Clear existing options except default
-        this.voiceSelect.innerHTML = '<option value="">Default</option>';
+        this.voiceSelect.innerHTML = '<option value="">Browser Default</option>';
         
         let selectedIndex = null;
         

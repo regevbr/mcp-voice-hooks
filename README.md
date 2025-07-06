@@ -56,7 +56,7 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
 
    The hooks are automatically installed when the MCP server starts. You need to send one text message to Claude to trigger the voice hooks.
 
-   **Note**: After the first-time installation, you may need to restart Claude for the hooks to take effect.
+   **Note**: After the first-time installation, you will need to restart Claude for the hooks to take effect.
 
    The default port is 5111. To use a different port, add to your project's `.claude/settings.json`:
 
@@ -70,17 +70,17 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
 
 ## Voice responses
 
-Voice responses are disabled by default. To enable them:
+There are two options for voice responses:
 
-1. Open the web interface at <http://localhost:5111>
-2. Check the "Enable Voice Responses" checkbox
-3. Optionally check "Use Browser TTS" for cross-platform text-to-speech
+1. Browser Text-to-Speech (Cross-platform)
+2. System Voice (Mac only)
 
-No configuration files or environment variables needed! The settings are saved in your browser and applied immediately.
+Browser Text-to-Speech is the default. To use System Voice, uncheck "Use Browser TTS" in the web interface. The Mac Siri voices are the highest quality voices and respect speech rate better than the google voices.
 
 ### Browser Text-to-Speech (Cross-platform)
 
 When "Use Browser TTS" is enabled:
+
 - Voice selection dropdown appears
 - Adjustable speech rate slider
 - Test button to preview your selected voice
@@ -105,7 +105,6 @@ Test it with the bash command:
 ```bash
 say "Hi, this is your mac system voice"
 ```
-
 
 ## Manual Hook Installation
 
