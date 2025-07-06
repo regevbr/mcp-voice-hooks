@@ -32,8 +32,6 @@ class VoiceHooksClient {
         this.voiceSelect = document.getElementById('voiceSelect');
         this.speechRateSlider = document.getElementById('speechRate');
         this.speechRateInput = document.getElementById('speechRateInput');
-        this.speechVolumeSlider = document.getElementById('speechVolume');
-        this.speechVolumeInput = document.getElementById('speechVolumeInput');
         this.testTTSBtn = document.getElementById('testTTSBtn');
         this.voiceResponsesToggle = document.getElementById('voiceResponsesToggle');
         this.voiceOptions = document.getElementById('voiceOptions');
@@ -159,25 +157,6 @@ class VoiceHooksClient {
                 this.speechRateInput.value = value.toFixed(1);
                 // Save rate to localStorage
                 localStorage.setItem('speechRate', this.speechRate.toString());
-            }
-        });
-        
-        this.speechVolumeSlider.addEventListener('input', (e) => {
-            this.speechVolume = parseFloat(e.target.value);
-            this.speechVolumeInput.value = this.speechVolume.toFixed(1);
-            // Save volume to localStorage
-            localStorage.setItem('speechVolume', this.speechVolume.toString());
-        });
-        
-        this.speechVolumeInput.addEventListener('input', (e) => {
-            let value = parseFloat(e.target.value);
-            if (!isNaN(value)) {
-                value = Math.max(0, Math.min(1, value)); // Clamp to valid range
-                this.speechVolume = value;
-                this.speechVolumeSlider.value = value.toString();
-                this.speechVolumeInput.value = value.toFixed(1);
-                // Save volume to localStorage
-                localStorage.setItem('speechVolume', this.speechVolume.toString());
             }
         });
         
@@ -414,7 +393,6 @@ class VoiceHooksClient {
         // Set default voice preferences
         this.speechRate = 1.0;
         this.speechPitch = 1.0;
-        this.speechVolume = 1.0;
         this.selectedVoice = 'system';
     }
     
@@ -504,8 +482,7 @@ class VoiceHooksClient {
                     },
                     body: JSON.stringify({
                         text: text,
-                        rate: Math.round(this.speechRate * 250), // Convert rate to words per minute
-                        volume: this.speechVolume
+                        rate: Math.round(this.speechRate * 250) // Convert rate to words per minute
                     }),
                 });
                 
@@ -540,7 +517,6 @@ class VoiceHooksClient {
             // Set speech properties
             utterance.rate = this.speechRate;
             utterance.pitch = this.speechPitch;
-            utterance.volume = this.speechVolume;
             
             // Event handlers
             utterance.onstart = () => {
@@ -583,13 +559,6 @@ class VoiceHooksClient {
             this.speechRate = parseFloat(storedRate);
             this.speechRateSlider.value = storedRate;
             this.speechRateInput.value = this.speechRate.toFixed(1);
-        }
-        
-        const storedVolume = localStorage.getItem('speechVolume');
-        if (storedVolume !== null) {
-            this.speechVolume = parseFloat(storedVolume);
-            this.speechVolumeSlider.value = storedVolume;
-            this.speechVolumeInput.value = this.speechVolume.toFixed(1);
         }
         
         // Load selected voice (will be applied after voices load)
