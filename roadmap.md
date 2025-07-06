@@ -37,7 +37,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 - [ ] MVP
   - [ ] add an info icon for the rate slider that warns that the google voices don't work well with speech rate
-  - [ ] hide, label, or separate low quality voices
+  - [x] hide, label, or separate low quality voices
   - [ ] choose a good default voice
   - [x] if i leave the browser open and restart the server, then it thinks voice input is off but it's actually on in the frontend. The same thing can happen with voice responses on/off
 - [x] Reject speak requests when voice responses is disabled
