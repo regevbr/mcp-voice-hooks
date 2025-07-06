@@ -35,9 +35,12 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 ### Next tasks
 
+- [ ] add an info icon for the rate slider that warns that the google voices don't work well with speech rate
 - [x] Reject speak requests when voice responses is disabled
   - [x] Server should return an error when voice responses is off
 - [x] add a voice-input-is-active state tracker on the server and only block tool calls etc if "start listening" is active in the browser
+- [x] reject dequeue and wait for utterance if voice input is not active
+  - [x] server should return an error when voice input is not active
 - [x] Replace "Use Browser TTS" checkbox with voice selection dropdown
   - [x] First option: "Mac System Voice" (uses macOS `say` command)
   - [x] Remaining options: Browser voices from speechSynthesis.getVoices()
@@ -87,7 +90,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
     - [x] if voice responses are enabled, require speak_and_then_wait_for_utterance in the stop hook, otherwise require wait_for_utterance
 - [x] add a CLI argument --speak to the server to enable voice responses
   - [x] remove the MCP_VOICE_RESPONSES_ENABLED environment variable and switch all references to it to --speak
-  - [ ] update the readme to reflect the new CLI argument
+  - [x] update the readme to reflect the new CLI argument
 - [ ] Investigate hiding the speak mcp tools when voice responses are disabled
 - [ ] Investigate consolidating the pre-tool hook, pre-speak hook, and pre-wait hook into a single hook that runs before all tools and checks which tool is being used and switches logic based on that
 - [x] Improve conversation flow by tracking tool usage ✅ **COMPLETED**

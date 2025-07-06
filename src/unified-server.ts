@@ -155,6 +155,15 @@ app.get('/api/utterances/status', (_req: Request, res: Response) => {
 
 // MCP server integration
 app.post('/api/dequeue-utterances', (req: Request, res: Response) => {
+  // Check if voice input is active
+  if (!voicePreferences.voiceInputActive) {
+    res.status(400).json({
+      success: false,
+      error: 'Voice input is not active. Cannot dequeue utterances when voice input is disabled.'
+    });
+    return;
+  }
+
   const { limit = 10 } = req.body;
   const pendingUtterances = queue.utterances
     .filter(u => u.status === 'pending')
@@ -177,6 +186,15 @@ app.post('/api/dequeue-utterances', (req: Request, res: Response) => {
 
 // Wait for utterance endpoint
 app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
+  // Check if voice input is active
+  if (!voicePreferences.voiceInputActive) {
+    res.status(400).json({
+      success: false,
+      error: 'Voice input is not active. Cannot wait for utterances when voice input is disabled.'
+    });
+    return;
+  }
+
   const { seconds_to_wait = DEFAULT_WAIT_TIMEOUT_SECONDS } = req.body;
   const secondsToWait = Math.max(
     MIN_WAIT_TIMEOUT_SECONDS,
@@ -703,6 +721,18 @@ if (IS_MCP_MANAGED) {
 
         const data = await response.json() as any;
 
+        // Check if the request was successful
+        if (!response.ok) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Error: ${data.error || 'Failed to dequeue utterances'}`,
+              },
+            ],
+          };
+        }
+
         if (data.utterances.length === 0) {
           return {
             content: [
@@ -740,6 +770,18 @@ if (IS_MCP_MANAGED) {
         });
 
         const data = await response.json() as any;
+
+        // Check if the request was successful
+        if (!response.ok) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Error: ${data.error || 'Failed to wait for utterances'}`,
+              },
+            ],
+          };
+        }
 
         if (data.utterances && data.utterances.length > 0) {
           const utteranceTexts = data.utterances
