@@ -22,11 +22,20 @@
         ]
       },
       {
-        "matcher": "^mcp__voice-hooks__(speak|speak_and_then_wait_for_utterance)$",
+        "matcher": "^mcp__voice-hooks__speak$",
         "hooks": [
           {
             "type": "command",
             "command": "sh ~/.mcp-voice-hooks/hooks/pre-speak-hook.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "^mcp__voice-hooks__wait_for_utterance$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh ~/.mcp-voice-hooks/hooks/pre-wait-hook.sh"
           }
         ]
       }

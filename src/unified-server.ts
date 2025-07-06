@@ -90,6 +90,8 @@ const IS_MCP_MANAGED = process.argv.includes('--mcp-managed');
 // Global state
 const queue = new UtteranceQueue();
 let lastTimeoutTimestamp: Date | null = null;
+let lastToolUseTimestamp: Date | null = null;
+let lastSpeakTimestamp: Date | null = null;
 
 // HTTP Server Setup (always created)
 const app = express();
@@ -310,7 +312,7 @@ app.post('/api/validate-action', (req: Request, res: Response) => {
   if (action === 'stop') {
     const shouldWait = !lastTimeoutTimestamp ||
       queue.utterances.some(u => u.timestamp > lastTimeoutTimestamp!);
-    
+
     if (shouldWait) {
       res.json({
         allowed: false,
@@ -354,6 +356,7 @@ app.post('/api/hooks/pre-tool', (req: Request, res: Response) => {
   }
 
   // All checks passed - allow tool use
+  lastToolUseTimestamp = new Date();
   res.json({
     decision: 'approve'
   });
@@ -384,15 +387,24 @@ app.post('/api/hooks/stop', (req: Request, res: Response) => {
     }
   }
 
+  // Check if spoken since last tool use (when voice enabled)
+  if (voiceResponsesEnabled && lastToolUseTimestamp && 
+      (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
+    res.json({
+      decision: 'block',
+      reason: 'Assistant must speak after using tools. Please use the speak tool to respond before proceeding.'
+    });
+    return;
+  }
+
   // Check if we should wait for utterances
   const shouldWait = !lastTimeoutTimestamp ||
     queue.utterances.some(u => u.timestamp > lastTimeoutTimestamp!);
-  
+
   if (shouldWait) {
-    const toolToUse = voiceResponsesEnabled ? 'speak_and_then_wait_for_utterance' : 'wait_for_utterance';
     res.json({
       decision: 'block',
-      reason: `Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use ${toolToUse} to check for voice input`
+      reason: 'Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
     });
     return;
   }
@@ -405,7 +417,7 @@ app.post('/api/hooks/stop', (req: Request, res: Response) => {
 });
 
 // Pre-speak hook endpoint - only checks for pending utterances
-app.post('/api/hooks/pre-speak', (req: Request, res: Response) => {
+app.post('/api/hooks/pre-speak', (_req: Request, res: Response) => {
   // Check for pending utterances
   const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
   if (pendingUtterances.length > 0) {
@@ -417,6 +429,48 @@ app.post('/api/hooks/pre-speak', (req: Request, res: Response) => {
   }
 
   // All checks passed - allow speak/wait
+  res.json({
+    decision: 'approve'
+  });
+});
+
+// Pre-wait hook endpoint - validates wait_for_utterance calls
+app.post('/api/hooks/pre-wait', (_req: Request, res: Response) => {
+  const voiceResponsesEnabled = process.env.VOICE_RESPONSES_ENABLED === 'true';
+
+  // Check for pending utterances
+  const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
+  if (pendingUtterances.length > 0) {
+    res.json({
+      decision: 'block',
+      reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first. Please use dequeue_utterances to process them.`
+    });
+    return;
+  }
+
+  // Check for delivered but unresponded utterances (when voice enabled)
+  if (voiceResponsesEnabled) {
+    const deliveredUtterances = queue.utterances.filter(u => u.status === 'delivered');
+    if (deliveredUtterances.length > 0) {
+      res.json({
+        decision: 'block',
+        reason: `${deliveredUtterances.length} delivered utterance(s) require voice response. Please use the speak tool to respond before proceeding.`
+      });
+      return;
+    }
+  }
+
+  // Check if spoken since last tool use (when voice enabled)
+  if (voiceResponsesEnabled && lastToolUseTimestamp && 
+      (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
+    res.json({
+      decision: 'block',
+      reason: 'Assistant must speak after using tools. Please use the speak tool to respond before waiting for utterances.'
+    });
+    return;
+  }
+
+  // All checks passed - allow wait_for_utterance
   res.json({
     decision: 'approve'
   });
@@ -454,6 +508,9 @@ app.post('/api/speak', async (req: Request, res: Response) => {
       u.status = 'responded';
       debugLog(`[Queue] marked as responded: "${u.text}"	[id: ${u.id}]`);
     });
+
+    // Track that speak was called
+    lastSpeakTimestamp = new Date();
 
     res.json({
       success: true,
@@ -547,27 +604,6 @@ if (IS_MCP_MANAGED) {
               text: {
                 type: 'string',
                 description: 'The text to speak',
-              },
-            },
-            required: ['text'],
-          },
-        },
-        {
-          name: 'speak_and_then_wait_for_utterance',
-          description: 'Speak text using text-to-speech, then wait for user utterance. This combines speaking and waiting in a single action for natural conversation flow.',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              text: {
-                type: 'string',
-                description: 'The text to speak before waiting',
-              },
-              seconds_to_wait: {
-                type: 'number',
-                description: `Maximum seconds to wait for an utterance after speaking (default: ${DEFAULT_WAIT_TIMEOUT_SECONDS}, min: ${MIN_WAIT_TIMEOUT_SECONDS}, max: ${MAX_WAIT_TIMEOUT_SECONDS})`,
-                default: DEFAULT_WAIT_TIMEOUT_SECONDS,
-                minimum: MIN_WAIT_TIMEOUT_SECONDS,
-                maximum: MAX_WAIT_TIMEOUT_SECONDS,
               },
             },
             required: ['text'],
@@ -695,83 +731,6 @@ if (IS_MCP_MANAGED) {
               },
             ],
             isError: true,
-          };
-        }
-      }
-
-      if (name === 'speak_and_then_wait_for_utterance') {
-        const text = args?.text as string;
-        const requestedSeconds = (args?.seconds_to_wait as number) ?? DEFAULT_WAIT_TIMEOUT_SECONDS;
-        const secondsToWait = Math.max(
-          MIN_WAIT_TIMEOUT_SECONDS,
-          Math.min(MAX_WAIT_TIMEOUT_SECONDS, requestedSeconds)
-        );
-
-        if (!text || !text.trim()) {
-          return {
-            content: [
-              {
-                type: 'text',
-                text: 'Error: Text is required for speak_and_then_wait_for_utterance tool',
-              },
-            ],
-            isError: true,
-          };
-        }
-
-        // First, speak the text
-        const speakResponse = await fetch(`http://localhost:${HTTP_PORT}/api/speak`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text }),
-        });
-
-        const speakData = await speakResponse.json() as any;
-
-        if (!speakResponse.ok) {
-          return {
-            content: [
-              {
-                type: 'text',
-                text: `Error speaking text: ${speakData.error || 'Unknown error'}`,
-              },
-            ],
-            isError: true,
-          };
-        }
-
-        // Then wait for utterance
-        debugLog(`[MCP] Calling wait_for_utterance after speaking with ${secondsToWait}s timeout`);
-
-        const waitResponse = await fetch(`http://localhost:${HTTP_PORT}/api/wait-for-utterances`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ seconds_to_wait: secondsToWait }),
-        });
-
-        const waitData = await waitResponse.json() as any;
-
-        if (waitData.utterances && waitData.utterances.length > 0) {
-          const utteranceTexts = waitData.utterances
-            .map((u: any) => `[${u.timestamp}] "${u.text}"`)
-            .join('\n');
-
-          return {
-            content: [
-              {
-                type: 'text',
-                text: `Found ${waitData.count} utterance(s):\n\n${utteranceTexts}${getVoiceResponseReminder()}`,
-              },
-            ],
-          };
-        } else {
-          return {
-            content: [
-              {
-                type: 'text',
-                text: waitData.message || `No utterances found after waiting ${secondsToWait} seconds.`,
-              },
-            ],
           };
         }
       }
