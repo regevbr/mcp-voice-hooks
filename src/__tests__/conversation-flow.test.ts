@@ -178,6 +178,21 @@ describe('conversation flow tracking', () => {
         respondedCount: deliveredUtterances.length
       });
     });
+
+    // Mock clear utterances endpoint
+    app.delete('/api/utterances', (req, res) => {
+      const clearedCount = queue.utterances.length;
+      queue.utterances = [];
+      
+      // Reset timeout timestamp when clearing queue
+      lastTimeoutTimestamp = null;
+
+      res.json({
+        success: true,
+        message: `Cleared ${clearedCount} utterances`,
+        clearedCount
+      });
+    });
   });
 
   describe('tool usage tracking', () => {
@@ -395,6 +410,96 @@ describe('conversation flow tracking', () => {
         .send({});
 
       expect(response.body).toEqual({ decision: 'approve' });
+    });
+  });
+
+  describe('queue clearing and stop hook interaction', () => {
+    it('should reset lastTimeoutTimestamp when clearing queue', async () => {
+      // Simulate a timeout
+      lastTimeoutTimestamp = new Date();
+      
+      // Clear the queue
+      const clearResponse = await request(app)
+        .delete('/api/utterances')
+        .send({});
+
+      expect(clearResponse.status).toBe(200);
+      expect(lastTimeoutTimestamp).toBeNull();
+    });
+
+    it('should block stop after clearing queue and adding new utterances', async () => {
+      // Use a tool
+      await request(app)
+        .post('/api/hooks/pre-tool')
+        .send({});
+
+      // Speak
+      await request(app)
+        .post('/api/speak')
+        .send({ text: 'Response' });
+
+      // Simulate a timeout
+      lastTimeoutTimestamp = new Date();
+
+      // Stop should be allowed initially
+      let response = await request(app)
+        .post('/api/hooks/stop')
+        .send({});
+
+      expect(response.body.decision).toBe('approve');
+
+      // Clear the queue
+      await request(app)
+        .delete('/api/utterances')
+        .send({});
+
+      // Add new utterance after clearing
+      queue.utterances.push({
+        id: '1',
+        text: 'New utterance after clear',
+        timestamp: new Date(),
+        status: 'pending'
+      });
+
+      // Stop should now be blocked due to pending utterance
+      response = await request(app)
+        .post('/api/hooks/stop')
+        .send({});
+
+      expect(response.body).toEqual({
+        decision: 'block',
+        reason: '1 pending utterance(s) must be dequeued first. Please use dequeue_utterances to process them.'
+      });
+    });
+
+    it('should require wait_for_utterance after clearing queue even without pending utterances', async () => {
+      // Use a tool
+      await request(app)
+        .post('/api/hooks/pre-tool')
+        .send({});
+
+      // Speak
+      await request(app)
+        .post('/api/speak')
+        .send({ text: 'Response' });
+
+      // Simulate a timeout
+      lastTimeoutTimestamp = new Date();
+
+      // Clear the queue (resets lastTimeoutTimestamp)
+      await request(app)
+        .delete('/api/utterances')
+        .send({});
+
+      // Stop should be blocked because lastTimeoutTimestamp is null
+      const response = await request(app)
+        .post('/api/hooks/stop')
+        .send({});
+
+      expect(response.body).toEqual({
+        decision: 'block',
+        reason: 'Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
+      });
     });
   });
 });
