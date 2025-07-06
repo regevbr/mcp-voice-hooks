@@ -836,7 +836,7 @@ if (IS_MCP_MANAGED) {
             content: [
               {
                 type: 'text',
-                text: `Spoke: "${text}"\n${data.respondedCount > 0 ? `Marked ${data.respondedCount} utterance(s) as responded.` : 'No delivered utterances to mark as responded.'}`,
+                text: '',  // Return empty string for success
               },
             ],
           };

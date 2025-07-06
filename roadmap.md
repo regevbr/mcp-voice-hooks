@@ -64,10 +64,10 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [ ] clean up completed tasks in roadmap.md
 - [x] experiment with having the server remind the assistant to use voice responses instead of having a post tool hook
 - [ ] Set up automated publishing workflow (GitHub Actions)
-- [ ] Clean up speak endpoint response to reduce window clutter
-  - [ ] Remove or simplify the "Spoke: [text]" output
-  - [ ] Remove or simplify the "Marked X utterance(s) as responded" message
-  - [ ] Make the response more concise while maintaining necessary functionality
+- [x] Clean up speak endpoint response to reduce window clutter
+  - [x] Remove or simplify the "Spoke: [text]" output
+  - [x] Remove or simplify the "Marked X utterance(s) as responded" message
+  - [x] Make the response more concise while maintaining necessary functionality
 - [x] ensure hooks and settings are updated on every server startup
 - [x] bump version to 1.0.7
 - [x] bump version to 1.0.8
