@@ -95,8 +95,7 @@ let lastSpeakTimestamp: Date | null = null;
 
 // Voice preferences (controlled by browser)
 let voicePreferences = {
-  voiceResponsesEnabled: false,
-  browserTTSEnabled: false
+  voiceResponsesEnabled: false
 };
 
 // HTTP Server Setup (always created)
@@ -489,13 +488,12 @@ function notifyTTSClients(text: string) {
 
 // API for voice preferences
 app.post('/api/voice-preferences', (req: Request, res: Response) => {
-  const { voiceResponsesEnabled, browserTTSEnabled } = req.body;
+  const { voiceResponsesEnabled } = req.body;
   
   // Update preferences
   voicePreferences.voiceResponsesEnabled = !!voiceResponsesEnabled;
-  voicePreferences.browserTTSEnabled = !!browserTTSEnabled;
   
-  debugLog(`[Preferences] Updated: voiceResponses=${voicePreferences.voiceResponsesEnabled}, browserTTS=${voicePreferences.browserTTSEnabled}`);
+  debugLog(`[Preferences] Updated: voiceResponses=${voicePreferences.voiceResponsesEnabled}`);
   
   res.json({
     success: true,
@@ -524,18 +522,11 @@ app.post('/api/speak', async (req: Request, res: Response) => {
   }
 
   try {
-    // Check if browser TTS is enabled
-    const useBrowserTTS = voicePreferences.browserTTSEnabled;
-
-    if (useBrowserTTS) {
-      // Send text to browser for TTS
-      notifyTTSClients(text);
-      debugLog(`[Speak] Sent text to browser for TTS: "${text}"`);
-    } else {
-      // Execute text-to-speech using macOS say command
-      await execAsync(`say -r 250 "${text.replace(/"/g, '\\"')}"`);
-      debugLog(`[Speak] Spoke text using macOS say: "${text}"`);
-    }
+    // Always notify browser clients - they decide how to speak
+    notifyTTSClients(text);
+    debugLog(`[Speak] Sent text to browser for TTS: "${text}"`);
+    
+    // Note: The browser will decide whether to use system voice or browser voice
 
     // Mark all delivered utterances as responded
     const deliveredUtterances = queue.utterances.filter(u => u.status === 'delivered');
@@ -556,6 +547,34 @@ app.post('/api/speak', async (req: Request, res: Response) => {
     debugLog(`[Speak] Failed to speak text: ${error}`);
     res.status(500).json({
       error: 'Failed to speak text',
+      details: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
+// API for system text-to-speech (always uses Mac say command)
+app.post('/api/speak-system', async (req: Request, res: Response) => {
+  const { text, rate = 250 } = req.body;
+
+  if (!text || !text.trim()) {
+    res.status(400).json({ error: 'Text is required' });
+    return;
+  }
+
+  try {
+    // Execute text-to-speech using macOS say command
+    // Note: Mac say command doesn't support volume control
+    await execAsync(`say -r ${rate} "${text.replace(/"/g, '\\"')}"`);
+    debugLog(`[Speak System] Spoke text using macOS say: "${text}" (rate: ${rate})`);
+
+    res.json({
+      success: true,
+      message: 'Text spoken successfully via system voice'
+    });
+  } catch (error) {
+    debugLog(`[Speak System] Failed to speak text: ${error}`);
+    res.status(500).json({
+      error: 'Failed to speak text via system voice',
       details: error instanceof Error ? error.message : String(error)
     });
   }

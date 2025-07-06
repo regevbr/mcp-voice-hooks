@@ -44,6 +44,13 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [x] Show dropdown only when voice responses is enabled
   - [x] Group options into three sections (e.g., System TTS, Browser TTS using local voices, Browser TTS using cloud voices)
   - [ ] Show rate and volume options for System TTS as well
+- [x] Refactor voice system architecture for cleaner separation
+  - [x] Create /api/speak-system endpoint that always uses Mac say command
+  - [x] Update browser to handle voice selection entirely
+    - [x] Call /api/speak-system when "Mac System Voice" is selected
+    - [x] Use local speechSynthesis when browser voice is selected
+  - [x] Remove browserTTSEnabled state sharing between server and browser
+  - [x] Browser becomes solely responsible for voice selection logic
 - [x] Add text input field next to rate slider
   - [x] Allow users to type exact rate values
   - [x] Sync with slider position

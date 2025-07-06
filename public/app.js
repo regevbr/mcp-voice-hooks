@@ -492,48 +492,72 @@ class VoiceHooksClient {
         }
     }
     
-    speakText(text) {
-        if (!window.speechSynthesis) {
-            console.error('Speech synthesis not available');
-            return;
-        }
-        
-        // Cancel any ongoing speech
-        window.speechSynthesis.cancel();
-        
-        // Create utterance
-        const utterance = new SpeechSynthesisUtterance(text);
-        
-        // Set voice if using browser voice
-        if (this.selectedVoice && this.selectedVoice.startsWith('browser:')) {
-            const voiceIndex = parseInt(this.selectedVoice.substring(8));
-            if (this.voices[voiceIndex]) {
-                utterance.voice = this.voices[voiceIndex];
+    async speakText(text) {
+        // Check if we should use system voice
+        if (this.selectedVoice === 'system') {
+            // Use Mac system voice via server
+            try {
+                const response = await fetch(`${this.baseUrl}/api/speak-system`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        rate: Math.round(this.speechRate * 250), // Convert rate to words per minute
+                        volume: this.speechVolume
+                    }),
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    console.error('Failed to speak via system voice:', error);
+                }
+            } catch (error) {
+                console.error('Failed to call speak-system API:', error);
             }
+        } else {
+            // Use browser voice
+            if (!window.speechSynthesis) {
+                console.error('Speech synthesis not available');
+                return;
+            }
+            
+            // Cancel any ongoing speech
+            window.speechSynthesis.cancel();
+            
+            // Create utterance
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Set voice if using browser voice
+            if (this.selectedVoice && this.selectedVoice.startsWith('browser:')) {
+                const voiceIndex = parseInt(this.selectedVoice.substring(8));
+                if (this.voices[voiceIndex]) {
+                    utterance.voice = this.voices[voiceIndex];
+                }
+            }
+            
+            // Set speech properties
+            utterance.rate = this.speechRate;
+            utterance.pitch = this.speechPitch;
+            utterance.volume = this.speechVolume;
+            
+            // Event handlers
+            utterance.onstart = () => {
+                this.debugLog('Started speaking:', text);
+            };
+            
+            utterance.onend = () => {
+                this.debugLog('Finished speaking');
+            };
+            
+            utterance.onerror = (event) => {
+                console.error('Speech synthesis error:', event);
+            };
+            
+            // Speak the text
+            window.speechSynthesis.speak(utterance);
         }
-        
-        // Set speech properties
-        utterance.rate = this.speechRate;
-        utterance.pitch = this.speechPitch;
-        utterance.volume = this.speechVolume;
-        
-        // Event handlers
-        utterance.onstart = () => {
-            this.debugLog('Started speaking:', text);
-            // Could add visual indicator here
-        };
-        
-        utterance.onend = () => {
-            this.debugLog('Finished speaking');
-            // Could remove visual indicator here
-        };
-        
-        utterance.onerror = (event) => {
-            console.error('Speech synthesis error:', event);
-        };
-        
-        // Speak the text
-        window.speechSynthesis.speak(utterance);
     }
     
     loadPreferences() {
@@ -585,7 +609,6 @@ class VoiceHooksClient {
     
     async updateVoicePreferences() {
         const voiceResponsesEnabled = this.voiceResponsesToggle.checked;
-        const useBrowserTTS = this.selectedVoice && this.selectedVoice.startsWith('browser:');
         
         try {
             // Send preferences to server
@@ -595,12 +618,11 @@ class VoiceHooksClient {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    voiceResponsesEnabled,
-                    browserTTSEnabled: useBrowserTTS
+                    voiceResponsesEnabled
                 }),
             });
             
-            this.debugLog('Voice preferences updated:', { voiceResponsesEnabled, browserTTSEnabled: useBrowserTTS, selectedVoice: this.selectedVoice });
+            this.debugLog('Voice preferences updated:', { voiceResponsesEnabled });
         } catch (error) {
             console.error('Failed to update voice preferences:', error);
         }
