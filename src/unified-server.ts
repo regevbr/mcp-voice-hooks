@@ -512,11 +512,10 @@ app.post('/api/speak', async (req: Request, res: Response) => {
 
   // Check if voice responses are enabled
   if (!voicePreferences.voiceResponsesEnabled) {
-    debugLog(`[Speak] Voice responses disabled, silently succeeding`);
-    res.json({
-      success: true,
-      message: 'Voice responses are disabled',
-      respondedCount: 0
+    debugLog(`[Speak] Voice responses disabled, returning error`);
+    res.status(400).json({
+      error: 'Voice responses are disabled',
+      message: 'Cannot speak when voice responses are disabled'
     });
     return;
   }

@@ -35,8 +35,8 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 ### Next tasks
 
-- [ ] Reject speak requests when voice responses is disabled
-  - [ ] Server should return an error when voice responses is off
+- [x] Reject speak requests when voice responses is disabled
+  - [x] Server should return an error when voice responses is off
 - [ ] add a voice-input state tracker on the server and only block tool calls etc if voice input is enabled
 - [x] Replace "Use Browser TTS" checkbox with voice selection dropdown
   - [x] First option: "Mac System Voice" (uses macOS `say` command)
@@ -45,7 +45,6 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [x] Group options into three sections (e.g., System TTS, Browser TTS using local voices, Browser TTS using cloud voices)
   - [x] remove volume slider
   - [ ] group local voices into low and high quality
-
 - [x] Refactor voice system architecture for cleaner separation
   - [x] Create /api/speak-system endpoint that always uses Mac say command
   - [x] Update browser to handle voice selection entirely
@@ -86,8 +85,8 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
     - [x] Forces dequeue_utterances to be called before any speaking/waiting.
     - [x] This ensures clean conversation flow: dequeue → speak → wait
     - [x] if voice responses are enabled, require speak_and_then_wait_for_utterance in the stop hook, otherwise require wait_for_utterance
-- [ ] add a CLI argument --speak to the server to enable voice responses
-  - [ ] remove the MCP_VOICE_RESPONSES_ENABLED environment variable and switch all references to it to --speak
+- [x] add a CLI argument --speak to the server to enable voice responses
+  - [x] remove the MCP_VOICE_RESPONSES_ENABLED environment variable and switch all references to it to --speak
   - [ ] update the readme to reflect the new CLI argument
 - [ ] Investigate hiding the speak mcp tools when voice responses are disabled
 - [ ] Investigate consolidating the pre-tool hook, pre-speak hook, and pre-wait hook into a single hook that runs before all tools and checks which tool is being used and switches logic based on that
