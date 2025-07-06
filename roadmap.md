@@ -59,20 +59,21 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [ ] remove the MCP_VOICE_RESPONSES_ENABLED environment variable and switch all references to it to --speak
 - [ ] Investigate hiding the speak mcp tools when voice responses are disabled
 - [ ] Investigate consolidating the pre-tool hook and the pre-speak hook into a single hook that runs before all tools and checks which tool is being used and switches logic based on that
-- [ ] Improve conversation flow by tracking tool usage
-  - [ ] Remove speak_and_then_wait_for_utterance tool (use separate speak and wait_for_utterance instead)
-  - [ ] Track timestamp of last approved tool use
-  - [ ] Enforce speaking after tool use before wait_for_utterance or stop:
-    - [ ] Check for pending utterances (must dequeue first)
-    - [ ] Check for unresponded utterances when voice enabled (must speak first)
-    - [ ] Check if spoken since last tool use (must speak first)
-    - [ ] Check if timeout occurred (if no, must wait_for_utterance; if yes, can stop)
-  - [ ] Create pre-wait hook that enforces speaking after tool use
-    - [ ] Hook matches only wait_for_utterance tool
-    - [ ] Validates no pending utterances
-    - [ ] Validates no unresponded utterances (when voice enabled)
-    - [ ] Validates that speak was called after last tool use
-  - [ ] Update stop hook logic to check if spoken since last tool use
+- [x] Improve conversation flow by tracking tool usage ✅ **COMPLETED**
+  - [x] Remove speak_and_then_wait_for_utterance tool (use separate speak and wait_for_utterance instead)
+  - [x] Track timestamp of last approved tool use
+  - [x] Enforce speaking after tool use before wait_for_utterance or stop:
+    - [x] Check for pending utterances (must dequeue first)
+    - [x] Check for unresponded utterances when voice enabled (must speak first)
+    - [x] Check if spoken since last tool use (must speak first)
+    - [x] Check if timeout occurred (if no, must wait_for_utterance; if yes, can stop)
+  - [x] Create pre-wait hook that enforces speaking after tool use
+    - [x] Hook matches only wait_for_utterance tool
+    - [x] Validates no pending utterances
+    - [x] Validates no unresponded utterances (when voice enabled)
+    - [x] Validates that speak was called after last tool use
+  - [x] Update stop hook logic to check if spoken since last tool use
+  - [x] Add comprehensive tests for conversation flow tracking
 
 ### Voice Response Tracking & Conversation Flow Enforcement
 
