@@ -137,16 +137,26 @@ class VoiceHooksClient {
         // TTS controls
         this.voiceSelect.addEventListener('change', (e) => {
             this.selectedVoiceIndex = e.target.value ? parseInt(e.target.value) : null;
+            // Save selected voice to localStorage
+            if (this.selectedVoiceIndex !== null && this.voices[this.selectedVoiceIndex]) {
+                localStorage.setItem('selectedVoiceName', this.voices[this.selectedVoiceIndex].name);
+            } else {
+                localStorage.removeItem('selectedVoiceName');
+            }
         });
         
         this.speechRateSlider.addEventListener('input', (e) => {
             this.speechRate = parseFloat(e.target.value);
             this.speechRateValue.textContent = this.speechRate.toFixed(1);
+            // Save rate to localStorage
+            localStorage.setItem('speechRate', this.speechRate.toString());
         });
         
         this.speechVolumeSlider.addEventListener('input', (e) => {
             this.speechVolume = parseFloat(e.target.value);
             this.speechVolumeValue.textContent = this.speechVolume.toFixed(1);
+            // Save volume to localStorage
+            localStorage.setItem('speechVolume', this.speechVolume.toString());
         });
         
         this.testTTSBtn.addEventListener('click', () => {
@@ -425,19 +435,35 @@ class VoiceHooksClient {
         // Clear existing options except default
         this.voiceSelect.innerHTML = '<option value="">Default</option>';
         
-        // Add voice options
+        let selectedIndex = null;
+        
+        // Filter and add only en-US voices
         this.voices.forEach((voice, index) => {
-            const option = document.createElement('option');
-            option.value = index.toString();
-            option.textContent = `${voice.name} (${voice.lang})`;
-            
-            // Mark local voices
-            if (voice.localService) {
-                option.textContent += ' [Local]';
+            // Only include English US voices
+            if (voice.lang.toLowerCase().startsWith('en-us')) {
+                const option = document.createElement('option');
+                option.value = index.toString();
+                option.textContent = voice.name;
+                
+                // Mark local voices
+                if (voice.localService) {
+                    option.textContent += ' [Local]';
+                }
+                
+                // Check if this is the saved voice
+                if (this.savedVoiceName && voice.name === this.savedVoiceName) {
+                    selectedIndex = index;
+                }
+                
+                this.voiceSelect.appendChild(option);
             }
-            
-            this.voiceSelect.appendChild(option);
         });
+        
+        // Restore saved selection
+        if (selectedIndex !== null) {
+            this.voiceSelect.value = selectedIndex.toString();
+            this.selectedVoiceIndex = selectedIndex;
+        }
     }
     
     speakText(text) {
@@ -506,6 +532,24 @@ class VoiceHooksClient {
         if (storedBrowserTTS === null) {
             localStorage.setItem('browserTTSEnabled', 'true');
         }
+        
+        // Load voice settings
+        const storedRate = localStorage.getItem('speechRate');
+        if (storedRate !== null) {
+            this.speechRate = parseFloat(storedRate);
+            this.speechRateSlider.value = storedRate;
+            this.speechRateValue.textContent = this.speechRate.toFixed(1);
+        }
+        
+        const storedVolume = localStorage.getItem('speechVolume');
+        if (storedVolume !== null) {
+            this.speechVolume = parseFloat(storedVolume);
+            this.speechVolumeSlider.value = storedVolume;
+            this.speechVolumeValue.textContent = this.speechVolume.toFixed(1);
+        }
+        
+        // Load selected voice name (will be applied after voices load)
+        this.savedVoiceName = localStorage.getItem('selectedVoiceName');
         
         // Update UI visibility
         this.updateVoiceOptionsVisibility();
