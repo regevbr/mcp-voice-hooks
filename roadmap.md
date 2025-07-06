@@ -53,6 +53,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] fix: reset lastTimeoutTimestamp when clearing utterance queue
   - [x] Prevents stop hook from incorrectly allowing stops after queue clear
   - [x] Added comprehensive tests for queue clearing behavior
+- [x] fix: resolve TypeScript warnings for unused parameters
 - [x] Improve speaking flow ✅ **COMPLETED**
   - [x] Add new speak_and_then_wait_for_utterance tool
   - [x] Make both speak and speak_and_then_wait_for_utterance fail if there are pending utterances

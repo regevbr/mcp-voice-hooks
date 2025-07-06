@@ -135,7 +135,7 @@ app.get('/api/utterances', (req: Request, res: Response) => {
   });
 });
 
-app.get('/api/utterances/status', (req: Request, res: Response) => {
+app.get('/api/utterances/status', (_req: Request, res: Response) => {
   const total = queue.utterances.length;
   const pending = queue.utterances.filter(u => u.status === 'pending').length;
   const delivered = queue.utterances.filter(u => u.status === 'delivered').length;
@@ -256,7 +256,7 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
 });
 
 // API for the stop hook to check if it should wait
-app.get('/api/should-wait', (req: Request, res: Response) => {
+app.get('/api/should-wait', (_req: Request, res: Response) => {
   const shouldWait = !lastTimeoutTimestamp ||
     queue.utterances.some(u => u.timestamp > lastTimeoutTimestamp!);
 
@@ -264,7 +264,7 @@ app.get('/api/should-wait', (req: Request, res: Response) => {
 });
 
 // API for pre-tool hook to check for pending utterances
-app.get('/api/has-pending-utterances', (req: Request, res: Response) => {
+app.get('/api/has-pending-utterances', (_req: Request, res: Response) => {
   const pendingCount = queue.utterances.filter(u => u.status === 'pending').length;
   const hasPending = pendingCount > 0;
 
@@ -437,7 +437,7 @@ app.post('/api/hooks/pre-wait', (_req: Request, res: Response) => {
 });
 
 // API to clear all utterances
-app.delete('/api/utterances', (req: Request, res: Response) => {
+app.delete('/api/utterances', (_req: Request, res: Response) => {
   const clearedCount = queue.utterances.length;
   queue.clear();
   
