@@ -95,7 +95,8 @@ let lastSpeakTimestamp: Date | null = null;
 
 // Voice preferences (controlled by browser)
 let voicePreferences = {
-  voiceResponsesEnabled: false
+  voiceResponsesEnabled: false,
+  voiceInputActive: false
 };
 
 // HTTP Server Setup (always created)
@@ -289,15 +290,17 @@ app.post('/api/validate-action', (req: Request, res: Response) => {
     return;
   }
 
-  // Check for pending utterances (both actions)
-  const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
-  if (pendingUtterances.length > 0) {
-    res.json({
-      allowed: false,
-      requiredAction: 'dequeue_utterances',
-      reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first. Please use dequeue_utterances to process them.`
-    });
-    return;
+  // Only check for pending utterances if voice input is active
+  if (voicePreferences.voiceInputActive) {
+    const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
+    if (pendingUtterances.length > 0) {
+      res.json({
+        allowed: false,
+        requiredAction: 'dequeue_utterances',
+        reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first. Please use dequeue_utterances to process them.`
+      });
+      return;
+    }
   }
 
   // Check for delivered but unresponded utterances (when voice enabled)
@@ -313,8 +316,8 @@ app.post('/api/validate-action', (req: Request, res: Response) => {
     }
   }
 
-  // For stop action, check if we should wait
-  if (action === 'stop') {
+  // For stop action, check if we should wait (only if voice input is active)
+  if (action === 'stop' && voicePreferences.voiceInputActive) {
     const shouldWait = !lastTimeoutTimestamp ||
       queue.utterances.some(u => u.timestamp > lastTimeoutTimestamp!);
 
@@ -337,15 +340,18 @@ app.post('/api/validate-action', (req: Request, res: Response) => {
 // Unified hook handler
 function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'): { decision: 'approve' | 'block', reason?: string } {
   const voiceResponsesEnabled = voicePreferences.voiceResponsesEnabled;
+  const voiceInputActive = voicePreferences.voiceInputActive;
 
-  // 1. Check for pending utterances
-  const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
-  if (pendingUtterances.length > 0) {
-    // Allow dequeue to proceed (dequeue doesn't go through hooks)
-    return {
-      decision: 'block',
-      reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first. Please use dequeue_utterances to process them.`
-    };
+  // 1. Check for pending utterances (only if voice input is active)
+  if (voiceInputActive) {
+    const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
+    if (pendingUtterances.length > 0) {
+      // Allow dequeue to proceed (dequeue doesn't go through hooks)
+      return {
+        decision: 'block',
+        reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first. Please use dequeue_utterances to process them.`
+      };
+    }
   }
 
   // 2. Check for delivered utterances (when voice enabled)
@@ -397,15 +403,17 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
       };
     }
 
-    // Check if should wait for utterances
-    const shouldWait = !lastTimeoutTimestamp ||
-      queue.utterances.some(u => u.timestamp > lastTimeoutTimestamp!);
+    // Check if should wait for utterances (only if voice input is active)
+    if (voiceInputActive) {
+      const shouldWait = !lastTimeoutTimestamp ||
+        queue.utterances.some(u => u.timestamp > lastTimeoutTimestamp!);
 
-    if (shouldWait) {
-      return {
-        decision: 'block',
-        reason: 'Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
-      };
+      if (shouldWait) {
+        return {
+          decision: 'block',
+          reason: 'Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
+        };
+      }
     }
 
     return {
@@ -498,6 +506,21 @@ app.post('/api/voice-preferences', (req: Request, res: Response) => {
   res.json({
     success: true,
     preferences: voicePreferences
+  });
+});
+
+// API for voice input state
+app.post('/api/voice-input-state', (req: Request, res: Response) => {
+  const { active } = req.body;
+  
+  // Update voice input state
+  voicePreferences.voiceInputActive = !!active;
+  
+  debugLog(`[Voice Input] ${voicePreferences.voiceInputActive ? 'Started' : 'Stopped'} listening`);
+  
+  res.json({
+    success: true,
+    voiceInputActive: voicePreferences.voiceInputActive
   });
 });
 

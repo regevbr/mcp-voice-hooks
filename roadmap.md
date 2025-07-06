@@ -37,7 +37,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 - [x] Reject speak requests when voice responses is disabled
   - [x] Server should return an error when voice responses is off
-- [ ] add a voice-input state tracker on the server and only block tool calls etc if voice input is enabled
+- [x] add a voice-input-is-active state tracker on the server and only block tool calls etc if "start listening" is active in the browser
 - [x] Replace "Use Browser TTS" checkbox with voice selection dropdown
   - [x] First option: "Mac System Voice" (uses macOS `say` command)
   - [x] Remaining options: Browser voices from speechSynthesis.getVoices()

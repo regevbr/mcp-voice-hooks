@@ -159,6 +159,11 @@ describe('utterance state transitions', () => {
 
   describe('state transition: delivered -> responded', () => {
     it('should transition from delivered to responded when speak is called', async () => {
+      // Enable voice responses first
+      await request(app)
+        .post('/api/voice-preferences')
+        .send({ voiceResponsesEnabled: true });
+
       // Add and deliver utterance
       await request(app).post('/api/potential-utterances').send({ text: 'Hello' });
       await request(app).post('/api/dequeue-utterances').send({ limit: 10 });

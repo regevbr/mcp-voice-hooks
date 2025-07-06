@@ -272,7 +272,7 @@ class VoiceHooksClient {
         }
     }
     
-    startListening() {
+    async startListening() {
         if (!this.recognition) {
             alert('Speech recognition not supported in this browser');
             return;
@@ -285,13 +285,16 @@ class VoiceHooksClient {
             this.listenBtnText.textContent = 'Stop Listening';
             this.listeningIndicator.classList.add('active');
             this.debugLog('Started listening');
+            
+            // Notify server that voice input is active
+            await this.updateVoiceInputState(true);
         } catch (e) {
             console.error('Failed to start recognition:', e);
             alert('Failed to start speech recognition. Please try again.');
         }
     }
     
-    stopListening() {
+    async stopListening() {
         if (this.recognition) {
             this.isListening = false;
             this.recognition.stop();
@@ -301,6 +304,9 @@ class VoiceHooksClient {
             this.interimText.textContent = '';
             this.interimText.classList.remove('active');
             this.debugLog('Stopped listening');
+            
+            // Notify server that voice input is no longer active
+            await this.updateVoiceInputState(false);
         }
     }
     
@@ -594,6 +600,23 @@ class VoiceHooksClient {
             this.debugLog('Voice preferences updated:', { voiceResponsesEnabled });
         } catch (error) {
             console.error('Failed to update voice preferences:', error);
+        }
+    }
+    
+    async updateVoiceInputState(active) {
+        try {
+            // Send voice input state to server
+            await fetch(`${this.baseUrl}/api/voice-input-state`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ active }),
+            });
+            
+            this.debugLog('Voice input state updated:', { active });
+        } catch (error) {
+            console.error('Failed to update voice input state:', error);
         }
     }
 }
