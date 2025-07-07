@@ -123,6 +123,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [ ] investigate why the stop hook is not being executed consistently
   - [ ] experiment with using the notification hook as well as the stop hook. That might be a different kind of stopping that is bypassing the stop hook.
   - [ ] alternatively: explore speak_and_then_wait_for_utterance tool for use when stopping only. (hard to know when we're stopping)
+  - [ ] finding: the stop hook is not always running
 
 ### Voice Response Tracking & Conversation Flow Enforcement
 
