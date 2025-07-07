@@ -352,6 +352,19 @@
             font-size: 16px;
         }
 
+        .info-message {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .info-message .empty-state {
+            color: #0c5460;
+            padding: 20px;
+            font-style: normal;
+        }
+
         /* Toggle switch styles */
         .switch {
             position: relative;
@@ -488,6 +501,9 @@
                 <button class="refresh-btn" id="clearAllBtn" style="background: #DC3545; margin-left: 8px;">Clear
                     All</button>
             </h3>
+            <div class="info-message" id="infoMessage" style="display: none;">
+                <div class="empty-state">You need to send one message in the Claude code CLI to start voice interaction</div>
+            </div>
             <div class="utterances-list" id="utterancesList">
                 <div class="empty-state">No utterances yet. Type something above to get started!</div>
             </div>

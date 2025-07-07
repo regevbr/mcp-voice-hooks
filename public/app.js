@@ -7,6 +7,7 @@ class VoiceHooksClient {
         this.refreshBtn = document.getElementById('refreshBtn');
         this.clearAllBtn = document.getElementById('clearAllBtn');
         this.utterancesList = document.getElementById('utterancesList');
+        this.infoMessage = document.getElementById('infoMessage');
         this.totalCount = document.getElementById('totalCount');
         this.pendingCount = document.getElementById('pendingCount');
         this.deliveredCount = document.getElementById('deliveredCount');
@@ -239,14 +240,18 @@ class VoiceHooksClient {
     updateUtterancesList(utterances) {
         if (utterances.length === 0) {
             this.utterancesList.innerHTML = '<div class="empty-state">No utterances yet. Type something above to get started!</div>';
+            this.infoMessage.style.display = 'none';
             return;
         }
 
         // Check if all messages are pending
         const allPending = utterances.every(u => u.status === 'pending');
         if (allPending) {
-            this.utterancesList.innerHTML = '<div class="empty-state">You need to send one message in the Claude code window to start voice interaction</div>';
-            return;
+            // Show info message but don't replace the utterances list
+            this.infoMessage.style.display = 'block';
+        } else {
+            // Hide info message when at least one utterance is delivered
+            this.infoMessage.style.display = 'none';
         }
 
         this.utterancesList.innerHTML = utterances.map(utterance => `
@@ -685,7 +690,7 @@ class VoiceHooksClient {
             if (voice) {
                 const isGoogleVoice = voice.name.toLowerCase().includes('google');
                 const isLocalVoice = voice.localService === true;
-                
+
                 // Show appropriate warnings
                 if (isGoogleVoice) {
                     // Show rate warning for Google voices
@@ -693,7 +698,7 @@ class VoiceHooksClient {
                 } else {
                     this.rateWarning.style.display = 'none';
                 }
-                
+
                 if (isLocalVoice) {
                     // Show system info for local browser voices
                     this.systemVoiceInfo.style.display = 'flex';

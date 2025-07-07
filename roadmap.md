@@ -41,6 +41,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [x] hide, label, or separate low quality voices
   - [x] choose a good default voice
   - [x] if i leave the browser open and restart the server, then it thinks voice input is off but it's actually on in the frontend. The same thing can happen with voice responses on/off
+  - [ ] If all utterances are pending, add help text to the browser that they need to send a typed message to Claude to start the conversation
 - [x] Known issue: Microsoft Edge speech recognition not working - shows "language-not-supported" error
   - Safari and Chrome work fine for speech recognition
 - [x] Reject speak requests when voice responses is disabled
