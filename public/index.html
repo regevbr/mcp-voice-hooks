@@ -390,11 +390,11 @@
             border-radius: 50%;
         }
 
-        input:checked + .slider {
+        input:checked+.slider {
             background-color: #007AFF;
         }
 
-        input:checked + .slider:before {
+        input:checked+.slider:before {
             transform: translateX(24px);
         }
     </style>
@@ -406,15 +406,15 @@
         <p class="subtitle">Speak or type to enqueue messages for Claude</p>
 
         <div class="tts-settings">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <h4 style="margin: 0;">Allow Claude to speak back to you</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4>Allow Claude to speak back to you</h4>
                 <label class="switch">
                     <input type="checkbox" id="voiceResponsesToggle">
                     <span class="slider"></span>
                 </label>
             </div>
             <div class="tts-controls" id="voiceOptions" style="display: none;">
-                <div class="tts-control" style="width: 100%; margin-bottom: 8px;">
+                <div class="tts-control" style="width: 100%;">
                     <label for="voiceSelect">Voice:</label>
                     <select id="voiceSelect">
                         <option value="system">Mac System Voice</option>
@@ -434,13 +434,12 @@
                     <span class="warning-icon">⚠️</span>
                     <span class="warning-text">Google voices may not respond well to rate adjustments</span>
                 </div>
-                <div class="tts-control" style="width: 100%; margin-top: 8px;">
+                <div class="tts-control" style="width: 100%;">
                     <label for="speechRate">Speaking Rate:</label>
                     <input type="range" id="speechRate" min="0.5" max="5" step="0.1" value="1">
-                    <input type="number" id="speechRateInput" min="0.5" max="5" step="0.1" value="1"
-                        style="width: 60px; margin-left: 8px;">
+                    <input type="number" id="speechRateInput" min="0.5" max="5" step="0.1" value="1">
                 </div>
-                <button class="tts-test-btn" id="testTTSBtn" style="margin-top: 8px;">Test Voice</button>
+                <button class="tts-test-btn" id="testTTSBtn">Test Voice</button>
             </div>
         </div>
 
