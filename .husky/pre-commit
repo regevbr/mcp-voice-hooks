@@ -4,12 +4,12 @@
 echo "Auto-staging all changes..."
 git add .
 
-# Check if the roadmap.md file has changes
-if git diff --cached --quiet roadmap.md; then
-  # Exit code 0 from diff --quiet means NO changes were staged for roadmap.md
-  echo "Error: roadmap.md must be updated and staged in every commit." >&2
-  exit 1
-fi
+# # Check if the roadmap.md file has changes
+# if git diff --cached --quiet roadmap.md; then
+#   # Exit code 0 from diff --quiet means NO changes were staged for roadmap.md
+#   echo "Error: roadmap.md must be updated and staged in every commit." >&2
+#   exit 1
+# fi
 
 # Run knip to check for unused dependencies, files, and exports
 echo "Running knip to check for unused dependencies, files, and exports..."

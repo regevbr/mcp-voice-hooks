@@ -667,20 +667,34 @@ class VoiceHooksClient {
     updateVoiceWarnings() {
         // Show/hide warnings based on selected voice
         if (this.selectedVoice === 'system') {
-            // Show system voice info, hide rate warning
+            // Show system voice info for Mac System Voice
             this.systemVoiceInfo.style.display = 'flex';
             this.rateWarning.style.display = 'none';
         } else if (this.selectedVoice && this.selectedVoice.startsWith('browser:')) {
-            // Check if it's a Google voice
+            // Check voice properties
             const voiceIndex = parseInt(this.selectedVoice.substring(8));
             const voice = this.voices[voiceIndex];
 
-            if (voice && voice.name.toLowerCase().includes('google')) {
-                // Show rate warning for Google voices
-                this.rateWarning.style.display = 'flex';
-                this.systemVoiceInfo.style.display = 'none';
+            if (voice) {
+                const isGoogleVoice = voice.name.toLowerCase().includes('google');
+                const isLocalVoice = voice.localService === true;
+                
+                // Show appropriate warnings
+                if (isGoogleVoice) {
+                    // Show rate warning for Google voices
+                    this.rateWarning.style.display = 'flex';
+                } else {
+                    this.rateWarning.style.display = 'none';
+                }
+                
+                if (isLocalVoice) {
+                    // Show system info for local browser voices
+                    this.systemVoiceInfo.style.display = 'flex';
+                } else {
+                    this.systemVoiceInfo.style.display = 'none';
+                }
             } else {
-                // Hide both warnings for other browser voices
+                // Hide both warnings if voice not found
                 this.rateWarning.style.display = 'none';
                 this.systemVoiceInfo.style.display = 'none';
             }
