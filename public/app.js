@@ -242,6 +242,13 @@ class VoiceHooksClient {
             return;
         }
 
+        // Check if all messages are pending
+        const allPending = utterances.every(u => u.status === 'pending');
+        if (allPending) {
+            this.utterancesList.innerHTML = '<div class="empty-state">You need to send one message in the Claude code window to start voice interaction</div>';
+            return;
+        }
+
         this.utterancesList.innerHTML = utterances.map(utterance => `
             <div class="utterance-item">
                 <div class="utterance-text">${this.escapeHtml(utterance.text)}</div>
