@@ -395,6 +395,8 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
 
   // 4. Handle wait for utterance
   if (attemptedAction === 'wait') {
+    // TEMPORARILY COMMENTED OUT - Remove comment to re-enable speak requirement
+    /*
     if (voiceResponsesEnabled && lastToolUseTimestamp &&
       (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
       return {
@@ -402,6 +404,7 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
         reason: 'Assistant must speak after using tools. Please use the speak tool to respond before waiting for utterances.'
       };
     }
+    */
     return { decision: 'approve' };
   }
 
@@ -413,6 +416,8 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
   // 6. Handle stop
   if (attemptedAction === 'stop') {
     // Check if must speak after tool use
+    // TEMPORARILY COMMENTED OUT - Remove comment to re-enable speak requirement
+    /*
     if (voiceResponsesEnabled && lastToolUseTimestamp &&
       (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
       return {
@@ -420,6 +425,7 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
         reason: 'Assistant must speak after using tools. Please use the speak tool to respond before proceeding.'
       };
     }
+    */
 
     // Check if should wait for utterances (only if voice input is active)
     if (voiceInputActive) {
