@@ -38,7 +38,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] temporarily remove requirement for Claude to speak before stopping
 - [ ] re-enable requirement for Claude to speak before stopping when 1.0.45 version of claude code is released with the stop hook fix
 - [x] eliminate timeout check in stop hook. Only check if voice input is active.
-- [ ] eliminate time-to-wait argument from wait_for_utterance tool. Default to 60 seconds.
+- [x] eliminate time-to-wait argument from wait_for_utterance tool. Default to 60 seconds.
 - [ ] add configurable timeout for wait_for_utterance tool on frontend
 - [ ] investigate if post-tool hook can send info to assistant and dequeue in there
 - [ ] add hint to post-tool hook that assistant should speak if there are unresponded utterances
