@@ -20,9 +20,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Constants
-const DEFAULT_WAIT_TIMEOUT_SECONDS = 30;
-const MIN_WAIT_TIMEOUT_SECONDS = 30;
-const MAX_WAIT_TIMEOUT_SECONDS = 60;
+const WAIT_TIMEOUT_SECONDS = 60;
 
 // Promisified exec for async/await
 const execAsync = promisify(exec);
@@ -89,8 +87,9 @@ const IS_MCP_MANAGED = process.argv.includes('--mcp-managed');
 
 // Global state
 const queue = new UtteranceQueue();
-let lastToolUseTimestamp: Date | null = null;
-let lastSpeakTimestamp: Date | null = null;
+// TODO: Uncomment these when Claude Code 1.0.45 is released and we reinstate speak-before-stop requirement
+// let lastToolUseTimestamp: Date | null = null;
+// let lastSpeakTimestamp: Date | null = null;
 
 // Voice preferences (controlled by browser)
 let voicePreferences = {
@@ -194,11 +193,7 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
     return;
   }
 
-  const { seconds_to_wait = DEFAULT_WAIT_TIMEOUT_SECONDS } = req.body;
-  const secondsToWait = Math.max(
-    MIN_WAIT_TIMEOUT_SECONDS,
-    Math.min(MAX_WAIT_TIMEOUT_SECONDS, seconds_to_wait)
-  );
+  const secondsToWait = WAIT_TIMEOUT_SECONDS;
   const maxWaitMs = secondsToWait * 1000;
   const startTime = Date.now();
 
@@ -359,13 +354,14 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
 
   // 3. Handle tool action
   if (attemptedAction === 'tool') {
-    lastToolUseTimestamp = new Date();
+    // TODO: Uncomment when Claude Code 1.0.45 is released
+    // lastToolUseTimestamp = new Date();
     return { decision: 'approve' };
   }
 
   // 4. Handle wait for utterance
   if (attemptedAction === 'wait') {
-    // TEMPORARILY COMMENTED OUT - Remove comment to re-enable speak requirement
+    // TEMPORARILY COMMENTED OUT - TODO: Remove comment to re-enable speak requirement when 1.0.45 is released
     /*
     if (voiceResponsesEnabled && lastToolUseTimestamp &&
       (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
@@ -386,7 +382,7 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
   // 6. Handle stop
   if (attemptedAction === 'stop') {
     // Check if must speak after tool use
-    // TEMPORARILY COMMENTED OUT - Remove comment to re-enable speak requirement
+    // TEMPORARILY COMMENTED OUT - TODO: Remove comment to re-enable speak requirement when 1.0.45 is released
     /*
     if (voiceResponsesEnabled && lastToolUseTimestamp &&
       (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
@@ -401,7 +397,7 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
     if (voiceInputActive) {
       return {
         decision: 'block',
-        reason: 'Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
+        reason: 'Assistant tried to end its response, but voice input is active. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
       };
     }
 
@@ -543,8 +539,8 @@ app.post('/api/speak', async (req: Request, res: Response) => {
       debugLog(`[Queue] marked as responded: "${u.text}"	[id: ${u.id}]`);
     });
 
-    // Track that speak was called
-    lastSpeakTimestamp = new Date();
+    // TODO: Uncomment when Claude Code 1.0.45 is released
+    // lastSpeakTimestamp = new Date();
 
     res.json({
       success: true,
@@ -643,18 +639,10 @@ if (IS_MCP_MANAGED) {
         },
         {
           name: 'wait_for_utterance',
-          description: 'Wait for an utterance to be available or until timeout. Returns immediately if no utterances since last timeout.',
+          description: 'Wait for an utterance to be available or until timeout',
           inputSchema: {
             type: 'object',
-            properties: {
-              seconds_to_wait: {
-                type: 'number',
-                description: `Maximum seconds to wait for an utterance (default: ${DEFAULT_WAIT_TIMEOUT_SECONDS}, min: ${MIN_WAIT_TIMEOUT_SECONDS}, max: ${MAX_WAIT_TIMEOUT_SECONDS})`,
-                default: DEFAULT_WAIT_TIMEOUT_SECONDS,
-                minimum: MIN_WAIT_TIMEOUT_SECONDS,
-                maximum: MAX_WAIT_TIMEOUT_SECONDS,
-              },
-            },
+            properties: {},
           },
         },
         {
@@ -724,17 +712,12 @@ if (IS_MCP_MANAGED) {
       }
 
       if (name === 'wait_for_utterance') {
-        const requestedSeconds = (args?.seconds_to_wait as number) ?? DEFAULT_WAIT_TIMEOUT_SECONDS;
-        const secondsToWait = Math.max(
-          MIN_WAIT_TIMEOUT_SECONDS,
-          Math.min(MAX_WAIT_TIMEOUT_SECONDS, requestedSeconds)
-        );
-        debugLog(`[MCP] Calling wait_for_utterance with ${secondsToWait}s timeout`);
+        debugLog(`[MCP] Calling wait_for_utterance`);
 
         const response = await fetch(`http://localhost:${HTTP_PORT}/api/wait-for-utterances`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ seconds_to_wait: secondsToWait }),
+          body: JSON.stringify({}),
         });
 
         const data = await response.json() as any;
@@ -769,7 +752,7 @@ if (IS_MCP_MANAGED) {
             content: [
               {
                 type: 'text',
-                text: data.message || `No utterances found after waiting ${secondsToWait} seconds.`,
+                text: data.message || `No utterances found. Timed out.`,
               },
             ],
           };

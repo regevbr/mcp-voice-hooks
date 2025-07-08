@@ -192,7 +192,7 @@ describe('Voice Input State Error Handling', () => {
 
       const response = await request(app)
         .post('/api/wait-for-utterances')
-        .send({ seconds_to_wait: 30 })
+        .send({})
         .expect(400);
 
       expect(response.body).toEqual({
@@ -210,7 +210,7 @@ describe('Voice Input State Error Handling', () => {
 
       const response = await request(app)
         .post('/api/wait-for-utterances')
-        .send({ seconds_to_wait: 30 })
+        .send({})
         .expect(200);
 
       expect(response.body.success).toBe(true);
