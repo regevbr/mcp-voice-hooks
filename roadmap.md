@@ -127,6 +127,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
     - [x] Validates that speak was called after last tool use
   - [x] Update stop hook logic to check if spoken since last tool use
   - [x] Add comprehensive tests for conversation flow tracking
+- [ ] Remove mocking from test as much as possible. Claude went off the rails and made way too many mocks. Tons of duplicate logic exists.
 
 ### Voice Response Tracking & Conversation Flow Enforcement
 
@@ -174,10 +175,10 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] Created comprehensive unit tests for validate-action endpoint
 - [x] Created unit tests for utterance state transitions
 - [x] All tests passing (58 total)
-- [ ] create dedicated endpoints for each hook
-  - [ ] pre-tool hook
-  - [ ] stop hook
-- [ ] have the server respond in the exact format that can be passed directly to claude. e.g. echo "{\"decision\": \"block\", \"reason\": \"$reason\"}"
+- [x] create dedicated endpoints for each hook
+  - [x] pre-tool hook
+  - [x] stop hook
+- [x] have the server respond in the exact format that can be passed directly to claude. e.g. echo "{\"decision\": \"block\", \"reason\": \"$reason\"}"
 
 ### Text-Based POC ✅ **COMPLETED**
 
