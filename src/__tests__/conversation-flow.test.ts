@@ -4,16 +4,19 @@ import express from 'express';
 describe('conversation flow tracking', () => {
   let app: express.Application;
   let queue: any;
-  let lastTimeoutTimestamp: Date | null;
   let lastToolUseTimestamp: Date | null;
   let lastSpeakTimestamp: Date | null;
+  let voicePreferences: any;
 
   beforeEach(() => {
     // Reset state
     delete process.env.VOICE_RESPONSES_ENABLED;
-    lastTimeoutTimestamp = null;
     lastToolUseTimestamp = null;
     lastSpeakTimestamp = null;
+    voicePreferences = {
+      voiceResponsesEnabled: false,
+      voiceInputActive: false
+    };
     
     // Mock queue
     queue = {
@@ -26,7 +29,7 @@ describe('conversation flow tracking', () => {
 
     // Pre-tool hook endpoint
     app.post('/api/hooks/pre-tool', (req, res) => {
-      const voiceResponsesEnabled = process.env.VOICE_RESPONSES_ENABLED === 'true';
+      const voiceResponsesEnabled = voicePreferences.voiceResponsesEnabled;
 
       // Check for pending utterances
       const pendingUtterances = queue.utterances.filter((u: any) => u.status === 'pending');
@@ -135,11 +138,8 @@ describe('conversation flow tracking', () => {
         return;
       }
 
-      // Check if we should wait for utterances
-      const shouldWait = !lastTimeoutTimestamp ||
-        queue.utterances.some((u: any) => u.timestamp > lastTimeoutTimestamp!);
-
-      if (shouldWait) {
+      // Check if we should wait for utterances (only if voice input is active)
+      if (voicePreferences.voiceInputActive) {
         res.json({
           decision: 'block',
           reason: 'Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
@@ -149,8 +149,7 @@ describe('conversation flow tracking', () => {
 
       // All checks passed - allow stop
       res.json({
-        decision: 'approve',
-        reason: 'No utterances since last timeout'
+        decision: 'approve'
       });
     });
 
@@ -184,8 +183,6 @@ describe('conversation flow tracking', () => {
       const clearedCount = queue.utterances.length;
       queue.utterances = [];
       
-      // Reset timeout timestamp when clearing queue
-      lastTimeoutTimestamp = null;
 
       res.json({
         success: true,
@@ -335,7 +332,7 @@ describe('conversation flow tracking', () => {
       });
     });
 
-    it('should check for wait requirement after speak check', async () => {
+    it('should allow stop when spoken after tool use and voice input is not active', async () => {
       // Use a tool
       await request(app)
         .post('/api/hooks/pre-tool')
@@ -346,14 +343,13 @@ describe('conversation flow tracking', () => {
         .post('/api/speak')
         .send({ text: 'Response' });
 
-      // Now stop should check for wait requirement
+      // Voice input is not active, so stop should be allowed
       const response = await request(app)
         .post('/api/hooks/stop')
         .send({});
 
       expect(response.body).toEqual({
-        decision: 'block',
-        reason: 'Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
+        decision: 'approve'
       });
     });
 
@@ -368,16 +364,16 @@ describe('conversation flow tracking', () => {
         .post('/api/speak')
         .send({ text: 'Response' });
 
-      // Set timeout timestamp to simulate wait completion
-      lastTimeoutTimestamp = new Date();
+      // Enable voice input to test stop behavior
+      voicePreferences.voiceInputActive = true;
 
       const response = await request(app)
         .post('/api/hooks/stop')
         .send({});
 
       expect(response.body).toEqual({
-        decision: 'approve',
-        reason: 'No utterances since last timeout'
+        decision: 'block',
+        reason: 'Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
       });
     });
   });
@@ -414,20 +410,11 @@ describe('conversation flow tracking', () => {
   });
 
   describe('queue clearing and stop hook interaction', () => {
-    it('should reset lastTimeoutTimestamp when clearing queue', async () => {
-      // Simulate a timeout
-      lastTimeoutTimestamp = new Date();
-      
-      // Clear the queue
-      const clearResponse = await request(app)
-        .delete('/api/utterances')
-        .send({});
-
-      expect(clearResponse.status).toBe(200);
-      expect(lastTimeoutTimestamp).toBeNull();
-    });
 
     it('should block stop after clearing queue and adding new utterances', async () => {
+      // Enable voice input for this test
+      voicePreferences.voiceInputActive = true;
+
       // Use a tool
       await request(app)
         .post('/api/hooks/pre-tool')
@@ -438,15 +425,12 @@ describe('conversation flow tracking', () => {
         .post('/api/speak')
         .send({ text: 'Response' });
 
-      // Simulate a timeout
-      lastTimeoutTimestamp = new Date();
-
-      // Stop should be allowed initially
+      // Stop should be blocked when voice input is active
       let response = await request(app)
         .post('/api/hooks/stop')
         .send({});
 
-      expect(response.body.decision).toBe('approve');
+      expect(response.body.decision).toBe('block');
 
       // Clear the queue
       await request(app)
@@ -473,6 +457,9 @@ describe('conversation flow tracking', () => {
     });
 
     it('should require wait_for_utterance after clearing queue even without pending utterances', async () => {
+      // Enable voice input for this test
+      voicePreferences.voiceInputActive = true;
+
       // Use a tool
       await request(app)
         .post('/api/hooks/pre-tool')
@@ -483,15 +470,13 @@ describe('conversation flow tracking', () => {
         .post('/api/speak')
         .send({ text: 'Response' });
 
-      // Simulate a timeout
-      lastTimeoutTimestamp = new Date();
 
-      // Clear the queue (resets lastTimeoutTimestamp)
+      // Clear the queue
       await request(app)
         .delete('/api/utterances')
         .send({});
 
-      // Stop should be blocked because lastTimeoutTimestamp is null
+      // Stop should be blocked because voice input is active
       const response = await request(app)
         .post('/api/hooks/stop')
         .send({});

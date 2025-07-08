@@ -5,18 +5,16 @@ import type { Response } from 'express';
 describe('validate-action endpoint', () => {
   let app: express.Application;
   let queue: any;
-  let lastTimeoutTimestamp: Date | null;
 
   beforeEach(() => {
     // Reset environment
     delete process.env.VOICE_RESPONSES_ENABLED;
+    delete process.env.VOICE_INPUT_ACTIVE;
     
     // Mock queue
     queue = {
       utterances: []
     };
-    
-    lastTimeoutTimestamp = null;
 
     // Create express app with validate-action endpoint
     app = express();
@@ -25,21 +23,24 @@ describe('validate-action endpoint', () => {
     app.post('/api/validate-action', (req: express.Request, res: Response) => {
       const { action } = req.body;
       const voiceResponsesEnabled = process.env.VOICE_RESPONSES_ENABLED === 'true';
+      const voiceInputActive = process.env.VOICE_INPUT_ACTIVE === 'true';
 
       if (!action || !['tool-use', 'stop'].includes(action)) {
         res.status(400).json({ error: 'Invalid action. Must be "tool-use" or "stop"' });
         return;
       }
 
-      // Check for pending utterances (both actions)
-      const pendingUtterances = queue.utterances.filter((u: any) => u.status === 'pending');
-      if (pendingUtterances.length > 0) {
-        res.json({
-          allowed: false,
-          requiredAction: 'dequeue_utterances',
-          reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first`
-        });
-        return;
+      // Check for pending utterances (both actions) - only if voice input is active
+      if (voiceInputActive) {
+        const pendingUtterances = queue.utterances.filter((u: any) => u.status === 'pending');
+        if (pendingUtterances.length > 0) {
+          res.json({
+            allowed: false,
+            requiredAction: 'dequeue_utterances',
+            reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first`
+          });
+          return;
+        }
       }
 
       // Check for delivered but unresponded utterances (when voice enabled)
@@ -55,12 +56,9 @@ describe('validate-action endpoint', () => {
         }
       }
 
-      // For stop action, check if we should wait
-      if (action === 'stop') {
-        const shouldWait = !lastTimeoutTimestamp ||
-          queue.utterances.some((u: any) => u.timestamp > lastTimeoutTimestamp!);
-        
-        if (shouldWait) {
+      // For stop action, check if we should wait (only if voice input is active)
+      if (action === 'stop' && voiceInputActive) {
+        if (queue.utterances.length > 0) {
           res.json({
             allowed: false,
             requiredAction: 'wait_for_utterance',
@@ -111,7 +109,8 @@ describe('validate-action endpoint', () => {
       expect(response.body).toEqual({ allowed: true });
     });
 
-    it('should block when pending utterances exist', async () => {
+    it('should block when pending utterances exist and voice input is active', async () => {
+      process.env.VOICE_INPUT_ACTIVE = 'true';
       queue.utterances = [
         { id: '1', status: 'pending', text: 'Hello', timestamp: new Date() }
       ];
@@ -172,20 +171,17 @@ describe('validate-action endpoint', () => {
   });
 
   describe('stop action', () => {
-    it('should block when no timeout has occurred', async () => {
+    it('should allow when voice input is not active', async () => {
       const response = await request(app)
         .post('/api/validate-action')
         .send({ action: 'stop' });
 
-      expect(response.body).toEqual({
-        allowed: false,
-        requiredAction: 'wait_for_utterance',
-        reason: 'Must wait for potential voice input before stopping'
-      });
+      expect(response.body).toEqual({ allowed: true });
     });
 
-    it('should allow after timeout with no new utterances', async () => {
-      lastTimeoutTimestamp = new Date();
+    it('should allow when voice input is active but no utterances exist', async () => {
+      process.env.VOICE_INPUT_ACTIVE = 'true';
+      queue.utterances = [];
 
       const response = await request(app)
         .post('/api/validate-action')
@@ -194,8 +190,9 @@ describe('validate-action endpoint', () => {
       expect(response.body).toEqual({ allowed: true });
     });
 
-    it('should block when utterances exist after timeout', async () => {
-      lastTimeoutTimestamp = new Date(Date.now() - 60000); // 1 minute ago
+
+    it('should block when voice input is active and utterances exist', async () => {
+      process.env.VOICE_INPUT_ACTIVE = 'true';
       queue.utterances = [
         { id: '1', status: 'responded', text: 'Hello', timestamp: new Date() }
       ];
@@ -211,8 +208,8 @@ describe('validate-action endpoint', () => {
       });
     });
 
-    it('should block with pending utterances even after timeout', async () => {
-      lastTimeoutTimestamp = new Date();
+    it('should block with pending utterances when voice input is active', async () => {
+      process.env.VOICE_INPUT_ACTIVE = 'true';
       queue.utterances = [
         { id: '1', status: 'pending', text: 'Hello', timestamp: new Date() }
       ];
@@ -249,6 +246,7 @@ describe('validate-action endpoint', () => {
   describe('action priority', () => {
     it('should prioritize dequeue over speak', async () => {
       process.env.VOICE_RESPONSES_ENABLED = 'true';
+      process.env.VOICE_INPUT_ACTIVE = 'true';
       queue.utterances = [
         { id: '1', status: 'pending', text: 'Hello', timestamp: new Date() },
         { id: '2', status: 'delivered', text: 'World', timestamp: new Date() }

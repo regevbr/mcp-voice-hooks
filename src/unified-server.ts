@@ -89,7 +89,6 @@ const IS_MCP_MANAGED = process.argv.includes('--mcp-managed');
 
 // Global state
 const queue = new UtteranceQueue();
-let lastTimeoutTimestamp: Date | null = null;
 let lastToolUseTimestamp: Date | null = null;
 let lastSpeakTimestamp: Date | null = null;
 
@@ -205,35 +204,17 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
 
   debugLog(`[Server] Starting wait_for_utterance (${secondsToWait}s)`);
 
-  // Check if we should return immediately
-  if (lastTimeoutTimestamp) {
-    const hasNewUtterances = queue.utterances.some(
-      u => u.timestamp > lastTimeoutTimestamp!
-    );
-    if (!hasNewUtterances) {
-      debugLog('[Server] No new utterances since last timeout, returning immediately');
-      res.json({
-        success: true,
-        utterances: [],
-        message: `No utterances found after waiting ${secondsToWait} seconds.`,
-        waitTime: 0,
-      });
-      return;
-    }
-  }
 
   let firstTime = true;
 
   // Poll for utterances
   while (Date.now() - startTime < maxWaitMs) {
     const pendingUtterances = queue.utterances.filter(
-      u => u.status === 'pending' &&
-        (!lastTimeoutTimestamp || u.timestamp > lastTimeoutTimestamp)
+      u => u.status === 'pending'
     );
 
     if (pendingUtterances.length > 0) {
-      // Found utterances - clear lastTimeoutTimestamp
-      lastTimeoutTimestamp = null;
+      // Found utterances
 
       // Sort by timestamp (oldest first)
       const sortedUtterances = pendingUtterances
@@ -269,7 +250,6 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
   }
 
   // Timeout reached - no utterances found
-  lastTimeoutTimestamp = new Date();
 
   res.json({
     success: true,
@@ -279,13 +259,6 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
   });
 });
 
-// API for the stop hook to check if it should wait
-app.get('/api/should-wait', (_req: Request, res: Response) => {
-  const shouldWait = !lastTimeoutTimestamp ||
-    queue.utterances.some(u => u.timestamp > lastTimeoutTimestamp!);
-
-  res.json({ shouldWait });
-});
 
 // API for pre-tool hook to check for pending utterances
 app.get('/api/has-pending-utterances', (_req: Request, res: Response) => {
@@ -336,10 +309,7 @@ app.post('/api/validate-action', (req: Request, res: Response) => {
 
   // For stop action, check if we should wait (only if voice input is active)
   if (action === 'stop' && voicePreferences.voiceInputActive) {
-    const shouldWait = !lastTimeoutTimestamp ||
-      queue.utterances.some(u => u.timestamp > lastTimeoutTimestamp!);
-
-    if (shouldWait) {
+    if (queue.utterances.length > 0) {
       res.json({
         allowed: false,
         requiredAction: 'wait_for_utterance',
@@ -429,15 +399,10 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
 
     // Check if should wait for utterances (only if voice input is active)
     if (voiceInputActive) {
-      const shouldWait = !lastTimeoutTimestamp ||
-        queue.utterances.some(u => u.timestamp > lastTimeoutTimestamp!);
-
-      if (shouldWait) {
-        return {
-          decision: 'block',
-          reason: 'Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
-        };
-      }
+      return {
+        decision: 'block',
+        reason: 'Assistant tried to end its response. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
+      };
     }
 
     return {
@@ -477,9 +442,6 @@ app.post('/api/hooks/pre-wait', (_req: Request, res: Response) => {
 app.delete('/api/utterances', (_req: Request, res: Response) => {
   const clearedCount = queue.utterances.length;
   queue.clear();
-
-  // Reset timeout timestamp when clearing queue to avoid stop hook issues
-  lastTimeoutTimestamp = null;
 
   res.json({
     success: true,

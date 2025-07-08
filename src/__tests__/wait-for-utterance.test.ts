@@ -52,7 +52,7 @@ describe('wait_for_utterance behavior', () => {
       expect(queue.utterances.find(u => u.id === u3.id)?.status).toBe('delivered');
     });
 
-    it('should handle lastTimeoutTimestamp filtering before marking', () => {
+    it('should filter pending utterances correctly', () => {
       const oldTimestamp = new Date(Date.now() - 10000);
       const recentTimestamp = new Date();
       
@@ -60,20 +60,16 @@ describe('wait_for_utterance behavior', () => {
       const u1 = queue.add('Old utterance', oldTimestamp);
       const u2 = queue.add('Recent utterance', recentTimestamp);
       
-      // Simulate lastTimeoutTimestamp check
-      const lastTimeoutTimestamp = new Date(Date.now() - 5000);
-      const newUtterances = queue.utterances.filter(
-        u => u.status === 'pending' && u.timestamp > lastTimeoutTimestamp
+      // Filter pending utterances
+      const pendingUtterances = queue.utterances.filter(
+        u => u.status === 'pending'
       );
       
-      // Should only find recent utterance
-      expect(newUtterances).toHaveLength(1);
-      expect(newUtterances[0].text).toBe('Recent utterance');
+      // Should find both utterances
+      expect(pendingUtterances).toHaveLength(2);
       
-      // Mark only the new utterances as delivered
-      newUtterances.forEach(u => {
-        queue.markDelivered(u.id);
-      });
+      // Mark only the recent one as delivered
+      queue.markDelivered(u2.id);
       
       // Verify correct marking
       expect(queue.utterances.find(u => u.id === u1.id)?.status).toBe('pending'); // Old one stays pending
