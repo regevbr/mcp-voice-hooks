@@ -100,27 +100,24 @@ The hooks are automatically installed/updated when the MCP server starts. Howeve
 npx mcp-voice-hooks install-hooks
 ```
 
-This will:
-
-- Clean up any existing `~/.mcp-voice-hooks` directory contents
-- Install/update hook scripts to `~/.mcp-voice-hooks/hooks/`
-- Configure your project's `.claude/settings.json`
+This will configure your project's `.claude/settings.json` with the necessary inline hook commands.
 
 ## Uninstallation
 
 To completely remove MCP Voice Hooks:
 
 ```bash
-# Remove hooks and settings
-npx mcp-voice-hooks uninstall
-
-# Also remove from Claude MCP servers
+# Remove from Claude MCP servers
 claude mcp remove voice-hooks
+```
+
+```bash
+# Also remove hooks and settings
+npx mcp-voice-hooks uninstall
 ```
 
 This will:
 
-- Remove the `~/.mcp-voice-hooks` directory
 - Clean up voice hooks from your project's `.claude/settings.json`
 - Preserve any custom hooks you've added
 

@@ -2,10 +2,9 @@
 
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
 import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
-import { replaceVoiceHooks, areHooksEqual } from '../dist/hook-merger.js';
+import { replaceVoiceHooks, areHooksEqual, removeVoiceHooks } from '../dist/hook-merger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,10 +18,7 @@ async function main() {
     if (command === 'install-hooks') {
       console.log('🔧 Installing MCP Voice Hooks...');
       
-      // Step 1: Ensure user directory exists and install/update hooks
-      await ensureUserDirectorySetup();
-      
-      // Step 2: Configure Claude Code settings automatically
+      // Configure Claude Code settings automatically
       await configureClaudeCodeSettings();
       
       console.log('\n✅ Installation complete!');
@@ -46,33 +42,6 @@ async function main() {
   }
 }
 
-// Ensure ~/.mcp-voice-hooks/ directory exists (no longer copying hook scripts)
-async function ensureUserDirectorySetup() {
-  const userDir = path.join(os.homedir(), '.mcp-voice-hooks');
-  
-  console.log('📁 Setting up user directory:', userDir);
-  
-  // Clean up existing directory contents
-  if (fs.existsSync(userDir)) {
-    console.log('🧹 Cleaning up existing directory...');
-    fs.rmSync(userDir, { recursive: true, force: true });
-  }
-  
-  // Create directory
-  if (!fs.existsSync(userDir)) {
-    fs.mkdirSync(userDir, { recursive: true });
-    console.log('✅ Created user directory');
-  }
-  
-  // Copy README.md from project root to user directory
-  const projectReadmePath = path.join(__dirname, '..', 'README.md');
-  const userReadmePath = path.join(userDir, 'README.md');
-  
-  if (fs.existsSync(projectReadmePath)) {
-    fs.copyFileSync(projectReadmePath, userReadmePath);
-    console.log('✅ Copied README.md');
-  }
-}
 
 // Automatically configure Claude Code settings
 async function configureClaudeCodeSettings() {
@@ -209,19 +178,9 @@ async function runMCPServer() {
 
 // Uninstall MCP Voice Hooks
 async function uninstall() {
-  const userDir = path.join(os.homedir(), '.mcp-voice-hooks');
   const claudeSettingsPath = path.join(process.cwd(), '.claude', 'settings.json');
   
-  // Step 1: Remove ~/.mcp-voice-hooks directory
-  if (fs.existsSync(userDir)) {
-    console.log('📁 Removing user directory:', userDir);
-    fs.rmSync(userDir, { recursive: true, force: true });
-    console.log('✅ Removed ~/.mcp-voice-hooks');
-  } else {
-    console.log('ℹ️  ~/.mcp-voice-hooks directory not found');
-  }
-  
-  // Step 2: Remove voice hooks from Claude settings
+  // Remove voice hooks from Claude settings
   if (fs.existsSync(claudeSettingsPath)) {
     try {
       console.log('⚙️  Removing voice hooks from Claude settings...');
@@ -252,6 +211,7 @@ async function uninstall() {
   } else {
     console.log('ℹ️  No Claude settings file found in current project');
   }
+  
   
   console.log('\n✅ Uninstallation complete!');
   console.log('👋 MCP Voice Hooks has been removed.');
