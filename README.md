@@ -21,8 +21,8 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
 
 ## Browser Compatibility
 
-- ✅ **Chrome**: Full support for speech recognition and text-to-speech
-- ✅ **Safari**: Full support for speech recognition and text-to-speech
+- ✅ **Chrome**: Full support for speech recognition, browser text-to-speech, and system text-to-speech
+- ⚠️ **Safari**: Full support for speech recognition, but only system text-to-speech is supported
 - ❌ **Edge**: Speech recognition not working on Apple Silicon (language-not-supported error)
 
 ## Installation in Your Own Project
@@ -66,23 +66,18 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
 
 There are two options for voice responses:
 
-1. Browser Text-to-Speech (Cloud)
-2. Browser Text-to-Speech (Local)
-3. Mac System Voice
+1. Browser Text-to-Speech
+2. System Text-to-Speech
 
 ### Selecting and downloading high quality System Voices (Mac only)
 
-When "Mac System Voice" is selected, the system uses macOS's built-in `say` command.
+Mac has built-in text to speech, but high quality voices are not available by default.
 
-Configure the system voice in `System Settings > Accessibility > Spoken Content > System Voice`
-
-I recommend using a Siri voice, as they are much higher quality.
+You can download high quality voices from the system voice menu: `System Settings > Accessibility > Spoken Content > System Voice`
 
 Click the info icon next to the system voice dropdown. Search for "Siri" to find the highest quality voices. You'll have to trigger a download of the voice.
 
-It may take a while to download.
-
-Once it's downloaded, you can select it in the system voice dropdown.
+Once it's downloaded, you can select it in the system voice menu.
 
 Test it with the bash command:
 
@@ -90,7 +85,13 @@ Test it with the bash command:
 say "Hi, this is your mac system voice"
 ```
 
-You can also download other high quality voices in the same way. Other voices will show up in the browser voice dropdown, but for Siri voices you need to set the system voice and select Mac System Voice in the browser voice dropdown.
+For Siri voices you need to set your system voice and select "Mac System Voice" in the voice-hooks browser interface.
+
+Other downloaded voices will show up in the voice dropdown in the voice-hooks browser interface.
+
+### Selecting and downloading high quality Browser Voices
+
+
 
 ## Manual Hook Installation
 
@@ -100,7 +101,7 @@ The hooks are automatically installed/updated when the MCP server starts. Howeve
 npx mcp-voice-hooks install-hooks
 ```
 
-This will configure your project's `.claude/settings.json` with the necessary inline hook commands.
+This will configure your project's `.claude/settings.json` with the necessary hook commands.
 
 ## Uninstallation
 
@@ -123,7 +124,7 @@ This will:
 
 ## Known Limitations
 
-- **Intermittent Stop Hook Execution**: Claude Code's Stop hooks are not triggered consistently. Sometimes the assistant can end responses without the Stop hook being executed. I believe this is an issue with Claude Code's hook system, not with mcp-voice-hooks. When working correctly, the Stop hook should prevent the assistant from stopping without first checking for voice input.
+- **Intermittent Stop Hook Execution**: Claude Code's Stop hooks are not triggered if the agent stops immediately after a tool call. This results in the assistant occasionally stopping without checking for voice input. This will be fixed in 1.0.45. [github issue](https://github.com/anthropics/claude-code/issues/3113#issuecomment-3047324928)
 
 ## Development Mode
 
