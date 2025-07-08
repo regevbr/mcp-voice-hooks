@@ -35,13 +35,23 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 ### Next tasks
 
+- [ ] temporarily remove requirement for Claude to speak before stopping
+- [ ] eliminate timeout check in stop hook. Only check if voice input is active.
+- [ ] eliminate time-to-wait argument from wait_for_utterance tool. Default to 60 seconds.
+- [ ] add configurable timeout for wait_for_utterance tool on frontend
+- [ ] investigate if post-tool hook can send info to assistant and dequeue in there
+- [ ] add note to dequeue_utterances response that spoken response is required (if voice responses are enabled)
+- [ ] eliminate dequeue_utterances tool. Just dequeue in the hooks. Return the utterances and the note about spoken response.
+- [ ] remove the bash scripts for the hooks. They could be defined inline in the claude settings.
+  - [ ] consider using a custom subdomain so we can easily identify our hooks in the claude settings
+- [ ] experiment with waiting for utterance automatically in stop hook. How is the user experience? Can the user see that the assistant is waiting for them to speak? We could show something in the frontend.
 - [ ] MVP
   - [x] add a warning when adjusting rate for google voices that the google voices don't work well with speech rate
   - [x] link to readme for info on system voice settings
   - [x] hide, label, or separate low quality voices
   - [x] choose a good default voice
   - [x] if i leave the browser open and restart the server, then it thinks voice input is off but it's actually on in the frontend. The same thing can happen with voice responses on/off
-  - [ ] If all utterances are pending, add help text to the browser that they need to send a typed message to Claude to start the conversation
+  - [x] If all utterances are pending, add help text to the browser that they need to send a typed message to Claude to start the conversation
 - [x] Known issue: Microsoft Edge speech recognition not working - shows "language-not-supported" error
   - Safari and Chrome work fine for speech recognition
 - [x] Reject speak requests when voice responses is disabled
@@ -55,7 +65,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [x] Show dropdown only when voice responses is enabled
   - [x] Group options into three sections (e.g., System TTS, Browser TTS using local voices, Browser TTS using cloud voices)
   - [x] remove volume slider
-  - [ ] group local voices into low and high quality
+  - [x] group local voices into low and high quality
 - [x] Refactor voice system architecture for cleaner separation
   - [x] Create /api/speak-system endpoint that always uses Mac say command
   - [x] Update browser to handle voice selection entirely
@@ -115,15 +125,6 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
     - [x] Validates that speak was called after last tool use
   - [x] Update stop hook logic to check if spoken since last tool use
   - [x] Add comprehensive tests for conversation flow tracking
-- [ ] Optimization:
-  - [ ] auto dequeue when that is the only valid action
-  - [ ] auto wait for utterance when that is the only valid action
-  - [ ] automatically dequeue post tool use as well
-  - [ ] remove the dequeue mcp tool just dequeue in the hooks
-- [ ] investigate why the stop hook is not being executed consistently
-  - [ ] experiment with using the notification hook as well as the stop hook. That might be a different kind of stopping that is bypassing the stop hook.
-  - [ ] alternatively: explore speak_and_then_wait_for_utterance tool for use when stopping only. (hard to know when we're stopping)
-  - [ ] finding: the stop hook is not always running
 
 ### Voice Response Tracking & Conversation Flow Enforcement
 
