@@ -46,63 +46,22 @@ async function main() {
   }
 }
 
-// Ensure ~/.mcp-voice-hooks/hooks/ directory exists and contains latest hook files
+// Ensure ~/.mcp-voice-hooks/ directory exists (no longer copying hook scripts)
 async function ensureUserDirectorySetup() {
   const userDir = path.join(os.homedir(), '.mcp-voice-hooks');
-  const hooksDir = path.join(userDir, 'hooks');
   
   console.log('📁 Setting up user directory:', userDir);
   
-  // Clean up existing directory contents (except README.md if it exists)
+  // Clean up existing directory contents
   if (fs.existsSync(userDir)) {
     console.log('🧹 Cleaning up existing directory...');
-    
-    // Remove hooks directory if it exists
-    if (fs.existsSync(hooksDir)) {
-      fs.rmSync(hooksDir, { recursive: true, force: true });
-      console.log('✅ Cleaned up old hooks');
-    }
-    
-    // Remove any other files
-    const files = fs.readdirSync(userDir);
-    for (const file of files) {
-      const filePath = path.join(userDir, file);
-      const stat = fs.statSync(filePath);
-      if (stat.isDirectory()) {
-        fs.rmSync(filePath, { recursive: true, force: true });
-      } else {
-        fs.unlinkSync(filePath);
-      }
-    }
+    fs.rmSync(userDir, { recursive: true, force: true });
   }
   
-  // Create directories
+  // Create directory
   if (!fs.existsSync(userDir)) {
     fs.mkdirSync(userDir, { recursive: true });
     console.log('✅ Created user directory');
-  }
-  
-  if (!fs.existsSync(hooksDir)) {
-    fs.mkdirSync(hooksDir, { recursive: true });
-    console.log('✅ Created hooks directory');
-  }
-  
-  // Copy/update hook files from the package's .claude/hooks/ to user directory
-  const packageHooksDir = path.join(__dirname, '..', '.claude', 'hooks');
-  
-  if (fs.existsSync(packageHooksDir)) {
-    const hookFiles = fs.readdirSync(packageHooksDir).filter(file => file.endsWith('.sh'));
-    
-    for (const hookFile of hookFiles) {
-      const sourcePath = path.join(packageHooksDir, hookFile);
-      const destPath = path.join(hooksDir, hookFile);
-      
-      // Copy hook file
-      fs.copyFileSync(sourcePath, destPath);
-      console.log(`✅ Updated hook: ${hookFile}`);
-    }
-  } else {
-    console.log('⚠️  Package hooks directory not found, skipping hook installation');
   }
   
   // Copy README.md from project root to user directory
@@ -141,7 +100,7 @@ async function configureClaudeCodeSettings() {
     }
   }
   
-  // Add hook configuration
+  // Add hook configuration with inline commands
   const hookConfig = {
     "Stop": [
       {
@@ -149,7 +108,7 @@ async function configureClaudeCodeSettings() {
         "hooks": [
           {
             "type": "command",
-            "command": "sh ~/.mcp-voice-hooks/hooks/stop-hook.sh"
+            "command": "curl -s -X POST \"http://localhost:${MCP_VOICE_HOOKS_PORT:-5111}/api/hooks/stop\" || echo '{\"decision\": \"approve\", \"reason\": \"voice-hooks unavailable\"}'"
           }
         ]
       }
@@ -160,7 +119,7 @@ async function configureClaudeCodeSettings() {
         "hooks": [
           {
             "type": "command",
-            "command": "sh ~/.mcp-voice-hooks/hooks/pre-tool-hook.sh"
+            "command": "curl -s -X POST \"http://localhost:${MCP_VOICE_HOOKS_PORT:-5111}/api/hooks/pre-tool\" || echo '{\"decision\": \"approve\", \"reason\": \"voice-hooks unavailable\"}'"
           }
         ]
       },
@@ -169,7 +128,7 @@ async function configureClaudeCodeSettings() {
         "hooks": [
           {
             "type": "command",
-            "command": "sh ~/.mcp-voice-hooks/hooks/pre-speak-hook.sh"
+            "command": "curl -s -X POST \"http://localhost:${MCP_VOICE_HOOKS_PORT:-5111}/api/hooks/pre-speak\" || echo '{\"decision\": \"approve\", \"reason\": \"voice-hooks unavailable\"}'"
           }
         ]
       },
@@ -178,7 +137,7 @@ async function configureClaudeCodeSettings() {
         "hooks": [
           {
             "type": "command",
-            "command": "sh ~/.mcp-voice-hooks/hooks/pre-wait-hook.sh"
+            "command": "curl -s -X POST \"http://localhost:${MCP_VOICE_HOOKS_PORT:-5111}/api/hooks/pre-wait\" || echo '{\"decision\": \"approve\", \"reason\": \"voice-hooks unavailable\"}'"
           }
         ]
       }
@@ -204,19 +163,10 @@ async function configureClaudeCodeSettings() {
 
 // Silent hook installation check - runs on every startup
 async function ensureHooksInstalled() {
-  const userDir = path.join(os.homedir(), '.mcp-voice-hooks');
-  const hooksDir = path.join(userDir, 'hooks');
-  
   try {
     console.log('🔄 Updating hooks to latest version...');
     
-    // Always remove and recreate the hooks directory to ensure clean state
-    if (fs.existsSync(hooksDir)) {
-      fs.rmSync(hooksDir, { recursive: true, force: true });
-    }
-    
-    // Recreate with latest hooks
-    await ensureUserDirectorySetup();
+    // Update hooks configuration in settings.json
     await configureClaudeCodeSettings();
     console.log('✅ Hooks and settings updated');
   } catch (error) {

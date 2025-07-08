@@ -8,7 +8,7 @@ describe('Hook Management', () => {
         hooks: [
           {
             type: 'command',
-            command: 'sh ~/.mcp-voice-hooks/hooks/stop-hook.sh',
+            command: 'curl -s -X POST "http://localhost:${MCP_VOICE_HOOKS_PORT:-5111}/api/hooks/stop" || echo \'{"decision": "approve", "reason": "voice-hooks unavailable"}\'',
           },
         ],
       },
@@ -19,7 +19,7 @@ describe('Hook Management', () => {
         hooks: [
           {
             type: 'command',
-            command: 'sh ~/.mcp-voice-hooks/hooks/pre-tool-hook.sh',
+            command: 'curl -s -X POST "http://localhost:${MCP_VOICE_HOOKS_PORT:-5111}/api/hooks/pre-tool" || echo \'{"decision": "approve", "reason": "voice-hooks unavailable"}\'',
           },
         ],
       },
@@ -27,7 +27,7 @@ describe('Hook Management', () => {
   };
 
   describe('removeVoiceHooks', () => {
-    it('should remove hooks that reference .mcp-voice-hooks', () => {
+    it('should remove hooks that use MCP_VOICE_HOOKS_PORT', () => {
       const existing: HookSettings = {
         Stop: [
           {
@@ -35,7 +35,7 @@ describe('Hook Management', () => {
             hooks: [
               {
                 type: 'command',
-                command: 'sh ~/.mcp-voice-hooks/hooks/stop-hook.sh',
+                command: 'curl -s -X POST "http://localhost:${MCP_VOICE_HOOKS_PORT:-5111}/api/hooks/stop" || echo \'{"decision": "approve", "reason": "voice-hooks unavailable"}\'',
               },
             ],
           },
@@ -65,7 +65,7 @@ describe('Hook Management', () => {
             hooks: [
               {
                 type: 'command',
-                command: 'sh ~/.mcp-voice-hooks/hooks/stop-hook.sh',
+                command: 'curl -s -X POST "http://localhost:${MCP_VOICE_HOOKS_PORT:-5111}/api/hooks/stop" || echo \'{"decision": "approve", "reason": "voice-hooks unavailable"}\'',
               },
             ],
           },
@@ -109,7 +109,7 @@ describe('Hook Management', () => {
             hooks: [
               {
                 type: 'command',
-                command: 'sh ~/.mcp-voice-hooks/hooks/old-stop-hook.sh',
+                command: 'curl -s -X POST "http://localhost:${MCP_VOICE_HOOKS_PORT:-5111}/api/hooks/old-stop" || echo \'{"decision": "approve"}\'',
               },
             ],
           },
@@ -130,11 +130,11 @@ describe('Hook Management', () => {
       // Should have 2 Stop hooks: custom + new voice hook
       expect(result.Stop).toHaveLength(2);
       expect(result.Stop[0].hooks[0].command).toBe('custom-stop.sh');
-      expect(result.Stop[1].hooks[0].command).toBe('sh ~/.mcp-voice-hooks/hooks/stop-hook.sh');
+      expect(result.Stop[1].hooks[0].command).toBe('curl -s -X POST "http://localhost:${MCP_VOICE_HOOKS_PORT:-5111}/api/hooks/stop" || echo \'{"decision": "approve", "reason": "voice-hooks unavailable"}\'');
       
       // Should have the new PreToolUse hook
       expect(result.PreToolUse).toHaveLength(1);
-      expect(result.PreToolUse[0].hooks[0].command).toBe('sh ~/.mcp-voice-hooks/hooks/pre-tool-hook.sh');
+      expect(result.PreToolUse[0].hooks[0].command).toBe('curl -s -X POST "http://localhost:${MCP_VOICE_HOOKS_PORT:-5111}/api/hooks/pre-tool" || echo \'{"decision": "approve", "reason": "voice-hooks unavailable"}\'');
     });
 
     it('should add voice hooks when no existing hooks', () => {

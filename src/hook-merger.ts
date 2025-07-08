@@ -13,17 +13,18 @@ export interface HookSettings {
 }
 
 /**
- * Removes any existing voice hooks that reference our directory
+ * Removes any existing voice hooks that use MCP_VOICE_HOOKS_PORT
  * @param hooks - The current hooks configuration
  * @returns The hooks with voice hooks removed
  */
 export function removeVoiceHooks(hooks: HookSettings = {}): HookSettings {
   const cleaned: HookSettings = {};
-  const voiceHookPattern = /\.mcp-voice-hooks/;
+  // Pattern to match voice hooks by the unique environment variable
+  const voiceHookPattern = /MCP_VOICE_HOOKS_PORT/;
   
   for (const [hookType, hookArray] of Object.entries(hooks)) {
     cleaned[hookType] = hookArray.filter(hookConfig => {
-      // Keep this hook config only if none of its commands reference our directory
+      // Keep this hook config only if none of its commands match our pattern
       return !hookConfig.hooks.some(hook => voiceHookPattern.test(hook.command));
     });
     
