@@ -368,15 +368,12 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
       const dequeueResult = dequeueUtterancesCore();
       
       if (dequeueResult.success && dequeueResult.utterances && dequeueResult.utterances.length > 0) {
-        // Format utterances for display
-        const utteranceTexts = dequeueResult.utterances
-          .reverse() // Reverse to show oldest first
-          .map(u => `"${u.text}"`)
-          .join('\n');
+        // Reverse to show oldest first
+        const reversedUtterances = dequeueResult.utterances.reverse();
         
         return {
           decision: 'block',
-          reason: `Dequeued ${dequeueResult.utterances.length} utterance(s):\n\n${utteranceTexts}${getVoiceResponseReminder()}`
+          reason: formatVoiceUtterances(reversedUtterances)
         };
       }
     }
@@ -450,13 +447,9 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
 
           // If utterances were found, block and return them
           if (data.utterances && data.utterances.length > 0) {
-            const utteranceTexts = data.utterances
-              .map((u: any) => `"${u.text}"`)
-              .join(', ');
-            
             return {
               decision: 'block' as const,
-              reason: `Found ${data.utterances.length} new utterance(s) during wait: ${utteranceTexts}. Assistant should process these utterances.`
+              reason: formatVoiceUtterances(data.utterances)
             };
           }
 
@@ -557,6 +550,15 @@ function notifyWaitStatus(isWaiting: boolean) {
   ttsClients.forEach(client => {
     client.write(`data: ${message}\n\n`);
   });
+}
+
+// Helper function to format voice utterances for display
+function formatVoiceUtterances(utterances: any[]): string {
+  const utteranceTexts = utterances
+    .map(u => `"${u.text}"`)
+    .join('\n');
+  
+  return `Assistant received voice input from the user (${utterances.length} utterance${utterances.length !== 1 ? 's' : ''}):\n\n${utteranceTexts}${getVoiceResponseReminder()}`;
 }
 
 // API for voice preferences
