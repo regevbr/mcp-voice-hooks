@@ -6,9 +6,6 @@ class VoiceHooksClient {
         this.clearAllBtn = document.getElementById('clearAllBtn');
         this.utterancesList = document.getElementById('utterancesList');
         this.infoMessage = document.getElementById('infoMessage');
-        this.totalCount = document.getElementById('totalCount');
-        this.pendingCount = document.getElementById('pendingCount');
-        this.deliveredCount = document.getElementById('deliveredCount');
 
         // Voice controls
         this.listenBtn = document.getElementById('listenBtn');
@@ -190,9 +187,6 @@ class VoiceHooksClient {
     }
 
     updateStatus(status) {
-        this.totalCount.textContent = status.total;
-        this.pendingCount.textContent = status.pending;
-        this.deliveredCount.textContent = status.delivered;
     }
 
     updateUtterancesList(utterances) {

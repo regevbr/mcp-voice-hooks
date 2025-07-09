@@ -73,31 +73,6 @@
             cursor: not-allowed;
         }
 
-        .status {
-            display: flex;
-            gap: 24px;
-            margin-bottom: 24px;
-        }
-
-        .status-item {
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            text-align: center;
-            flex: 1;
-        }
-
-        .status-number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #007AFF;
-        }
-
-        .status-label {
-            font-size: 14px;
-            color: #666;
-        }
-
         .utterances-section h3 {
             color: #333;
             margin-bottom: 16px;
@@ -424,8 +399,26 @@
 <body>
     <div class="container">
         <h1>Voice Mode for Claude Code</h1>
-        <p class="subtitle">Speak or type to enqueue messages for Claude</p>
 
+
+
+        <div class="input-section">
+            <div class="voice-controls">
+                <button id="listenBtn">
+                    <svg class="mic-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path
+                            d="M12 1C10.34 1 9 2.34 9 4V12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12V4C15 2.34 13.66 1 12 1ZM19 12C19 15.53 16.39 18.44 13 18.93V22H11V18.93C7.61 18.44 5 15.53 5 12H7C7 14.76 9.24 17 12 17C14.76 17 17 14.76 17 12H19Z" />
+                    </svg>
+                    <span id="listenBtnText">Start Listening</span>
+                </button>
+                <div class="listening-indicator" id="listeningIndicator">
+                    <div class="listening-dot"></div>
+                    <span>Listening...</span>
+                </div>
+            </div>
+
+            <div class="interim-text" id="interimText">Start speaking and your words will appear here...</div>
+        </div>
         <div class="tts-settings">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h4>Allow Claude to speak back to you</h4>
@@ -461,39 +454,6 @@
                     <input type="number" id="speechRateInput" min="0.5" max="5" step="0.1" value="1">
                 </div>
                 <button class="tts-test-btn" id="testTTSBtn">Test Voice</button>
-            </div>
-        </div>
-
-        <div class="input-section">
-            <div class="voice-controls">
-                <button id="listenBtn">
-                    <svg class="mic-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path
-                            d="M12 1C10.34 1 9 2.34 9 4V12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12V4C15 2.34 13.66 1 12 1ZM19 12C19 15.53 16.39 18.44 13 18.93V22H11V18.93C7.61 18.44 5 15.53 5 12H7C7 14.76 9.24 17 12 17C14.76 17 17 14.76 17 12H19Z" />
-                    </svg>
-                    <span id="listenBtnText">Start Listening</span>
-                </button>
-                <div class="listening-indicator" id="listeningIndicator">
-                    <div class="listening-dot"></div>
-                    <span>Listening...</span>
-                </div>
-            </div>
-
-            <div class="interim-text" id="interimText">Start speaking and your words will appear here...</div>
-        </div>
-
-        <div class="status">
-            <div class="status-item">
-                <div class="status-number" id="totalCount">0</div>
-                <div class="status-label">Total</div>
-            </div>
-            <div class="status-item">
-                <div class="status-number" id="pendingCount">0</div>
-                <div class="status-label">Pending</div>
-            </div>
-            <div class="status-item">
-                <div class="status-number" id="deliveredCount">0</div>
-                <div class="status-label">Delivered</div>
             </div>
         </div>
 
