@@ -361,20 +361,28 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
   const voiceResponsesEnabled = voicePreferences.voiceResponsesEnabled;
   const voiceInputActive = voicePreferences.voiceInputActive;
 
-  // 1. Auto-dequeue pending utterances (only if voice input is active and auto-deliver is enabled)
-  if (voiceInputActive && AUTO_DELIVER_VOICE_INPUT) {
+  // 1. Check for pending utterances (different behavior based on auto-deliver setting)
+  if (voiceInputActive) {
     const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
     if (pendingUtterances.length > 0) {
-      // Auto-dequeue the utterances
-      const dequeueResult = dequeueUtterancesCore();
-      
-      if (dequeueResult.success && dequeueResult.utterances && dequeueResult.utterances.length > 0) {
-        // Reverse to show oldest first
-        const reversedUtterances = dequeueResult.utterances.reverse();
+      if (AUTO_DELIVER_VOICE_INPUT) {
+        // Auto-dequeue the utterances
+        const dequeueResult = dequeueUtterancesCore();
         
+        if (dequeueResult.success && dequeueResult.utterances && dequeueResult.utterances.length > 0) {
+          // Reverse to show oldest first
+          const reversedUtterances = dequeueResult.utterances.reverse();
+          
+          return {
+            decision: 'block',
+            reason: formatVoiceUtterances(reversedUtterances)
+          };
+        }
+      } else {
+        // Manual mode: block and tell assistant to use dequeue_utterances tool
         return {
           decision: 'block',
-          reason: formatVoiceUtterances(reversedUtterances)
+          reason: `${pendingUtterances.length} pending utterance(s) available. Use the dequeue_utterances tool to retrieve them.`
         };
       }
     }
@@ -429,45 +437,53 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
       };
     }
 
-    // Check if should wait for utterances (only if voice input is active and auto-deliver is enabled)
-    if (voiceInputActive && AUTO_DELIVER_VOICE_INPUT) {
-      // Auto-wait for utterances
-      return (async () => {
-        try {
-          debugLog(`[Stop Hook] Auto-calling wait_for_utterance...`);
-          const data = await waitForUtteranceCore();
-          debugLog(`[Stop Hook] wait_for_utterance response: ${JSON.stringify(data)}`);
+    // Check if should wait for utterances (only if voice input is active)
+    if (voiceInputActive) {
+      if (AUTO_DELIVER_VOICE_INPUT) {
+        // Auto-wait for utterances
+        return (async () => {
+          try {
+            debugLog(`[Stop Hook] Auto-calling wait_for_utterance...`);
+            const data = await waitForUtteranceCore();
+            debugLog(`[Stop Hook] wait_for_utterance response: ${JSON.stringify(data)}`);
 
-          // If error (voice input not active), treat as no utterances found
-          if (!data.success && data.error) {
+            // If error (voice input not active), treat as no utterances found
+            if (!data.success && data.error) {
+              return {
+                decision: 'approve' as const,
+                reason: data.error
+              };
+            }
+
+            // If utterances were found, block and return them
+            if (data.utterances && data.utterances.length > 0) {
+              return {
+                decision: 'block' as const,
+                reason: formatVoiceUtterances(data.utterances)
+              };
+            }
+
+            // If no utterances found (including when voice was deactivated), approve stop
             return {
               decision: 'approve' as const,
-              reason: data.error
+              reason: data.message || 'No utterances found during wait'
             };
-          }
-
-          // If utterances were found, block and return them
-          if (data.utterances && data.utterances.length > 0) {
+          } catch (error) {
+            debugLog(`[Stop Hook] Error calling wait_for_utterance: ${error}`);
+            // In auto-deliver mode, fail open on errors
             return {
-              decision: 'block' as const,
-              reason: formatVoiceUtterances(data.utterances)
+              decision: 'approve' as const,
+              reason: 'Auto-wait encountered an error, proceeding'
             };
           }
-
-          // If no utterances found (including when voice was deactivated), approve stop
-          return {
-            decision: 'approve' as const,
-            reason: data.message || 'No utterances found during wait'
-          };
-        } catch (error) {
-          debugLog(`[Stop Hook] Error calling wait_for_utterance: ${error}`);
-          // On error, fall back to blocking with original message
-          return {
-            decision: 'block' as const,
-            reason: 'Assistant tried to end its response, but voice input is active. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
-          };
-        }
-      })();
+        })();
+      } else {
+        // Manual mode: block and tell assistant to use wait_for_utterance tool
+        return {
+          decision: 'block',
+          reason: 'Assistant tried to end its response, but voice input is active. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
+        };
+      }
     }
 
     return {
