@@ -35,6 +35,8 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 ### Next tasks
 
+- [ ] Combine the text and audio input boxes into a single box.
+- [ ] Change the "No utterances yet. Type something above to get started!" to "No speech input yet. Click Start Listening to get started!". Then change it to "No speech input yet. Say something to get started!" when the user clicks start listening.
 - [x] temporarily remove requirement for Claude to speak before stopping
 - [ ] re-enable requirement for Claude to speak before stopping when 1.0.45 version of claude code is released with the stop hook fix
 - [x] eliminate timeout check in stop hook. Only check if voice input is active.
@@ -45,7 +47,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [ ] add note to dequeue_utterances response that spoken response is required (if voice responses are enabled)
 - [ ] eliminate dequeue_utterances tool. Just dequeue in the hooks. Return the utterances and the note about spoken response.
 - [x] remove the bash scripts for the hooks. They could be defined inline in the claude settings.
-  - [x] consider using a custom subdomain so we can easily identify our hooks in the claude settings
+  - [x] consider using a custom subdomain
 - [ ] experiment with waiting for utterance automatically in stop hook. How is the user experience? Can the user see that the assistant is waiting for them to speak? We could show something in the frontend.
 - [ ] MVP
   - [x] add a warning when adjusting rate for google voices that the google voices don't work well with speech rate
