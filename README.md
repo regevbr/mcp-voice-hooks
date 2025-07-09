@@ -1,4 +1,4 @@
-# mcp-voice-hooks
+# Claude Code Voice Mode
 
 Real-time voice interaction for Claude Code. Speak naturally while Claude works - interrupt, redirect, or provide continuous feedback without stopping.
 

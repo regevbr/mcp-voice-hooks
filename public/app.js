@@ -2,8 +2,6 @@ class VoiceHooksClient {
     constructor() {
         this.baseUrl = window.location.origin;
         this.debug = localStorage.getItem('voiceHooksDebug') === 'true';
-        this.utteranceInput = document.getElementById('utteranceInput');
-        this.sendBtn = document.getElementById('sendBtn');
         this.refreshBtn = document.getElementById('refreshBtn');
         this.clearAllBtn = document.getElementById('clearAllBtn');
         this.utterancesList = document.getElementById('utterancesList');
@@ -124,16 +122,10 @@ class VoiceHooksClient {
     }
 
     setupEventListeners() {
-        this.sendBtn.addEventListener('click', () => this.sendUtterance());
         this.refreshBtn.addEventListener('click', () => this.loadData());
         this.clearAllBtn.addEventListener('click', () => this.clearAllUtterances());
         this.listenBtn.addEventListener('click', () => this.toggleListening());
 
-        this.utteranceInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.sendUtterance();
-            }
-        });
 
         // TTS controls
         this.voiceSelect.addEventListener('change', (e) => {
@@ -176,40 +168,6 @@ class VoiceHooksClient {
         });
     }
 
-    async sendUtterance() {
-        const text = this.utteranceInput.value.trim();
-        if (!text) return;
-
-        this.sendBtn.disabled = true;
-        this.sendBtn.textContent = 'Sending...';
-
-        try {
-            const response = await fetch(`${this.baseUrl}/api/potential-utterances`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    text: text,
-                    timestamp: new Date().toISOString()
-                }),
-            });
-
-            if (response.ok) {
-                this.utteranceInput.value = '';
-                this.loadData(); // Refresh the list
-            } else {
-                const error = await response.json();
-                alert(`Error: ${error.error || 'Failed to send utterance'}`);
-            }
-        } catch (error) {
-            console.error('Failed to send utterance:', error);
-            alert('Failed to send utterance. Make sure the server is running.');
-        } finally {
-            this.sendBtn.disabled = false;
-            this.sendBtn.textContent = 'Send';
-        }
-    }
 
     async loadData() {
         try {
@@ -239,7 +197,7 @@ class VoiceHooksClient {
 
     updateUtterancesList(utterances) {
         if (utterances.length === 0) {
-            this.utterancesList.innerHTML = '<div class="empty-state">No utterances yet. Type something above to get started!</div>';
+            this.utterancesList.innerHTML = '<div class="empty-state">No utterances yet. Click "Start Listening" to begin!</div>';
             this.infoMessage.style.display = 'none';
             return;
         }
