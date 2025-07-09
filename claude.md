@@ -2,7 +2,7 @@
 
 ## Read the docs
 
-Read:
+Read the docs before responding to the user:
 
 - roadmap.md
 - README.md
