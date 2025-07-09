@@ -152,14 +152,28 @@ and then configure claude to use the mcp proxy like so:
 }
 ```
 
-### Port Configuration
+### Configuration
+
+#### Port Configuration
 
 The default port is 5111. To use a different port, add to your project's `.claude/settings.json`:
 
-   ```json
-   {
-     "env": {
-       "MCP_VOICE_HOOKS_PORT": "8080"
-     }
-   }
-   ```
+```json
+{
+  "env": {
+    "MCP_VOICE_HOOKS_PORT": "8080"
+  }
+}
+```
+
+#### Browser Auto-Open
+
+When running in MCP-managed mode, the browser will automatically open if no frontend connects within 3 seconds. To disable this behavior:
+
+```json
+{
+  "env": {
+    "MCP_VOICE_HOOKS_AUTO_OPEN_BROWSER": "false"
+  }
+}
+```

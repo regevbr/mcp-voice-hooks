@@ -599,7 +599,8 @@ app.listen(HTTP_PORT, async () => {
   }
   
   // Auto-open browser if no frontend connects within 3 seconds
-  if (IS_MCP_MANAGED) {
+  const autoOpenBrowser = process.env.MCP_VOICE_HOOKS_AUTO_OPEN_BROWSER !== 'false'; // Default to true
+  if (IS_MCP_MANAGED && autoOpenBrowser) {
     setTimeout(async () => {
       if (ttsClients.size === 0) {
         debugLog('[Browser] No frontend connected, opening browser...');
