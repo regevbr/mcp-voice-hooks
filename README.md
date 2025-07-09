@@ -25,42 +25,22 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
 - ⚠️ **Safari**: Full support for speech recognition, but only system text-to-speech is supported
 - ❌ **Edge**: Speech recognition not working on Apple Silicon (language-not-supported error)
 
-## Installation in Your Own Project
+## Quick Start
 
-1. **Add the MCP server**:
+```bash
+# Install hooks in the current project directory (one time)
+npx mcp-voice-hooks install-hooks
 
-   Run the following command to automatically add the MCP server to your current project in `~/.claude.json`:
+# Add the MCP server to the current project (one time)
+claude mcp add voice-hooks npx mcp-voice-hooks
 
-    ```bash
-    claude mcp add voice-hooks npx mcp-voice-hooks
-    ```
+# Start Claude Code
+claude
+```
 
-   or manually add the following to your project's `.mcp.json`:
+Then open the voice interface at <http://localhost:5111> and start speaking!
 
-   ```json
-   {
-     "mcpServers": {
-       "voice-hooks": {
-         "type": "stdio",
-         "command": "npx",
-         "args": ["mcp-voice-hooks"],
-         "env": {}
-       }
-     }
-   }
-   ```
-
-2. **Start Claude Code**:
-
-   ```bash
-   claude
-   ```
-
-   **Important**: After the first-time installation, you will need to restart Claude for the hooks to take effect. This is because the hooks are automatically installed when the MCP server starts for the first time.
-
-3. **Open the voice interface** at <http://localhost:5111> and start speaking!
-
-  You need to send one text message to Claude to trigger the voice hooks.
+You need to send one text message to Claude to trigger the voice hooks.
 
 ## Voice responses
 
@@ -82,16 +62,14 @@ Once it's downloaded, you can select it in the system voice menu.
 Test it with the bash command:
 
 ```bash
-say "Hi, this is your mac system voice"
+say "Hi, this is your Mac system voice"
 ```
 
-For Siri voices you need to set your system voice and select "Mac System Voice" in the voice-hooks browser interface.
+To use Siri voices with voice-hooks, you need to set your system voice and select "Mac System Voice" in the voice-hooks browser interface.
 
-Other downloaded voices will show up in the voice dropdown in the voice-hooks browser interface.
+Other downloaded voices will show up in the voice dropdown in the voice-hooks browser interface so you can select them there directly, instead of using the "Mac System Voice" option.
 
 ### Selecting and downloading high quality Browser Voices
-
-
 
 ## Manual Hook Installation
 

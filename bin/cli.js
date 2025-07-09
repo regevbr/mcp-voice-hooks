@@ -17,22 +17,22 @@ async function main() {
   try {
     if (command === 'install-hooks') {
       console.log('🔧 Installing MCP Voice Hooks...');
-      
+
       // Configure Claude Code settings automatically
       await configureClaudeCodeSettings();
-      
+
       console.log('\n✅ Installation complete!');
-      console.log('📝 To start the server, run: npx mcp-voice-hooks');
+      console.log('📝 To add the server to Claude Code, run: `claude mcp add voice-hooks npx mcp-voice-hooks`');
     } else if (command === 'uninstall') {
       console.log('🗑️  Uninstalling MCP Voice Hooks...');
       await uninstall();
     } else {
       // Default behavior: ensure hooks are installed/updated, then run the MCP server
       console.log('🎤 MCP Voice Hooks - Starting server...');
-      
+
       // Auto-install/update hooks on every startup
       await ensureHooksInstalled();
-      
+
       console.log('');
       await runMCPServer();
     }
@@ -47,15 +47,15 @@ async function main() {
 async function configureClaudeCodeSettings() {
   const claudeDir = path.join(process.cwd(), '.claude');
   const settingsPath = path.join(claudeDir, 'settings.json');
-  
+
   console.log('⚙️  Configuring project Claude Code settings...');
-  
+
   // Create .claude directory if it doesn't exist
   if (!fs.existsSync(claudeDir)) {
     fs.mkdirSync(claudeDir, { recursive: true });
     console.log('✅ Created project .claude directory');
   }
-  
+
   // Read existing settings or create new
   let settings = {};
   if (fs.existsSync(settingsPath)) {
@@ -68,7 +68,7 @@ async function configureClaudeCodeSettings() {
       settings = {};
     }
   }
-  
+
   // Add hook configuration with inline commands
   const hookConfig = {
     "Stop": [
@@ -112,19 +112,19 @@ async function configureClaudeCodeSettings() {
       }
     ]
   };
-  
+
   // Replace voice hooks intelligently
   const updatedHooks = replaceVoiceHooks(settings.hooks || {}, hookConfig);
-  
+
   // Check if hooks actually changed (ignoring order)
   if (areHooksEqual(settings.hooks || {}, updatedHooks)) {
     console.log('✅ Claude settings already up to date');
     return;
   }
-  
+
   // Update settings with new hooks
   settings.hooks = updatedHooks;
-  
+
   // Write settings back
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
   console.log('✅ Updated project Claude Code settings');
@@ -134,7 +134,7 @@ async function configureClaudeCodeSettings() {
 async function ensureHooksInstalled() {
   try {
     console.log('🔄 Updating hooks to latest version...');
-    
+
     // Update hooks configuration in settings.json
     await configureClaudeCodeSettings();
     console.log('✅ Hooks and settings updated');
@@ -147,29 +147,29 @@ async function ensureHooksInstalled() {
 // Run the MCP server
 async function runMCPServer() {
   const serverPath = path.join(__dirname, '..', 'dist', 'unified-server.js');
-  
+
   // Run the compiled JavaScript server
   const child = spawn('node', [serverPath, '--mcp-managed'], {
     stdio: 'inherit',
     cwd: path.join(__dirname, '..')
   });
-  
+
   child.on('error', (error) => {
     console.error('❌ Failed to start MCP server:', error.message);
     process.exit(1);
   });
-  
+
   child.on('exit', (code) => {
     console.log(`🔄 MCP server exited with code ${code}`);
     process.exit(code);
   });
-  
+
   // Handle graceful shutdown
   process.on('SIGINT', () => {
     console.log('\n🛑 Shutting down...');
     child.kill('SIGINT');
   });
-  
+
   process.on('SIGTERM', () => {
     console.log('\n🛑 Shutting down...');
     child.kill('SIGTERM');
@@ -179,26 +179,26 @@ async function runMCPServer() {
 // Uninstall MCP Voice Hooks
 async function uninstall() {
   const claudeSettingsPath = path.join(process.cwd(), '.claude', 'settings.json');
-  
+
   // Remove voice hooks from Claude settings
   if (fs.existsSync(claudeSettingsPath)) {
     try {
       console.log('⚙️  Removing voice hooks from Claude settings...');
-      
+
       const settingsContent = fs.readFileSync(claudeSettingsPath, 'utf8');
       const settings = JSON.parse(settingsContent);
-      
+
       if (settings.hooks) {
         // Remove voice hooks
         const cleanedHooks = removeVoiceHooks(settings.hooks);
-        
+
         if (Object.keys(cleanedHooks).length === 0) {
           // If no hooks remain, remove the hooks property entirely
           delete settings.hooks;
         } else {
           settings.hooks = cleanedHooks;
         }
-        
+
         // Write updated settings
         fs.writeFileSync(claudeSettingsPath, JSON.stringify(settings, null, 2));
         console.log('✅ Removed voice hooks from Claude settings');
@@ -211,8 +211,8 @@ async function uninstall() {
   } else {
     console.log('ℹ️  No Claude settings file found in current project');
   }
-  
-  
+
+
   console.log('\n✅ Uninstallation complete!');
   console.log('👋 MCP Voice Hooks has been removed.');
 }
