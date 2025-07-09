@@ -41,7 +41,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] Change the "No utterances yet. Type something above to get started!" to "No speech input yet. Click Start Listening to get started!". Then change it to "No speech input yet. Say something to get started!" when the user clicks start listening.
 - [x] rework the UI so that start listening is at the very top of the page and the page can work in a tiny window
 - [x] automatically open the localhost url in the browser when the server starts (if it's not already open)
-- [ ] wait_for_utterance should check if voice input is still active on every loop and return immediately if it's not.
+- [x] wait_for_utterance should check if voice input is still active on every loop and return immediately if it's not.
 - [ ] handle multiple instances running on same machine for different Claude Code projects (dynamic port allocation or per-project configuration)
 - [x] temporarily remove requirement for Claude to speak before stopping
 - [ ] re-enable requirement for Claude to speak before stopping when 1.0.45 version of claude code is released with the stop hook fix
