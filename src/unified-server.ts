@@ -22,6 +22,7 @@ const __dirname = path.dirname(__filename);
 // Constants
 const WAIT_TIMEOUT_SECONDS = 60;
 const HTTP_PORT = process.env.MCP_VOICE_HOOKS_PORT ? parseInt(process.env.MCP_VOICE_HOOKS_PORT) : 5111;
+const AUTO_DELIVER_VOICE_INPUT = process.env.MCP_VOICE_HOOKS_AUTO_DELIVER_VOICE_INPUT !== 'false'; // Default to true (auto-deliver enabled)
 
 // Promisified exec for async/await
 const execAsync = promisify(exec);
@@ -677,10 +678,12 @@ app.listen(HTTP_PORT, async () => {
   if (!IS_MCP_MANAGED) {
     console.log(`[HTTP] Server listening on http://localhost:${HTTP_PORT}`);
     console.log(`[Mode] Running in ${IS_MCP_MANAGED ? 'MCP-managed' : 'standalone'} mode`);
+    console.log(`[Auto-deliver] Voice input auto-delivery is ${AUTO_DELIVER_VOICE_INPUT ? 'enabled (tools hidden)' : 'disabled (tools shown)'}`);
   } else {
     // In MCP mode, write to stderr to avoid interfering with protocol
     console.error(`[HTTP] Server listening on http://localhost:${HTTP_PORT}`);
     console.error(`[Mode] Running in MCP-managed mode`);
+    console.error(`[Auto-deliver] Voice input auto-delivery is ${AUTO_DELIVER_VOICE_INPUT ? 'enabled (tools hidden)' : 'disabled (tools shown)'}`);
   }
   
   // Auto-open browser if no frontend connects within 3 seconds
@@ -729,8 +732,11 @@ if (IS_MCP_MANAGED) {
 
   // Tool handlers
   mcpServer.setRequestHandler(ListToolsRequestSchema, async () => {
-    return {
-      tools: [
+    const tools = [];
+    
+    // Only show dequeue_utterances and wait_for_utterance if auto-deliver is disabled
+    if (!AUTO_DELIVER_VOICE_INPUT) {
+      tools.push(
         {
           name: 'dequeue_utterances',
           description: 'Dequeue pending utterances and mark them as delivered',
@@ -746,23 +752,27 @@ if (IS_MCP_MANAGED) {
             type: 'object',
             properties: {},
           },
-        },
-        {
-          name: 'speak',
-          description: 'Speak text using text-to-speech and mark delivered utterances as responded',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              text: {
-                type: 'string',
-                description: 'The text to speak',
-              },
-            },
-            required: ['text'],
+        }
+      );
+    }
+    
+    // Always show the speak tool
+    tools.push({
+      name: 'speak',
+      description: 'Speak text using text-to-speech and mark delivered utterances as responded',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          text: {
+            type: 'string',
+            description: 'The text to speak',
           },
         },
-      ],
-    };
+        required: ['text'],
+      },
+    });
+    
+    return { tools };
   });
 
   mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {

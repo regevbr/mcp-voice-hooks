@@ -47,17 +47,18 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] re-enable requirement for Claude to speak before stopping when 1.0.45 version of claude code is released with the stop hook fix
 - [x] eliminate timeout check in stop hook. Only check if voice input is active.
 - [x] eliminate time-to-wait argument from wait_for_utterance tool. Default to 60 seconds.
-- [ ] make the formatting consistent between the pre-tool auto-dequeue and the stop hook auto-wait. Both should have the speak reminder at the end if voice responses are enabled.
+- [x] make the formatting consistent between the pre-tool auto-dequeue and the stop hook auto-wait. Both should have the speak reminder at the end if voice responses are enabled.
 - [ ] add configurable timeout for wait_for_utterance tool on frontend
 - [ ] investigate if post-tool hook can send info to assistant and dequeue in there
-- [ ] add hint to post-tool hook that assistant should speak if there are unresponded utterances
-- [ ] add note to dequeue_utterances response that spoken response is required (if voice responses are enabled)
+- [x] add hint to post-tool hook that assistant should speak if there are unresponded utterances
+- [x] add note to dequeue_utterances response that spoken response is required (if voice responses are enabled)
 - [ ] eliminate dequeue_utterances tool. Just dequeue in the hooks. Return the utterances and the note about spoken response.
 - [x] remove the bash scripts for the hooks. They could be defined inline in the claude settings.
   - [x] consider using a custom subdomain
 - [x] experiment with waiting for utterance automatically in stop hook. How is the user experience? Can the user see that the assistant is waiting for them to speak? We could show something in the frontend.
 - [x] add a front-end indicator when Claude is waiting for utterances
-- [ ] make the auto-wait in stop hook behavior configurable? Alternatively, eliminate the wait_for_utterance tool and just use the stop hook.
+- [ ] make the auto-wait and auto dequeue behavior configurable? Alternatively, eliminate the tools and just use the hooks.
+  - [ ] add a config option to hide the tools and enable auto-wait and auto-dequeue
 - [ ] MVP
   - [x] add a warning when adjusting rate for google voices that the google voices don't work well with speech rate
   - [x] link to readme for info on system voice settings
