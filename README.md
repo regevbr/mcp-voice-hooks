@@ -4,8 +4,6 @@ Real-time voice interaction for Claude Code. Speak naturally while Claude works 
 
 Optionally enable text-to-speech to have Claude speak back to you.
 
-Mac only for now.
-
 ## Demo
 
 [![Voice Hooks Demo](https://img.youtube.com/vi/zx2aXTmWYYQ/0.jpg)](https://youtu.be/zx2aXTmWYYQ)
@@ -39,8 +37,6 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
 - ✅ **Chrome**: Full support for speech recognition, browser text-to-speech, and system text-to-speech
 - ⚠️ **Safari**: Full support for speech recognition, but only system text-to-speech is supported
 - ❌ **Edge**: Speech recognition not working on Apple Silicon (language-not-supported error)
-
-You need to send one text message to Claude to trigger the voice hooks.
 
 ## Voice responses
 
