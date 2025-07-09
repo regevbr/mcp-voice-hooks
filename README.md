@@ -102,7 +102,7 @@ This will:
 
 ## Known Limitations
 
-- **Intermittent Stop Hook Execution**: Claude Code's Stop hooks are not triggered if the agent stops immediately after a tool call. This results in the assistant occasionally stopping without checking for voice input. This will be fixed in 1.0.45. [github issue](https://github.com/anthropics/claude-code/issues/3113#issuecomment-3047324928)
+- **Intermittent Stop Hook Execution**: Claude Code's Stop hooks are not triggered if the agent stops immediately after a tool call. This results in the assistant occasionally stopping without checking for voice input. This will be fixed in Claude Code 1.0.45. [github issue](https://github.com/anthropics/claude-code/issues/3113#issuecomment-3047324928)
 
 ## Development Mode
 
