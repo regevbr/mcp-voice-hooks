@@ -403,8 +403,8 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop' |
     }
   }
 
-  // 3. Handle tool action
-  if (attemptedAction === 'tool') {
+  // 3. Handle tool and post-tool actions
+  if (attemptedAction === 'tool' || attemptedAction === 'post-tool') {
     lastToolUseTimestamp = new Date();
     return { decision: 'approve' };
   }
@@ -490,17 +490,6 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop' |
       decision: 'approve',
       reason: 'No utterances since last timeout'
     };
-  }
-
-  // 7. Handle post-tool
-  if (attemptedAction === 'post-tool') {
-    // Post-tool hooks process the same logic as pre-tool (auto-dequeue and delivered checks)
-    // The difference is that blocking is advisory rather than enforced
-    // Auto-dequeue is already handled in step 1 above
-    // Check for delivered utterances is already handled in step 2 above
-    
-    // If we got here, no action needed
-    return { decision: 'approve' };
   }
 
   // Default to approve (shouldn't reach here)
