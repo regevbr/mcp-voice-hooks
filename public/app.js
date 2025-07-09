@@ -74,8 +74,8 @@ class VoiceHooksClient {
                 if (event.results[i].isFinal) {
                     // User paused - send as complete utterance
                     this.sendVoiceUtterance(transcript);
-                    // Clear interim text
-                    this.interimText.textContent = '';
+                    // Restore placeholder text
+                    this.interimText.textContent = 'Start speaking and your words will appear here...';
                     this.interimText.classList.remove('active');
                 } else {
                     // Still speaking - show interim results
@@ -273,7 +273,7 @@ class VoiceHooksClient {
             this.listenBtn.classList.remove('listening');
             this.listenBtnText.textContent = 'Start Listening';
             this.listeningIndicator.classList.remove('active');
-            this.interimText.textContent = '';
+            this.interimText.textContent = 'Start speaking and your words will appear here...';
             this.interimText.classList.remove('active');
             this.debugLog('Stopped listening');
 

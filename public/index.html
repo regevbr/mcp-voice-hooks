@@ -246,7 +246,6 @@
         }
 
         .interim-text {
-            display: none;
             padding: 12px;
             background: #F8F9FA;
             border: 1px solid #DEE2E6;
@@ -254,10 +253,15 @@
             margin-bottom: 16px;
             font-style: italic;
             color: #6C757D;
+            min-height: 44px; /* Maintain minimum height to prevent collapse */
+            max-height: 120px; /* Prevent excessive growth */
+            overflow-y: auto; /* Add scroll if content is too long */
+            transition: color 0.2s ease-in-out;
         }
 
         .interim-text.active {
-            display: block;
+            color: #333; /* Darker color for actual speech */
+            font-style: normal;
         }
 
         .mic-icon {
@@ -471,7 +475,7 @@
                 </div>
             </div>
 
-            <div class="interim-text" id="interimText"></div>
+            <div class="interim-text" id="interimText">Start speaking and your words will appear here...</div>
         </div>
 
         <div class="status">
