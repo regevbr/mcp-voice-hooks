@@ -168,13 +168,6 @@ class VoiceHooksClient {
 
     async loadData() {
         try {
-            // Load status
-            const statusResponse = await fetch(`${this.baseUrl}/api/utterances/status`);
-            if (statusResponse.ok) {
-                const status = await statusResponse.json();
-                this.updateStatus(status);
-            }
-
             // Load utterances
             const utterancesResponse = await fetch(`${this.baseUrl}/api/utterances?limit=20`);
             if (utterancesResponse.ok) {
@@ -184,9 +177,6 @@ class VoiceHooksClient {
         } catch (error) {
             console.error('Failed to load data:', error);
         }
-    }
-
-    updateStatus(status) {
     }
 
     updateUtterancesList(utterances) {
