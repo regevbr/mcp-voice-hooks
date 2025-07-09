@@ -586,25 +586,17 @@ app.get('/', (_req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-// Function to open browser cross-platform in a small window
+// Function to open browser cross-platform
 function openBrowser(url: string) {
   const platform = process.platform;
   let command: string;
   
   if (platform === 'darwin') {
-    // On macOS, use AppleScript to open Chrome in a new small window
-    command = `osascript -e 'tell application "Google Chrome"
-      activate
-      make new window
-      set bounds of front window to {100, 100, 500, 600}
-      set URL of active tab of front window to "${url}"
-    end tell' || open -a "Google Chrome" "${url}" || open "${url}"`;
+    command = `open ${url}`;
   } else if (platform === 'win32') {
-    // On Windows, try Chrome with window size flags
-    command = `start chrome --new-window --window-size=400,500 --window-position=100,100 "${url}" || start "${url}"`;
+    command = `start ${url}`;
   } else {
-    // On Linux, try Chrome/Chromium with window size flags
-    command = `google-chrome --new-window --window-size=400,500 --window-position=100,100 "${url}" || chromium --new-window --window-size=400,500 --window-position=100,100 "${url}" || xdg-open "${url}"`;
+    command = `xdg-open ${url}`;
   }
   
   exec(command, (error) => {
