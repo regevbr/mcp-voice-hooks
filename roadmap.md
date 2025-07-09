@@ -38,7 +38,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] Remove the text input field from the frontend.
 - [x] Make the in-progress text box permanent so the layout doesn't jump around as the user starts and stops speaking
 - [x] remove the limit() parameter from the dequeue_utterances MCP tool. It should just dequeue all utterances.
-- [ ] Change the "No utterances yet. Type something above to get started!" to "No speech input yet. Click Start Listening to get started!". Then change it to "No speech input yet. Say something to get started!" when the user clicks start listening.
+- [x] Change the "No utterances yet. Type something above to get started!" to "No speech input yet. Click Start Listening to get started!". Then change it to "No speech input yet. Say something to get started!" when the user clicks start listening.
 - [x] rework the UI so that start listening is at the very top of the page and the page can work in a tiny window
 - [ ] automatically open the localhost url in the browser when the server starts (if it's not already open)
 - [ ] automatically launch a new tiny browser window when the server starts instead of just opening the localhost url in the existing browser window
