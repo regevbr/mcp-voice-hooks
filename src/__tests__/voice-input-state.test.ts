@@ -95,12 +95,54 @@ describe('Voice Input State Error Handling', () => {
         return;
       }
 
-      // Simplified implementation for testing
+      const startTime = Date.now();
+      const maxWaitMs = 1000; // 1 second for testing
+
+      // Poll for utterances
+      while (Date.now() - startTime < maxWaitMs) {
+        // Check if voice input is still active
+        if (!voicePreferences.voiceInputActive) {
+          res.json({
+            success: true,
+            utterances: [],
+            message: 'Voice input was deactivated',
+            waitTime: Date.now() - startTime,
+          });
+          return;
+        }
+
+        const pendingUtterances = queue.utterances.filter(
+          u => u.status === 'pending'
+        );
+
+        if (pendingUtterances.length > 0) {
+          // Mark as delivered
+          pendingUtterances.forEach(u => {
+            queue.markDelivered(u.id);
+          });
+
+          res.json({
+            success: true,
+            utterances: pendingUtterances.map(u => ({
+              text: u.text,
+              timestamp: u.timestamp,
+            })),
+            count: pendingUtterances.length,
+            waitTime: Date.now() - startTime,
+          });
+          return;
+        }
+
+        // Wait 10ms before checking again
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+
+      // Timeout reached
       res.json({
         success: true,
         utterances: [],
         message: 'No utterances found after waiting.',
-        waitTime: 0,
+        waitTime: maxWaitMs,
       });
     });
 
@@ -213,6 +255,32 @@ describe('Voice Input State Error Handling', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.utterances).toBeDefined();
+    });
+
+    it('should return immediately when voice input is deactivated during wait', async () => {
+      // Enable voice input
+      await request(app)
+        .post('/api/voice-input-state')
+        .send({ active: true })
+        .expect(200);
+
+      // Start wait request
+      const waitPromise = request(app)
+        .post('/api/wait-for-utterances')
+        .send({});
+
+      // Deactivate voice input after a short delay
+      setTimeout(async () => {
+        voicePreferences.voiceInputActive = false;
+      }, 50);
+
+      const response = await waitPromise;
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('Voice input was deactivated');
+      expect(response.body.utterances).toEqual([]);
+      expect(response.body.waitTime).toBeLessThan(100); // Should return quickly
     });
   });
 

@@ -202,6 +202,18 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
 
   // Poll for utterances
   while (Date.now() - startTime < maxWaitMs) {
+    // Check if voice input is still active
+    if (!voicePreferences.voiceInputActive) {
+      debugLog('[Server] Voice input deactivated during wait_for_utterance');
+      res.json({
+        success: true,
+        utterances: [],
+        message: 'Voice input was deactivated',
+        waitTime: Date.now() - startTime,
+      });
+      return;
+    }
+
     const pendingUtterances = queue.utterances.filter(
       u => u.status === 'pending'
     );
