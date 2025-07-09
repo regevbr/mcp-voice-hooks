@@ -494,9 +494,6 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop' |
 
   // 7. Handle post-tool
   if (attemptedAction === 'post-tool') {
-    // Track tool use timestamp
-    lastToolUseTimestamp = new Date();
-    
     // Post-tool hooks process the same logic as pre-tool (auto-dequeue and delivered checks)
     // The difference is that blocking is advisory rather than enforced
     // Auto-dequeue is already handled in step 1 above
