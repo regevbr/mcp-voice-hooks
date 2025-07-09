@@ -129,29 +129,6 @@ claude
 - For changes to **browser files** (`public/*`), just restart Claude Code
 - Then restart Claude Code to use the updated code
 
-### Hot Reload
-
-For hot reload during development, you can run the development server with
-
-```bash
-npm run dev-unified
-```
-
-and then configure claude to use the mcp proxy like so:
-
-```json
-{
-  "mcpServers": {
-    "voice-hooks": {
-      "type": "stdio",
-      "command": "npm",
-      "args": ["run", "mcp-proxy"],
-      "env": {}
-    }
-  }
-}
-```
-
 ### Port Configuration
 
 The default port is 5111. To use a different port, add to your project's `.claude/settings.json`:
