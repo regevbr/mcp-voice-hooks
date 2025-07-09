@@ -181,7 +181,7 @@ class VoiceHooksClient {
 
     updateUtterancesList(utterances) {
         if (utterances.length === 0) {
-            this.utterancesList.innerHTML = '<div class="empty-state">No utterances yet. Click "Start Listening" to begin!</div>';
+            this.utterancesList.innerHTML = '<div class="empty-state">Nothing yet.</div>';
             this.infoMessage.style.display = 'none';
             return;
         }
