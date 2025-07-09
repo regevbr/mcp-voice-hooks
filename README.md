@@ -185,7 +185,7 @@ By default, mcp-voice-hooks automatically delivers voice input to Claude through
 - Voice input is automatically processed when Claude attempts any action
 - Claude receives voice input naturally without needing to call tools
 
-To disable auto-delivery and show the tools (for debugging or manual control):
+To disable auto-delivery:
 
 ```json
 {
@@ -194,3 +194,9 @@ To disable auto-delivery and show the tools (for debugging or manual control):
   }
 }
 ```
+
+When auto-delivery is disabled:
+- The `dequeue_utterances` and `wait_for_utterance` tools become visible
+- Hooks no longer automatically process voice input
+- Claude must manually call the tools to receive voice input
+- This mode is useful for debugging or when you want manual control

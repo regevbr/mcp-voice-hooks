@@ -361,8 +361,8 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
   const voiceResponsesEnabled = voicePreferences.voiceResponsesEnabled;
   const voiceInputActive = voicePreferences.voiceInputActive;
 
-  // 1. Auto-dequeue pending utterances (only if voice input is active)
-  if (voiceInputActive) {
+  // 1. Auto-dequeue pending utterances (only if voice input is active and auto-deliver is enabled)
+  if (voiceInputActive && AUTO_DELIVER_VOICE_INPUT) {
     const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
     if (pendingUtterances.length > 0) {
       // Auto-dequeue the utterances
@@ -429,8 +429,8 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
       };
     }
 
-    // Check if should wait for utterances (only if voice input is active)
-    if (voiceInputActive) {
+    // Check if should wait for utterances (only if voice input is active and auto-deliver is enabled)
+    if (voiceInputActive && AUTO_DELIVER_VOICE_INPUT) {
       // Auto-wait for utterances
       return (async () => {
         try {

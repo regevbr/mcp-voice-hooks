@@ -52,13 +52,15 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [ ] investigate if post-tool hook can send info to assistant and dequeue in there
 - [x] add hint to post-tool hook that assistant should speak if there are unresponded utterances
 - [x] add note to dequeue_utterances response that spoken response is required (if voice responses are enabled)
-- [ ] eliminate dequeue_utterances tool. Just dequeue in the hooks. Return the utterances and the note about spoken response.
+- [x] eliminate dequeue_utterances tool. Just dequeue in the hooks. Return the utterances and the note about spoken response.
 - [x] remove the bash scripts for the hooks. They could be defined inline in the claude settings.
   - [x] consider using a custom subdomain
 - [x] experiment with waiting for utterance automatically in stop hook. How is the user experience? Can the user see that the assistant is waiting for them to speak? We could show something in the frontend.
 - [x] add a front-end indicator when Claude is waiting for utterances
-- [ ] make the auto-wait and auto dequeue behavior configurable? Alternatively, eliminate the tools and just use the hooks.
-  - [ ] add a config option to hide the tools and enable auto-wait and auto-dequeue
+- [x] make the auto-wait and auto dequeue behavior configurable? Alternatively, eliminate the tools and just use the hooks.
+  - [x] add a config option to hide the tools and enable auto-wait and auto-dequeue
+- [ ] Make the "must speak" stop hook text more consistent with the pre-tool auto-dequeue, and auto-wait text about voice input being active
+- [ ] Investigate if we can show and hide MCP tools live without restarting claude code (e.g. hide SPEAK if voice responses are disabled)
 - [ ] MVP
   - [x] add a warning when adjusting rate for google voices that the google voices don't work well with speech rate
   - [x] link to readme for info on system voice settings
