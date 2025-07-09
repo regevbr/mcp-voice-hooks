@@ -151,15 +151,14 @@ app.get('/api/utterances/status', (_req: Request, res: Response) => {
   });
 });
 
-// MCP server integration
-app.post('/api/dequeue-utterances', (req: Request, res: Response) => {
+// Shared dequeue logic
+function dequeueUtterancesCore() {
   // Check if voice input is active
   if (!voicePreferences.voiceInputActive) {
-    res.status(400).json({
+    return {
       success: false,
       error: 'Voice input is not active. Cannot dequeue utterances when voice input is disabled.'
-    });
-    return;
+    };
   }
 
   const pendingUtterances = queue.utterances
@@ -171,13 +170,25 @@ app.post('/api/dequeue-utterances', (req: Request, res: Response) => {
     queue.markDelivered(u.id);
   });
 
-  res.json({
+  return {
     success: true,
     utterances: pendingUtterances.map(u => ({
       text: u.text,
       timestamp: u.timestamp,
     })),
-  });
+  };
+}
+
+// MCP server integration
+app.post('/api/dequeue-utterances', (_req: Request, res: Response) => {
+  const result = dequeueUtterancesCore();
+  
+  if (!result.success && result.error) {
+    res.status(400).json(result);
+    return;
+  }
+  
+  res.json(result);
 });
 
 // Shared wait for utterance logic
@@ -266,7 +277,7 @@ async function waitForUtteranceCore() {
 }
 
 // Wait for utterance endpoint
-app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
+app.post('/api/wait-for-utterances', async (_req: Request, res: Response) => {
   const result = await waitForUtteranceCore();
   
   // If error response, return 400 status
@@ -349,15 +360,25 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
   const voiceResponsesEnabled = voicePreferences.voiceResponsesEnabled;
   const voiceInputActive = voicePreferences.voiceInputActive;
 
-  // 1. Check for pending utterances (only if voice input is active)
+  // 1. Auto-dequeue pending utterances (only if voice input is active)
   if (voiceInputActive) {
     const pendingUtterances = queue.utterances.filter(u => u.status === 'pending');
     if (pendingUtterances.length > 0) {
-      // Allow dequeue to proceed (dequeue doesn't go through hooks)
-      return {
-        decision: 'block',
-        reason: `${pendingUtterances.length} pending utterance(s) must be dequeued first. Please use dequeue_utterances to process them.`
-      };
+      // Auto-dequeue the utterances
+      const dequeueResult = dequeueUtterancesCore();
+      
+      if (dequeueResult.success && dequeueResult.utterances && dequeueResult.utterances.length > 0) {
+        // Format utterances for display
+        const utteranceTexts = dequeueResult.utterances
+          .reverse() // Reverse to show oldest first
+          .map(u => `"${u.text}"`)
+          .join('\n');
+        
+        return {
+          decision: 'block',
+          reason: `Dequeued ${dequeueResult.utterances.length} utterance(s):\n\n${utteranceTexts}${getVoiceResponseReminder()}`
+        };
+      }
     }
   }
 
