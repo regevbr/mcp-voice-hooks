@@ -253,14 +253,18 @@
             margin-bottom: 16px;
             font-style: italic;
             color: #6C757D;
-            min-height: 44px; /* Maintain minimum height to prevent collapse */
-            max-height: 120px; /* Prevent excessive growth */
-            overflow-y: auto; /* Add scroll if content is too long */
+            min-height: 44px;
+            /* Maintain minimum height to prevent collapse */
+            max-height: 120px;
+            /* Prevent excessive growth */
+            overflow-y: auto;
+            /* Add scroll if content is too long */
             transition: color 0.2s ease-in-out;
         }
 
         .interim-text.active {
-            color: #333; /* Darker color for actual speech */
+            color: #333;
+            /* Darker color for actual speech */
             font-style: normal;
         }
 
@@ -501,7 +505,8 @@
                     All</button>
             </h3>
             <div class="info-message" id="infoMessage" style="display: none;">
-                <div class="empty-state">You need to send one message in the Claude code CLI to start voice interaction</div>
+                <div class="empty-state">You need to send one message in the Claude code CLI to start voice interaction
+                </div>
             </div>
             <div class="utterances-list" id="utterancesList">
                 <div class="empty-state">No utterances yet. Type something above to get started!</div>

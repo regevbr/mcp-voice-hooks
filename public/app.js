@@ -156,7 +156,7 @@ class VoiceHooksClient {
         });
 
         this.testTTSBtn.addEventListener('click', () => {
-            this.speakText('Hello! This is a test of the text-to-speech voice.');
+            this.speakText('Hi, this is Voice Mode for Claude Code. How can I help you today?');
         });
 
         // Voice toggle listeners
