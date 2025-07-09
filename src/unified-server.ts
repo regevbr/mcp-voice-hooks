@@ -586,39 +586,11 @@ app.get('/', (_req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-// Function to open browser cross-platform
-function openBrowser(url: string) {
-  const platform = process.platform;
-  let command: string;
-  
-  if (platform === 'darwin') {
-    command = `open ${url}`;
-  } else if (platform === 'win32') {
-    command = `start ${url}`;
-  } else {
-    command = `xdg-open ${url}`;
-  }
-  
-  exec(command, (error) => {
-    if (error) {
-      console.error(`[Browser] Failed to open browser: ${error.message}`);
-    } else {
-      console.log(`[Browser] Opened ${url} in default browser`);
-    }
-  });
-}
-
 // Start HTTP server
 const HTTP_PORT = process.env.MCP_VOICE_HOOKS_PORT ? parseInt(process.env.MCP_VOICE_HOOKS_PORT) : 5111;
 app.listen(HTTP_PORT, () => {
-  const serverUrl = `http://localhost:${HTTP_PORT}`;
-  console.log(`[HTTP] Server listening on ${serverUrl}`);
+  console.log(`[HTTP] Server listening on http://localhost:${HTTP_PORT}`);
   console.log(`[Mode] Running in ${IS_MCP_MANAGED ? 'MCP-managed' : 'standalone'} mode`);
-  
-  // Open browser automatically unless disabled
-  if (process.env.MCP_VOICE_HOOKS_NO_BROWSER !== 'true') {
-    openBrowser(serverUrl);
-  }
 });
 
 // Helper function to get voice response reminder

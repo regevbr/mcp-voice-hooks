@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { exec } from 'child_process';
 import { InMemoryUtteranceQueue } from './utterance-queue.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -82,35 +81,10 @@ export class HttpServer {
     });
   }
 
-  private openBrowser(url: string) {
-    const platform = process.platform;
-    let command: string;
-    
-    if (platform === 'darwin') {
-      command = `open ${url}`;
-    } else if (platform === 'win32') {
-      command = `start ${url}`;
-    } else {
-      command = `xdg-open ${url}`;
-    }
-    
-    exec(command, (error) => {
-      if (error) {
-        console.error(`Failed to open browser: ${error.message}`);
-      } else {
-        console.log(`Opened ${url} in default browser`);
-      }
-    });
-  }
-
   start(): Promise<void> {
     return new Promise((resolve) => {
       this.app.listen(this.port, () => {
-        const serverUrl = `http://localhost:${this.port}`;
-        console.log(`HTTP Server running on ${serverUrl}`);
-        if (process.env.MCP_VOICE_HOOKS_NO_BROWSER !== 'true') {
-          this.openBrowser(serverUrl);
-        }
+        console.log(`HTTP Server running on http://localhost:${this.port}`);
         resolve();
       });
     });
