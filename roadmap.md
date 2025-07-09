@@ -44,7 +44,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] wait_for_utterance should check if voice input is still active on every loop and return immediately if it's not.
 - [ ] handle multiple instances running on same machine for different Claude Code projects (dynamic port allocation or per-project configuration)
 - [x] temporarily remove requirement for Claude to speak before stopping
-- [ ] re-enable requirement for Claude to speak before stopping when 1.0.45 version of claude code is released with the stop hook fix
+- [x] re-enable requirement for Claude to speak before stopping when 1.0.45 version of claude code is released with the stop hook fix
 - [x] eliminate timeout check in stop hook. Only check if voice input is active.
 - [x] eliminate time-to-wait argument from wait_for_utterance tool. Default to 60 seconds.
 - [ ] add configurable timeout for wait_for_utterance tool on frontend

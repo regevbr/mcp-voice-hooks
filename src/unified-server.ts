@@ -21,6 +21,7 @@ const __dirname = path.dirname(__filename);
 
 // Constants
 const WAIT_TIMEOUT_SECONDS = 60;
+const HTTP_PORT = process.env.MCP_VOICE_HOOKS_PORT ? parseInt(process.env.MCP_VOICE_HOOKS_PORT) : 5111;
 
 // Promisified exec for async/await
 const execAsync = promisify(exec);
@@ -87,9 +88,8 @@ const IS_MCP_MANAGED = process.argv.includes('--mcp-managed');
 
 // Global state
 const queue = new UtteranceQueue();
-// TODO: Uncomment these when Claude Code 1.0.45 is released and we reinstate speak-before-stop requirement
-// let lastToolUseTimestamp: Date | null = null;
-// let lastSpeakTimestamp: Date | null = null;
+let lastToolUseTimestamp: Date | null = null;
+let lastSpeakTimestamp: Date | null = null;
 
 // Voice preferences (controlled by browser)
 let voicePreferences = {
@@ -331,7 +331,7 @@ app.post('/api/validate-action', (req: Request, res: Response) => {
 });
 
 // Unified hook handler
-function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'): { decision: 'approve' | 'block', reason?: string } {
+function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'): { decision: 'approve' | 'block', reason?: string } | Promise<{ decision: 'approve' | 'block', reason?: string }> {
   const voiceResponsesEnabled = voicePreferences.voiceResponsesEnabled;
   const voiceInputActive = voicePreferences.voiceInputActive;
 
@@ -364,15 +364,12 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
 
   // 3. Handle tool action
   if (attemptedAction === 'tool') {
-    // TODO: Uncomment when Claude Code 1.0.45 is released
-    // lastToolUseTimestamp = new Date();
+    lastToolUseTimestamp = new Date();
     return { decision: 'approve' };
   }
 
   // 4. Handle wait for utterance
   if (attemptedAction === 'wait') {
-    // TEMPORARILY COMMENTED OUT - TODO: Remove comment to re-enable speak requirement when 1.0.45 is released
-    /*
     if (voiceResponsesEnabled && lastToolUseTimestamp &&
       (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
       return {
@@ -380,7 +377,6 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
         reason: 'Assistant must speak after using tools. Please use the speak tool to respond before waiting for utterances.'
       };
     }
-    */
     return { decision: 'approve' };
   }
 
@@ -392,8 +388,6 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
   // 6. Handle stop
   if (attemptedAction === 'stop') {
     // Check if must speak after tool use
-    // TEMPORARILY COMMENTED OUT - TODO: Remove comment to re-enable speak requirement when 1.0.45 is released
-    /*
     if (voiceResponsesEnabled && lastToolUseTimestamp &&
       (!lastSpeakTimestamp || lastSpeakTimestamp < lastToolUseTimestamp)) {
       return {
@@ -401,14 +395,48 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
         reason: 'Assistant must speak after using tools. Please use the speak tool to respond before proceeding.'
       };
     }
-    */
 
     // Check if should wait for utterances (only if voice input is active)
     if (voiceInputActive) {
-      return {
-        decision: 'block',
-        reason: 'Assistant tried to end its response, but voice input is active. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
-      };
+      // Auto-wait for utterances
+      return (async () => {
+        try {
+          debugLog(`[Stop Hook] Auto-calling wait_for_utterance...`);
+          const response = await fetch(`http://localhost:${HTTP_PORT}/api/wait-for-utterances`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({}),
+          });
+
+          const data = await response.json() as any;
+          debugLog(`[Stop Hook] wait_for_utterance response: ${JSON.stringify(data)}`);
+
+          // If utterances were found, block and return them
+          if (data.utterances && data.utterances.length > 0) {
+            const utteranceTexts = data.utterances
+              .map((u: any) => `"${u.text}"`)
+              .join(', ');
+            
+            return {
+              decision: 'block' as const,
+              reason: `Found ${data.utterances.length} new utterance(s) during wait: ${utteranceTexts}. Assistant should process these utterances.`
+            };
+          }
+
+          // If no utterances found (including when voice was deactivated), approve stop
+          return {
+            decision: 'approve' as const,
+            reason: data.message || 'No utterances found during wait'
+          };
+        } catch (error) {
+          debugLog(`[Stop Hook] Error calling wait_for_utterance: ${error}`);
+          // On error, fall back to blocking with original message
+          return {
+            decision: 'block' as const,
+            reason: 'Assistant tried to end its response, but voice input is active. Stopping is not allowed without first checking for voice input. Assistant should now use wait_for_utterance to check for voice input'
+          };
+        }
+      })();
     }
 
     return {
@@ -428,49 +456,7 @@ app.post('/api/hooks/pre-tool', (_req: Request, res: Response) => {
 });
 
 app.post('/api/hooks/stop', async (_req: Request, res: Response) => {
-  const voiceInputActive = voicePreferences.voiceInputActive;
-  debugLog(`[Stop Hook] Called, voice input active: ${voiceInputActive}`);
-  
-  // If voice input is active, automatically call wait_for_utterance
-  if (voiceInputActive) {
-    try {
-      debugLog(`[Stop Hook] Calling wait_for_utterance...`);
-      const response = await fetch(`http://localhost:${HTTP_PORT}/api/wait-for-utterances`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      });
-
-      const data = await response.json() as any;
-      debugLog(`[Stop Hook] wait_for_utterance response: ${JSON.stringify(data)}`);
-
-      // If utterances were found, block and return them
-      if (data.utterances && data.utterances.length > 0) {
-        const utteranceTexts = data.utterances
-          .map((u: any) => `"${u.text}"`)
-          .join(', ');
-        
-        res.json({
-          decision: 'block',
-          reason: `Found ${data.utterances.length} new utterance(s) during wait: ${utteranceTexts}. Assistant should process these utterances.`
-        });
-        return;
-      }
-
-      // If no utterances found (including when voice was deactivated), approve stop
-      res.json({
-        decision: 'approve',
-        reason: data.message || 'No utterances found during wait'
-      });
-      return;
-    } catch (error) {
-      debugLog(`[Stop Hook] Error calling wait_for_utterance: ${error}`);
-      // On error, fall back to standard behavior
-    }
-  }
-  
-  // For all other cases, use the standard handler
-  const result = handleHookRequest('stop');
+  const result = await handleHookRequest('stop');
   res.json(result);
 });
 
@@ -591,8 +577,7 @@ app.post('/api/speak', async (req: Request, res: Response) => {
       debugLog(`[Queue] marked as responded: "${u.text}"	[id: ${u.id}]`);
     });
 
-    // TODO: Uncomment when Claude Code 1.0.45 is released
-    // lastSpeakTimestamp = new Date();
+    lastSpeakTimestamp = new Date();
 
     res.json({
       success: true,
@@ -641,7 +626,6 @@ app.get('/', (_req: Request, res: Response) => {
 });
 
 // Start HTTP server
-const HTTP_PORT = process.env.MCP_VOICE_HOOKS_PORT ? parseInt(process.env.MCP_VOICE_HOOKS_PORT) : 5111;
 app.listen(HTTP_PORT, async () => {
   if (!IS_MCP_MANAGED) {
     console.log(`[HTTP] Server listening on http://localhost:${HTTP_PORT}`);
