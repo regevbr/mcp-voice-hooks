@@ -1,6 +1,7 @@
 {
   "entry": [
-    "src/unified-server.ts"
+    "src/unified-server.ts",
+    "src/index.ts"
   ],
   "project": [
     "src/**/*.ts"

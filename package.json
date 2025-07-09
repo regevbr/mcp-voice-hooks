@@ -1,7 +1,7 @@
 {
   "name": "mcp-voice-hooks",
   "version": "1.0.14",
-  "main": "dist/unified-server.js",
+  "main": "dist/index.js",
   "type": "module",
   "bin": {
     "mcp-voice-hooks": "bin/cli.js"
@@ -11,13 +11,13 @@
   },
   "scripts": {
     "build": "tsup",
-    "dev": "nodemon --exec ts-node --esm src/unified-server.ts",
+    "dev": "nodemon --exec ts-node --esm src/index.ts",
     "dev-unified": "ts-node --esm src/unified-server.ts",
-    "dev-debug": "DEBUG=true nodemon --exec ts-node --esm src/unified-server.ts",
+    "dev-debug": "DEBUG=true nodemon --exec ts-node --esm src/index.ts",
     "dev-unified-debug": "DEBUG=true ts-node --esm src/unified-server.ts",
     "mcp-unified": "ts-node --esm src/unified-server.ts --mcp-managed",
     "mcp-unified-debug": "DEBUG=true ts-node --esm src/unified-server.ts --mcp-managed",
-    "start": "node dist/unified-server.js",
+    "start": "node dist/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "prepare": "husky"
