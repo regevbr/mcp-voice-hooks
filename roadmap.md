@@ -43,6 +43,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [ ] automatically open the localhost url in the browser when the server starts (if it's not already open)
 - [ ] automatically launch a new tiny browser window when the server starts instead of just opening the localhost url in the existing browser window
 - [ ] investigate opening a chrome window with no toolbar and no address bar
+- [ ] handle multiple instances running on same machine for different Claude Code projects (dynamic port allocation or per-project configuration)
 - [x] temporarily remove requirement for Claude to speak before stopping
 - [ ] re-enable requirement for Claude to speak before stopping when 1.0.45 version of claude code is released with the stop hook fix
 - [x] eliminate timeout check in stop hook. Only check if voice input is active.

@@ -46,7 +46,8 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.13.3",
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "open": "^10.1.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

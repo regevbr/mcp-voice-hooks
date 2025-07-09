@@ -588,9 +588,32 @@ app.get('/', (_req: Request, res: Response) => {
 
 // Start HTTP server
 const HTTP_PORT = process.env.MCP_VOICE_HOOKS_PORT ? parseInt(process.env.MCP_VOICE_HOOKS_PORT) : 5111;
-app.listen(HTTP_PORT, () => {
-  console.log(`[HTTP] Server listening on http://localhost:${HTTP_PORT}`);
-  console.log(`[Mode] Running in ${IS_MCP_MANAGED ? 'MCP-managed' : 'standalone'} mode`);
+app.listen(HTTP_PORT, async () => {
+  if (!IS_MCP_MANAGED) {
+    console.log(`[HTTP] Server listening on http://localhost:${HTTP_PORT}`);
+    console.log(`[Mode] Running in ${IS_MCP_MANAGED ? 'MCP-managed' : 'standalone'} mode`);
+  } else {
+    // In MCP mode, write to stderr to avoid interfering with protocol
+    console.error(`[HTTP] Server listening on http://localhost:${HTTP_PORT}`);
+    console.error(`[Mode] Running in MCP-managed mode`);
+  }
+  
+  // Auto-open browser if no frontend connects within 3 seconds
+  if (IS_MCP_MANAGED) {
+    setTimeout(async () => {
+      if (ttsClients.size === 0) {
+        debugLog('[Browser] No frontend connected, opening browser...');
+        try {
+          const open = (await import('open')).default;
+          await open(`http://localhost:${HTTP_PORT}`);
+        } catch (error) {
+          debugLog('[Browser] Failed to open browser:', error);
+        }
+      } else {
+        debugLog(`[Browser] Frontend already connected (${ttsClients.size} client(s))`)
+      }
+    }, 3000);
+  }
 });
 
 // Helper function to get voice response reminder
@@ -603,7 +626,8 @@ function getVoiceResponseReminder(): string {
 
 // MCP Server Setup (only if MCP-managed)
 if (IS_MCP_MANAGED) {
-  console.log('[MCP] Initializing MCP server...');
+  // Use stderr in MCP mode to avoid interfering with protocol
+  console.error('[MCP] Initializing MCP server...');
 
   const mcpServer = new Server(
     {
@@ -812,7 +836,11 @@ if (IS_MCP_MANAGED) {
   // Connect via stdio
   const transport = new StdioServerTransport();
   mcpServer.connect(transport);
-  console.log('[MCP] Server connected via stdio');
+  // Use stderr in MCP mode to avoid interfering with protocol
+  console.error('[MCP] Server connected via stdio');
 } else {
-  console.log('[MCP] Skipping MCP server initialization (not in MCP-managed mode)');
+  // Only log in standalone mode
+  if (!IS_MCP_MANAGED) {
+    console.log('[MCP] Skipping MCP server initialization (not in MCP-managed mode)');
+  }
 }
