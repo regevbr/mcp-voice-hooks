@@ -23,7 +23,7 @@ const __dirname = path.dirname(__filename);
 const WAIT_TIMEOUT_SECONDS = 60;
 const HTTP_PORT = process.env.MCP_VOICE_HOOKS_PORT ? parseInt(process.env.MCP_VOICE_HOOKS_PORT) : 5111;
 const AUTO_DELIVER_VOICE_INPUT = process.env.MCP_VOICE_HOOKS_AUTO_DELIVER_VOICE_INPUT !== 'false'; // Default to true (auto-deliver enabled)
-const PRE_TOOL_HOOK_ENABLED = process.env.MCP_VOICE_HOOKS_PRE_TOOL_HOOK_ENABLED !== 'false'; // Default to true (pre-tool hook enabled)
+const PRE_TOOL_HOOK_ENABLED = process.env.MCP_VOICE_HOOKS_PRE_TOOL_HOOK_ENABLED === 'true'; // Default to false (pre-tool hook disabled)
 
 // Promisified exec for async/await
 const execAsync = promisify(exec);

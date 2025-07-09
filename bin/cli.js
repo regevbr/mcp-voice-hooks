@@ -113,7 +113,7 @@ async function configureClaudeCodeSettings() {
     ],
     "PostToolUse": [
       {
-        "matcher": "",
+        "matcher": "^(?!mcp__voice-hooks__).*",
         "hooks": [
           {
             "type": "command",
