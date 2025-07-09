@@ -10,6 +10,21 @@ Mac only for now.
 
 [![Voice Hooks Demo](https://img.youtube.com/vi/zx2aXTmWYYQ/0.jpg)](https://youtu.be/zx2aXTmWYYQ)
 
+## Quick Start
+
+```bash
+# Install hooks in the current project directory (one time)
+npx mcp-voice-hooks install-hooks
+
+# Add the MCP server to the current project (one time)
+claude mcp add voice-hooks npx mcp-voice-hooks
+
+# Start Claude Code
+claude
+```
+
+Then open the voice interface at <http://localhost:5111> in chrome or safari and click "Start Listening".
+
 ## Overview
 
 mcp-voice-hooks enables continuous voice conversations with AI assistants by:
@@ -24,21 +39,6 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
 - ✅ **Chrome**: Full support for speech recognition, browser text-to-speech, and system text-to-speech
 - ⚠️ **Safari**: Full support for speech recognition, but only system text-to-speech is supported
 - ❌ **Edge**: Speech recognition not working on Apple Silicon (language-not-supported error)
-
-## Quick Start
-
-```bash
-# Install hooks in the current project directory (one time)
-npx mcp-voice-hooks install-hooks
-
-# Add the MCP server to the current project (one time)
-claude mcp add voice-hooks npx mcp-voice-hooks
-
-# Start Claude Code
-claude
-```
-
-Then open the voice interface at <http://localhost:5111> and start speaking!
 
 You need to send one text message to Claude to trigger the voice hooks.
 
