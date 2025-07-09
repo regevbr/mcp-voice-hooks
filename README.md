@@ -8,7 +8,7 @@ Mac only for now.
 
 ## Demo
 
-[![Voice Hooks Demo](https://img.youtube.com/vi/KpkxvJ65gbM/0.jpg)](https://youtu.be/KpkxvJ65gbM)
+[![Voice Hooks Demo](https://img.youtube.com/vi/zx2aXTmWYYQ/0.jpg)](https://youtu.be/zx2aXTmWYYQ)
 
 ## Overview
 
