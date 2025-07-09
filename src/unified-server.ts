@@ -195,6 +195,9 @@ async function waitForUtteranceCore() {
   const startTime = Date.now();
 
   debugLog(`[WaitCore] Starting wait_for_utterance (${secondsToWait}s)`);
+  
+  // Notify frontend that wait has started
+  notifyWaitStatus(true);
 
   let firstTime = true;
 
@@ -203,6 +206,7 @@ async function waitForUtteranceCore() {
     // Check if voice input is still active
     if (!voicePreferences.voiceInputActive) {
       debugLog('[WaitCore] Voice input deactivated during wait_for_utterance');
+      notifyWaitStatus(false); // Notify wait has ended
       return {
         success: true,
         utterances: [],
@@ -227,6 +231,7 @@ async function waitForUtteranceCore() {
         queue.markDelivered(u.id);
       });
 
+      notifyWaitStatus(false); // Notify wait has ended
       return {
         success: true,
         utterances: sortedUtterances.map(u => ({
@@ -251,6 +256,7 @@ async function waitForUtteranceCore() {
   }
 
   // Timeout reached - no utterances found
+  notifyWaitStatus(false); // Notify wait has ended
   return {
     success: true,
     utterances: [],
@@ -519,6 +525,14 @@ app.get('/api/tts-events', (_req: Request, res: Response) => {
 // Helper function to notify all connected TTS clients
 function notifyTTSClients(text: string) {
   const message = JSON.stringify({ type: 'speak', text });
+  ttsClients.forEach(client => {
+    client.write(`data: ${message}\n\n`);
+  });
+}
+
+// Helper function to notify all connected clients about wait status
+function notifyWaitStatus(isWaiting: boolean) {
+  const message = JSON.stringify({ type: 'waitStatus', isWaiting });
   ttsClients.forEach(client => {
     client.write(`data: ${message}\n\n`);
   });

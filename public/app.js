@@ -369,6 +369,8 @@ class VoiceHooksClient {
 
                 if (data.type === 'speak' && data.text) {
                     this.speakText(data.text);
+                } else if (data.type === 'waitStatus') {
+                    this.handleWaitStatus(data.isWaiting);
                 }
             } catch (error) {
                 console.error('Failed to parse TTS event:', error);
@@ -656,6 +658,20 @@ class VoiceHooksClient {
             // Hide both warnings if no voice selected
             this.rateWarning.style.display = 'none';
             this.systemVoiceInfo.style.display = 'none';
+        }
+    }
+
+    handleWaitStatus(isWaiting) {
+        const listeningIndicatorText = this.listeningIndicator.querySelector('span');
+        
+        if (isWaiting) {
+            // Claude is waiting for voice input
+            listeningIndicatorText.textContent = 'Claude is paused and waiting for voice input';
+            this.debugLog('Claude is waiting for voice input');
+        } else {
+            // Back to normal listening state
+            listeningIndicatorText.textContent = 'Listening...';
+            this.debugLog('Claude finished waiting');
         }
     }
 }
