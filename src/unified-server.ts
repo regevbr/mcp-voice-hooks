@@ -357,7 +357,7 @@ app.post('/api/validate-action', (req: Request, res: Response) => {
 });
 
 // Unified hook handler
-function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'): { decision: 'approve' | 'block', reason?: string } | Promise<{ decision: 'approve' | 'block', reason?: string }> {
+function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop' | 'post-tool'): { decision: 'approve' | 'block', reason?: string } | Promise<{ decision: 'approve' | 'block', reason?: string }> {
   const voiceResponsesEnabled = voicePreferences.voiceResponsesEnabled;
   const voiceInputActive = voicePreferences.voiceInputActive;
 
@@ -492,6 +492,20 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
     };
   }
 
+  // 7. Handle post-tool
+  if (attemptedAction === 'post-tool') {
+    // Track tool use timestamp
+    lastToolUseTimestamp = new Date();
+    
+    // Post-tool hooks process the same logic as pre-tool (auto-dequeue and delivered checks)
+    // The difference is that blocking is advisory rather than enforced
+    // Auto-dequeue is already handled in step 1 above
+    // Check for delivered utterances is already handled in step 2 above
+    
+    // If we got here, no action needed
+    return { decision: 'approve' };
+  }
+
   // Default to approve (shouldn't reach here)
   return { decision: 'approve' };
 }
@@ -516,6 +530,13 @@ app.post('/api/hooks/pre-speak', (_req: Request, res: Response) => {
 // Pre-wait hook endpoint
 app.post('/api/hooks/pre-wait', (_req: Request, res: Response) => {
   const result = handleHookRequest('wait');
+  res.json(result);
+});
+
+// Post-tool hook endpoint
+app.post('/api/hooks/post-tool', (_req: Request, res: Response) => {
+  // Use the unified handler with 'post-tool' action
+  const result = handleHookRequest('post-tool');
   res.json(result);
 });
 

@@ -110,6 +110,17 @@ async function configureClaudeCodeSettings() {
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^(?!mcp__voice-hooks__).*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s -X POST \"http://localhost:${MCP_VOICE_HOOKS_PORT:-5111}/api/hooks/post-tool\" || echo '{}'"
+          }
+        ]
+      }
     ]
   };
 
