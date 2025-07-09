@@ -427,7 +427,49 @@ app.post('/api/hooks/pre-tool', (_req: Request, res: Response) => {
   res.json(result);
 });
 
-app.post('/api/hooks/stop', (_req: Request, res: Response) => {
+app.post('/api/hooks/stop', async (_req: Request, res: Response) => {
+  const voiceInputActive = voicePreferences.voiceInputActive;
+  debugLog(`[Stop Hook] Called, voice input active: ${voiceInputActive}`);
+  
+  // If voice input is active, automatically call wait_for_utterance
+  if (voiceInputActive) {
+    try {
+      debugLog(`[Stop Hook] Calling wait_for_utterance...`);
+      const response = await fetch(`http://localhost:${HTTP_PORT}/api/wait-for-utterances`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json() as any;
+      debugLog(`[Stop Hook] wait_for_utterance response: ${JSON.stringify(data)}`);
+
+      // If utterances were found, block and return them
+      if (data.utterances && data.utterances.length > 0) {
+        const utteranceTexts = data.utterances
+          .map((u: any) => `"${u.text}"`)
+          .join(', ');
+        
+        res.json({
+          decision: 'block',
+          reason: `Found ${data.utterances.length} new utterance(s) during wait: ${utteranceTexts}. Assistant should process these utterances.`
+        });
+        return;
+      }
+
+      // If no utterances found (including when voice was deactivated), approve stop
+      res.json({
+        decision: 'approve',
+        reason: data.message || 'No utterances found during wait'
+      });
+      return;
+    } catch (error) {
+      debugLog(`[Stop Hook] Error calling wait_for_utterance: ${error}`);
+      // On error, fall back to standard behavior
+    }
+  }
+  
+  // For all other cases, use the standard handler
   const result = handleHookRequest('stop');
   res.json(result);
 });
