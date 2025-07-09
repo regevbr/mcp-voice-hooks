@@ -162,11 +162,9 @@ app.post('/api/dequeue-utterances', (req: Request, res: Response) => {
     return;
   }
 
-  const { limit = 10 } = req.body;
   const pendingUtterances = queue.utterances
     .filter(u => u.status === 'pending')
-    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-    .slice(0, limit);
+    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
   // Mark as delivered
   pendingUtterances.forEach(u => {
@@ -628,13 +626,7 @@ if (IS_MCP_MANAGED) {
           description: 'Dequeue pending utterances and mark them as delivered',
           inputSchema: {
             type: 'object',
-            properties: {
-              limit: {
-                type: 'number',
-                description: 'Maximum number of utterances to dequeue (default: 10)',
-                default: 10,
-              },
-            },
+            properties: {},
           },
         },
         {
@@ -668,11 +660,10 @@ if (IS_MCP_MANAGED) {
 
     try {
       if (name === 'dequeue_utterances') {
-        const limit = (args?.limit as number) ?? 10;
         const response = await fetch(`http://localhost:${HTTP_PORT}/api/dequeue-utterances`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ limit }),
+          body: JSON.stringify({}),
         });
 
         const data = await response.json() as any;

@@ -66,11 +66,9 @@ describe('Voice Input State Error Handling', () => {
         return;
       }
 
-      const { limit = 10 } = req.body;
       const pendingUtterances = queue.utterances
         .filter(u => u.status === 'pending')
-        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-        .slice(0, limit);
+        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
       // Mark as delivered
       pendingUtterances.forEach(u => {
@@ -163,7 +161,7 @@ describe('Voice Input State Error Handling', () => {
       expect(response.body.utterances[1].text).toBe('Test utterance 1');
     });
 
-    it('should respect the limit parameter when voice input is active', async () => {
+    it('should dequeue all pending utterances when voice input is active', async () => {
       // Enable voice input
       await request(app)
         .post('/api/voice-input-state')
@@ -177,11 +175,11 @@ describe('Voice Input State Error Handling', () => {
 
       const response = await request(app)
         .post('/api/dequeue-utterances')
-        .send({ limit: 3 })
+        .send({})
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.utterances).toHaveLength(3);
+      expect(response.body.utterances).toHaveLength(5);
     });
   });
 

@@ -52,10 +52,8 @@ describe('utterance state transitions', () => {
 
     // Dequeue endpoint
     app.post('/api/dequeue-utterances', (req, res) => {
-      const { limit = 10 } = req.body;
       const pendingUtterances = queue.utterances
-        .filter((u: any) => u.status === 'pending')
-        .slice(0, limit);
+        .filter((u: any) => u.status === 'pending');
 
       pendingUtterances.forEach((u: any) => {
         queue.markDelivered(u.id);
@@ -141,17 +139,17 @@ describe('utterance state transitions', () => {
       await request(app).post('/api/potential-utterances').send({ text: 'Second' });
       await request(app).post('/api/potential-utterances').send({ text: 'Third' });
 
-      // Dequeue with limit
+      // Dequeue all pending utterances
       await request(app)
         .post('/api/dequeue-utterances')
-        .send({ limit: 2 });
+        .send({});
 
-      // Verify partial delivery
+      // Verify all are delivered
       const status = await request(app).get('/api/utterances/status');
       expect(status.body).toMatchObject({
         total: 3,
-        pending: 1,
-        delivered: 2,
+        pending: 0,
+        delivered: 3,
         responded: 0
       });
     });
@@ -166,7 +164,7 @@ describe('utterance state transitions', () => {
 
       // Add and deliver utterance
       await request(app).post('/api/potential-utterances').send({ text: 'Hello' });
-      await request(app).post('/api/dequeue-utterances').send({ limit: 10 });
+      await request(app).post('/api/dequeue-utterances').send({});
 
       // Verify delivered state
       let status = await request(app).get('/api/utterances/status');
@@ -189,29 +187,29 @@ describe('utterance state transitions', () => {
       });
     });
 
-    it('should only mark delivered utterances as responded', async () => {
-      // Add multiple utterances in different states
+    it('should mark all delivered utterances as responded', async () => {
+      // Add multiple utterances
       await request(app).post('/api/potential-utterances').send({ text: 'First' });
       await request(app).post('/api/potential-utterances').send({ text: 'Second' });
       await request(app).post('/api/potential-utterances').send({ text: 'Third' });
 
-      // Dequeue only first two
-      await request(app).post('/api/dequeue-utterances').send({ limit: 2 });
+      // Dequeue all utterances
+      await request(app).post('/api/dequeue-utterances').send({});
 
       // Speak response
       const speakResponse = await request(app)
         .post('/api/speak')
         .send({ text: 'Response' });
 
-      expect(speakResponse.body.respondedCount).toBe(2);
+      expect(speakResponse.body.respondedCount).toBe(3);
 
       // Verify states
       const status = await request(app).get('/api/utterances/status');
       expect(status.body).toMatchObject({
         total: 3,
-        pending: 1,
+        pending: 0,
         delivered: 0,
-        responded: 2
+        responded: 3
       });
     });
 
@@ -260,12 +258,12 @@ describe('utterance state transitions', () => {
     it('should handle multiple conversation turns', async () => {
       // First turn
       await request(app).post('/api/potential-utterances').send({ text: 'Hello' });
-      await request(app).post('/api/dequeue-utterances').send({ limit: 10 });
+      await request(app).post('/api/dequeue-utterances').send({});
       await request(app).post('/api/speak').send({ text: 'Hi there!' });
 
       // Second turn
       await request(app).post('/api/potential-utterances').send({ text: 'How are you?' });
-      await request(app).post('/api/dequeue-utterances').send({ limit: 10 });
+      await request(app).post('/api/dequeue-utterances').send({});
       await request(app).post('/api/speak').send({ text: 'I am doing well!' });
 
       // Verify final state
