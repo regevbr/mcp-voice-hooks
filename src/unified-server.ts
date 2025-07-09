@@ -180,23 +180,21 @@ app.post('/api/dequeue-utterances', (req: Request, res: Response) => {
   });
 });
 
-// Wait for utterance endpoint
-app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
+// Shared wait for utterance logic
+async function waitForUtteranceCore() {
   // Check if voice input is active
   if (!voicePreferences.voiceInputActive) {
-    res.status(400).json({
+    return {
       success: false,
       error: 'Voice input is not active. Cannot wait for utterances when voice input is disabled.'
-    });
-    return;
+    };
   }
 
   const secondsToWait = WAIT_TIMEOUT_SECONDS;
   const maxWaitMs = secondsToWait * 1000;
   const startTime = Date.now();
 
-  debugLog(`[Server] Starting wait_for_utterance (${secondsToWait}s)`);
-
+  debugLog(`[WaitCore] Starting wait_for_utterance (${secondsToWait}s)`);
 
   let firstTime = true;
 
@@ -204,14 +202,13 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
   while (Date.now() - startTime < maxWaitMs) {
     // Check if voice input is still active
     if (!voicePreferences.voiceInputActive) {
-      debugLog('[Server] Voice input deactivated during wait_for_utterance');
-      res.json({
+      debugLog('[WaitCore] Voice input deactivated during wait_for_utterance');
+      return {
         success: true,
         utterances: [],
         message: 'Voice input was deactivated',
         waitTime: Date.now() - startTime,
-      });
-      return;
+      };
     }
 
     const pendingUtterances = queue.utterances.filter(
@@ -230,7 +227,7 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
         queue.markDelivered(u.id);
       });
 
-      res.json({
+      return {
         success: true,
         utterances: sortedUtterances.map(u => ({
           id: u.id,
@@ -240,8 +237,7 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
         })),
         count: pendingUtterances.length,
         waitTime: Date.now() - startTime,
-      });
-      return;
+      };
     }
 
     if (firstTime) {
@@ -255,13 +251,25 @@ app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
   }
 
   // Timeout reached - no utterances found
-
-  res.json({
+  return {
     success: true,
     utterances: [],
     message: `No utterances found after waiting ${secondsToWait} seconds.`,
     waitTime: maxWaitMs,
-  });
+  };
+}
+
+// Wait for utterance endpoint
+app.post('/api/wait-for-utterances', async (req: Request, res: Response) => {
+  const result = await waitForUtteranceCore();
+  
+  // If error response, return 400 status
+  if (!result.success && result.error) {
+    res.status(400).json(result);
+    return;
+  }
+  
+  res.json(result);
 });
 
 
@@ -402,14 +410,16 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop'):
       return (async () => {
         try {
           debugLog(`[Stop Hook] Auto-calling wait_for_utterance...`);
-          const response = await fetch(`http://localhost:${HTTP_PORT}/api/wait-for-utterances`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({}),
-          });
-
-          const data = await response.json() as any;
+          const data = await waitForUtteranceCore();
           debugLog(`[Stop Hook] wait_for_utterance response: ${JSON.stringify(data)}`);
+
+          // If error (voice input not active), treat as no utterances found
+          if (!data.success && data.error) {
+            return {
+              decision: 'approve' as const,
+              reason: data.error
+            };
+          }
 
           // If utterances were found, block and return them
           if (data.utterances && data.utterances.length > 0) {
