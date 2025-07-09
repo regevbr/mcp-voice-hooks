@@ -23,6 +23,7 @@ const __dirname = path.dirname(__filename);
 const WAIT_TIMEOUT_SECONDS = 60;
 const HTTP_PORT = process.env.MCP_VOICE_HOOKS_PORT ? parseInt(process.env.MCP_VOICE_HOOKS_PORT) : 5111;
 const AUTO_DELIVER_VOICE_INPUT = process.env.MCP_VOICE_HOOKS_AUTO_DELIVER_VOICE_INPUT !== 'false'; // Default to true (auto-deliver enabled)
+const PRE_TOOL_HOOK_ENABLED = process.env.MCP_VOICE_HOOKS_PRE_TOOL_HOOK_ENABLED !== 'false'; // Default to true (pre-tool hook enabled)
 
 // Promisified exec for async/await
 const execAsync = promisify(exec);
@@ -498,6 +499,12 @@ function handleHookRequest(attemptedAction: 'tool' | 'speak' | 'wait' | 'stop' |
 
 // Dedicated hook endpoints that return in Claude's expected format
 app.post('/api/hooks/pre-tool', (_req: Request, res: Response) => {
+  // Check if pre-tool hook is enabled
+  if (!PRE_TOOL_HOOK_ENABLED) {
+    res.json({ decision: 'approve' });
+    return;
+  }
+  
   const result = handleHookRequest('tool');
   res.json(result);
 });
@@ -702,11 +709,13 @@ app.listen(HTTP_PORT, async () => {
     console.log(`[HTTP] Server listening on http://localhost:${HTTP_PORT}`);
     console.log(`[Mode] Running in ${IS_MCP_MANAGED ? 'MCP-managed' : 'standalone'} mode`);
     console.log(`[Auto-deliver] Voice input auto-delivery is ${AUTO_DELIVER_VOICE_INPUT ? 'enabled (tools hidden)' : 'disabled (tools shown)'}`);
+    console.log(`[Pre-tool Hook] Pre-tool hook is ${PRE_TOOL_HOOK_ENABLED ? 'enabled' : 'disabled'}`);
   } else {
     // In MCP mode, write to stderr to avoid interfering with protocol
     console.error(`[HTTP] Server listening on http://localhost:${HTTP_PORT}`);
     console.error(`[Mode] Running in MCP-managed mode`);
     console.error(`[Auto-deliver] Voice input auto-delivery is ${AUTO_DELIVER_VOICE_INPUT ? 'enabled (tools hidden)' : 'disabled (tools shown)'}`);
+    console.error(`[Pre-tool Hook] Pre-tool hook is ${PRE_TOOL_HOOK_ENABLED ? 'enabled' : 'disabled'}`);
   }
   
   // Auto-open browser if no frontend connects within 3 seconds

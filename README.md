@@ -200,3 +200,20 @@ When auto-delivery is disabled:
 - Hooks no longer automatically process voice input
 - Claude must manually call the tools to receive voice input
 - This mode is useful for debugging or when you want manual control
+
+#### Pre-Tool Hook Control
+
+By default, the pre-tool hook is enabled to check for voice input before tool execution. To disable the pre-tool hook:
+
+```json
+{
+  "env": {
+    "MCP_VOICE_HOOKS_PRE_TOOL_HOOK_ENABLED": "false"
+  }
+}
+```
+
+When the pre-tool hook is disabled:
+- Tools will execute immediately without checking for pending voice input
+- Voice input will only be processed at the stop hook or post-tool hook
+- This can be useful for testing or when you want tools to execute without interruption

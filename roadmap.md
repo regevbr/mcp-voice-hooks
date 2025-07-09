@@ -49,7 +49,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] eliminate time-to-wait argument from wait_for_utterance tool. Default to 60 seconds.
 - [x] make the formatting consistent between the pre-tool auto-dequeue and the stop hook auto-wait. Both should have the speak reminder at the end if voice responses are enabled.
 - [ ] add configurable timeout for wait_for_utterance tool on frontend
-- [ ] investigate if post-tool hook can send info to assistant and dequeue in there
+- [x] investigate if post-tool hook can send info to assistant and dequeue in there
 - [x] add hint to post-tool hook that assistant should speak if there are unresponded utterances
 - [x] add note to dequeue_utterances response that spoken response is required (if voice responses are enabled)
 - [x] eliminate dequeue_utterances tool. Just dequeue in the hooks. Return the utterances and the note about spoken response.
@@ -59,6 +59,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] add a front-end indicator when Claude is waiting for utterances
 - [x] make the auto-wait and auto dequeue behavior configurable? Alternatively, eliminate the tools and just use the hooks.
   - [x] add a config option to hide the tools and enable auto-wait and auto-dequeue
+  - [ ] consider unifying the pre-tool hook to just exclude the dequeue tool. The speak and wait for utterance tools can use the same logic as other tools.
 - [ ] Make the "must speak" stop hook text more consistent with the pre-tool auto-dequeue, and auto-wait text about voice input being active
 - [ ] Investigate if we can show and hide MCP tools live without restarting claude code (e.g. hide SPEAK if voice responses are disabled)
 - [ ] MVP
