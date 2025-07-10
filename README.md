@@ -1,40 +1,52 @@
 # Claude Code Voice Mode
 
-Real-time voice interaction for Claude Code. Speak naturally while Claude works - interrupt, redirect, or provide continuous feedback without stopping.
+Voice Mode for Claude Code is a new tool that allows you to have a two-way conversation with Claude Code.
+
+It uses the new [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) to deliver voice input to Claude while it works.
+
+This lets you speak naturally while Claude works - interrupt, redirect, or provide continuous feedback without stopping.
 
 Optionally enable text-to-speech to have Claude speak back to you.
+
+Voice recognition and text-to-speech are handled by the browser, so there is nothing to download, and no API keys are needed.
 
 ## Demo Video
 
 [![Demo Video](https://img.youtube.com/vi/GbDatJtm8_k/0.jpg)](https://youtu.be/GbDatJtm8_k)
 
-## Quick Start
+## Installation
+
+### 1. Install Claude Code
 
 ```bash
-# Install Claude Code >= 1.0.45 (IMPORTANT: there is a bug in the @latest version, 1.0.44, so you must specify the version explicitly)
+# IMPORTANT: there is a bug in the @latest version of Claude Code (1.0.44), so you must specify the version explicitly
 npm install -g @anthropic-ai/claude-code@">=1.0.45"
+```
 
-# Install hooks in the current project directory (one time)
+### 2. Install Voice Mode
+
+```bash
 npx mcp-voice-hooks install-hooks
-
-# Add the MCP server to the current project (one time)
 claude mcp add voice-hooks npx mcp-voice-hooks
+```
 
-# Start Claude Code
+### 3. Start Claude Code
+
+```bash
 claude
 ```
 
-Then open the voice interface at <http://localhost:5111> in Chrome or Safari and click "Start Listening".
+## Usage
 
-## Overview
+### 1. Start Listening
 
-mcp-voice-hooks enables continuous voice conversations with AI assistants by:
+The browser interface will automatically open after 3 seconds (<http://localhost:5111>).
 
-- Capturing voice input in real-time through a web interface
-- Queuing utterances for processing by Claude Code
-- Using hooks to deliver voice input to Claude while it works
+Click "Start Listening"
 
-This allows natural interruptions like "No, stop that" or "Wait, try something else"
+### 2. Speak
+
+Say something to Claude. You will need to send one message in the Claude Code CLI to start the conversation.
 
 ## Browser Compatibility
 
