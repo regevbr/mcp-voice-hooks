@@ -28,8 +28,8 @@ npm install -g @anthropic-ai/claude-code@">=1.0.45"
 ### 2. Install Voice Mode
 
 ```bash
-npx mcp-voice-hooks install-hooks
-claude mcp add voice-hooks npx mcp-voice-hooks
+npx mcp-voice-hooks@latest install-hooks
+claude mcp add voice-hooks npx mcp-voice-hooks@latest
 ```
 
 ## Usage
