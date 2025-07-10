@@ -37,7 +37,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 - [x] make the disable pre-tool hook configuration more nuanced. It should only control if we deqeueue before tools. We always want to enforce speaking if there are unresponded utterances.
 - [ ] add a note to the pre-speak hook that the voice response was not delivered because the assistant needs to read the new utterances first
-- [ ] find the mcp-proxy logic and fix it or remove it from the readme
+- [x] find the mcp-proxy logic and fix it or remove it from the readme
 - [ ] clean up unused code (index.ts?)
 - [ ] switch to using command line arguments for the configuration (except fot the port becuase we need to reference that in the hooks)
 - [x] Remove the text input field from the frontend.
@@ -64,7 +64,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 - [x] add a front-end indicator when Claude is waiting for utterances
 - [x] make the auto-wait and auto dequeue behavior configurable? Alternatively, eliminate the tools and just use the hooks.
   - [x] add a config option to hide the tools and enable auto-wait and auto-dequeue
-- [ ] Make the "must speak" stop hook text more consistent with the pre-tool auto-dequeue, and auto-wait text about voice input being active
+- [ ] Make the "must speak" stop hook text more consistent with the pre-tool-auto-dequeue and auto-wait text about voice input being active
 - [ ] Investigate if we can show and hide MCP tools live without restarting claude code (e.g. hide SPEAK if voice responses are disabled)
 - [ ] MVP
   - [x] add a warning when adjusting rate for google voices that the google voices don't work well with speech rate

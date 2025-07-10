@@ -21,7 +21,7 @@ claude mcp add voice-hooks npx mcp-voice-hooks
 claude
 ```
 
-Then open the voice interface at <http://localhost:5111> in chrome or safari and click "Start Listening".
+Then open the voice interface at <http://localhost:5111> in Chrome or Safari and click "Start Listening".
 
 ## Overview
 
@@ -64,8 +64,6 @@ say "Hi, this is your Mac system voice"
 To use Siri voices with voice-hooks, you need to set your system voice and select "Mac System Voice" in the voice-hooks browser interface.
 
 Other downloaded voices will show up in the voice dropdown in the voice-hooks browser interface so you can select them there directly, instead of using the "Mac System Voice" option.
-
-### Selecting and downloading high quality Browser Voices
 
 ## Manual Hook Installation
 
@@ -128,29 +126,6 @@ claude
 - After making changes to **TypeScript files** (`src/*.ts`), you must run `npm run build`
 - For changes to **browser files** (`public/*`), just restart Claude Code
 - Then restart Claude Code to use the updated code
-
-### Hot Reload
-
-For hot reload during development, you can run the development server with
-
-```bash
-npm run dev-unified
-```
-
-and then configure claude to use the mcp proxy like so:
-
-```json
-{
-  "mcpServers": {
-    "voice-hooks": {
-      "type": "stdio",
-      "command": "npm",
-      "args": ["run", "mcp-proxy"],
-      "env": {}
-    }
-  }
-}
-```
 
 ### Configuration
 
