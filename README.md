@@ -4,13 +4,16 @@ Real-time voice interaction for Claude Code. Speak naturally while Claude works 
 
 Optionally enable text-to-speech to have Claude speak back to you.
 
-## Demo
+## Demo Video
 
-[![Voice Hooks Demo](https://img.youtube.com/vi/zx2aXTmWYYQ/0.jpg)](https://youtu.be/zx2aXTmWYYQ)
+[![Demo Video](https://img.youtube.com/vi/GbDatJtm8_k/0.jpg)](https://youtu.be/GbDatJtm8_k)
 
 ## Quick Start
 
 ```bash
+# Install Claude Code >= 1.0.45 (IMPORTANT: there is a bug in the @latest version, 1.0.44, so you must specify the version explicitly)
+npm install -g @anthropic-ai/claude-code@">=1.0.45"
+
 # Install hooks in the current project directory (one time)
 npx mcp-voice-hooks install-hooks
 
@@ -29,8 +32,9 @@ mcp-voice-hooks enables continuous voice conversations with AI assistants by:
 
 - Capturing voice input in real-time through a web interface
 - Queuing utterances for processing by Claude Code
-- Using hooks to ensure Claude checks for voice input before tool use and before stopping
-- Allowing natural interruptions like "No, stop that" or "Wait, try something else"
+- Using hooks to deliver voice input to Claude while it works
+
+This allows natural interruptions like "No, stop that" or "Wait, try something else"
 
 ## Browser Compatibility
 
@@ -94,10 +98,6 @@ This will:
 - Clean up voice hooks from your project's `.claude/settings.json`
 - Preserve any custom hooks you've added
 
-## Known Limitations
-
-- **Intermittent Stop Hook Execution**: Claude Code's Stop hooks are not triggered if the agent stops immediately after a tool call. This results in the assistant occasionally stopping without checking for voice input. This will be fixed in Claude Code 1.0.45. [github issue](https://github.com/anthropics/claude-code/issues/3113#issuecomment-3047324928)
-
 ## Development Mode
 
 If you're developing mcp-voice-hooks itself:
@@ -153,31 +153,6 @@ When running in MCP-managed mode, the browser will automatically open if no fron
 }
 ```
 
-#### Auto-Deliver Voice Input (Default)
-
-By default, mcp-voice-hooks automatically delivers voice input to Claude after tool use, before speaking, and before stopping:
-
-- The `dequeue_utterances` and `wait_for_utterance` tools are hidden
-- Voice input is automatically processed when Claude attempts any action
-- Claude receives voice input naturally without needing to explicitly call mcp-voice-hooks tools
-
-To disable auto-delivery:
-
-```json
-{
-  "env": {
-    "MCP_VOICE_HOOKS_AUTO_DELIVER_VOICE_INPUT": "false"
-  }
-}
-```
-
-When auto-delivery is disabled:
-
-- The `dequeue_utterances` and `wait_for_utterance` tools become visible
-- Hooks no longer automatically process voice input
-- Claude must manually call the tools to receive voice input
-- This mode is useful for debugging or when you want manual control
-
 #### Auto-Deliver Voice Input Before Tools
 
 By default, voice input is not automatically delivered before tool execution to allow for faster tool execution. To enable auto-delivery before tools:
@@ -203,3 +178,28 @@ When auto-delivery before tools is disabled (default):
 - Voice input will only be processed at the stop hook or post-tool hook
 - **Important**: Delivered utterances that require voice responses will still be enforced
 - This provides better performance when voice interruption before tools is not needed
+
+#### Auto-Deliver Voice Input (Default)
+
+By default, mcp-voice-hooks automatically delivers voice input to Claude after tool use, before speaking, and before stopping:
+
+- The `dequeue_utterances` and `wait_for_utterance` MCP tools are hidden from Claude
+- Voice input is automatically delivered when Claude performs any action
+- Claude receives voice input naturally without needing to explicitly call mcp-voice-hooks tools
+
+To disable auto-delivery:
+
+```json
+{
+  "env": {
+    "MCP_VOICE_HOOKS_AUTO_DELIVER_VOICE_INPUT": "false"
+  }
+}
+```
+
+When auto-delivery is disabled:
+
+- The `dequeue_utterances` and `wait_for_utterance` tools become visible
+- Hooks no longer automatically process voice input
+- Claude will be blocked from making tool calls until it manually dequeues voice input
+- This mode is useful for debugging or when you want manual control
