@@ -454,22 +454,20 @@ class VoiceHooksClient {
             this.voiceSelect.value = savedVoice;
             this.selectedVoice = savedVoice;
         } else {
-            // Look for Google UK English Male voice first
-            let googleUKMaleIndex = -1;
+            // Look for Google US English Male voice first
+            let googleUSMaleIndex = -1;
             let microsoftAndrewIndex = -1;
-            
+
             this.voices.forEach((voice, index) => {
                 const voiceName = voice.name.toLowerCase();
-                
-                // Check for Google UK English Male
+
+                // Check for Google US English Male
                 if (voiceName.includes('google') &&
-                    voiceName.includes('uk') &&
-                    voiceName.includes('english') &&
-                    voiceName.includes('male') &&
-                    !voiceName.includes('female')) {
-                    googleUKMaleIndex = index;
+                    voiceName.includes('us') &&
+                    voiceName.includes('english')) {
+                    googleUSMaleIndex = index;
                 }
-                
+
                 // Check for Microsoft Andrew Online
                 if (voiceName.includes('microsoft') &&
                     voiceName.includes('andrew') &&
@@ -478,14 +476,14 @@ class VoiceHooksClient {
                 }
             });
 
-            if (googleUKMaleIndex !== -1) {
-                this.selectedVoice = `browser:${googleUKMaleIndex}`;
+            if (googleUSMaleIndex !== -1) {
+                this.selectedVoice = `browser:${googleUSMaleIndex}`;
                 this.voiceSelect.value = this.selectedVoice;
-                this.debugLog('Defaulting to Google UK English Male voice');
+                this.debugLog('Defaulting to Google US English Male voice');
             } else if (microsoftAndrewIndex !== -1) {
                 this.selectedVoice = `browser:${microsoftAndrewIndex}`;
                 this.voiceSelect.value = this.selectedVoice;
-                this.debugLog('Google UK English Male not found, defaulting to Microsoft Andrew Online');
+                this.debugLog('Google US English Male not found, defaulting to Microsoft Andrew Online');
             } else {
                 this.selectedVoice = 'system';
                 this.debugLog('Preferred voices not found, using system default');
