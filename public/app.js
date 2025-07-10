@@ -153,7 +153,7 @@ class VoiceHooksClient {
         });
 
         this.testTTSBtn.addEventListener('click', () => {
-            this.speakText('Hi, this is Voice Mode for Claude Code. How can I help you today?');
+            this.speakText('This is Voice Mode for Claude Code. How can I help you today?');
         });
 
         // Voice toggle listeners
@@ -454,7 +454,42 @@ class VoiceHooksClient {
             this.voiceSelect.value = savedVoice;
             this.selectedVoice = savedVoice;
         } else {
-            this.selectedVoice = 'system';
+            // Look for Google UK English Male voice first
+            let googleUKMaleIndex = -1;
+            let microsoftAndrewIndex = -1;
+            
+            this.voices.forEach((voice, index) => {
+                const voiceName = voice.name.toLowerCase();
+                
+                // Check for Google UK English Male
+                if (voiceName.includes('google') &&
+                    voiceName.includes('uk') &&
+                    voiceName.includes('english') &&
+                    voiceName.includes('male') &&
+                    !voiceName.includes('female')) {
+                    googleUKMaleIndex = index;
+                }
+                
+                // Check for Microsoft Andrew Online
+                if (voiceName.includes('microsoft') &&
+                    voiceName.includes('andrew') &&
+                    voiceName.includes('online')) {
+                    microsoftAndrewIndex = index;
+                }
+            });
+
+            if (googleUKMaleIndex !== -1) {
+                this.selectedVoice = `browser:${googleUKMaleIndex}`;
+                this.voiceSelect.value = this.selectedVoice;
+                this.debugLog('Defaulting to Google UK English Male voice');
+            } else if (microsoftAndrewIndex !== -1) {
+                this.selectedVoice = `browser:${microsoftAndrewIndex}`;
+                this.voiceSelect.value = this.selectedVoice;
+                this.debugLog('Google UK English Male not found, defaulting to Microsoft Andrew Online');
+            } else {
+                this.selectedVoice = 'system';
+                this.debugLog('Preferred voices not found, using system default');
+            }
         }
 
         // Update warnings based on selected voice
@@ -663,7 +698,7 @@ class VoiceHooksClient {
 
     handleWaitStatus(isWaiting) {
         const listeningIndicatorText = this.listeningIndicator.querySelector('span');
-        
+
         if (isWaiting) {
             // Claude is waiting for voice input
             listeningIndicatorText.textContent = 'Claude is paused and waiting for voice input';
