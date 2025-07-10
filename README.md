@@ -1,10 +1,10 @@
-# Claude Code Voice Mode
+# Voice Mode for Claude Code
 
-Voice Mode for Claude Code is a new tool that allows you to have a two-way conversation with Claude Code.
+Voice Mode for Claude Code allows you to have a continuous two-way conversation with Claude Code, hands-free.
 
 It uses the new [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) to deliver voice input to Claude while it works.
 
-This lets you speak naturally while Claude works - interrupt, redirect, or provide continuous feedback without stopping.
+This lets you speak continuously to Claude - interrupt, redirect, or provide feedback without stopping.
 
 Optionally enable text-to-speech to have Claude speak back to you.
 
@@ -15,6 +15,8 @@ Voice recognition and text-to-speech are handled by the browser, so there is not
 [![Demo Video](https://img.youtube.com/vi/GbDatJtm8_k/0.jpg)](https://youtu.be/GbDatJtm8_k)
 
 ## Installation
+
+Installation is easy.
 
 ### 1. Install Claude Code
 
@@ -30,21 +32,21 @@ npx mcp-voice-hooks install-hooks
 claude mcp add voice-hooks npx mcp-voice-hooks
 ```
 
-### 3. Start Claude Code
+## Usage
+
+### 1. Start Claude Code
 
 ```bash
 claude
 ```
 
-## Usage
-
-### 1. Start Listening
+### 2. Start Listening
 
 The browser interface will automatically open after 3 seconds (<http://localhost:5111>).
 
 Click "Start Listening"
 
-### 2. Speak
+### 3. Speak
 
 Say something to Claude. You will need to send one message in the Claude Code CLI to start the conversation.
 
