@@ -35,6 +35,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
 
 ### Next tasks
 
+- [x] make sure voice input and voice responses are disabled when the browser is closed
 - [x] make the disable pre-tool hook configuration more nuanced. It should only control if we deqeueue before tools. We always want to enforce speaking if there are unresponded utterances.
 - [ ] add a note to the pre-speak hook that the voice response was not delivered because the assistant needs to read the new utterances first
 - [x] find the mcp-proxy logic and fix it or remove it from the readme

@@ -563,6 +563,18 @@ app.get('/api/tts-events', (_req: Request, res: Response) => {
   // Remove client on disconnect
   res.on('close', () => {
     ttsClients.delete(res);
+    
+    // If no clients remain, disable voice features
+    if (ttsClients.size === 0) {
+      debugLog('[SSE] Last browser disconnected, disabling voice features');
+      if (voicePreferences.voiceInputActive || voicePreferences.voiceResponsesEnabled) {
+        debugLog(`[SSE] Voice features disabled - Input: ${voicePreferences.voiceInputActive} -> false, Responses: ${voicePreferences.voiceResponsesEnabled} -> false`);
+        voicePreferences.voiceInputActive = false;
+        voicePreferences.voiceResponsesEnabled = false;
+      }
+    } else {
+      debugLog(`[SSE] Browser disconnected, ${ttsClients.size} client(s) remaining`);
+    }
   });
 });
 
