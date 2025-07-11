@@ -15,7 +15,12 @@ async function main() {
   const command = args[0];
 
   try {
-    if (command === 'install-hooks') {
+    if (command === '--version' || command === '-v') {
+      // Read package.json to get version
+      const packageJsonPath = path.join(__dirname, '..', 'package.json');
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      console.log(packageJson.version);
+    } else if (command === 'install-hooks') {
       console.log('🔧 Installing MCP Voice Hooks...');
 
       // Configure Claude Code settings automatically
