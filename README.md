@@ -90,7 +90,7 @@ The hooks are automatically installed/updated when the MCP server starts. Howeve
 npx mcp-voice-hooks install-hooks
 ```
 
-This will configure your project's `.claude/settings.json` with the necessary hook commands.
+This will configure your project's `.claude/settings.local.json` with the necessary hook commands.
 
 ## Uninstallation
 
@@ -108,7 +108,7 @@ npx mcp-voice-hooks uninstall
 
 This will:
 
-- Clean up voice hooks from your project's `.claude/settings.json`
+- Clean up voice hooks from your project's `.claude/settings.local.json`
 - Preserve any custom hooks you've added
 
 ## Development Mode
@@ -144,7 +144,7 @@ claude
 
 #### Port Configuration
 
-The default port is 5111. To use a different port, add to your project's `.claude/settings.json`:
+The default port is 5111. To use a different port, add to your project's `.claude/settings.local.json`:
 
 ```json
 {

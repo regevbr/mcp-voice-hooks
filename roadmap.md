@@ -325,7 +325,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [x] Handle server startup and configuration
 - [x] Implement `npx mcp-voice-hooks install-hooks` subcommand
   - [x] Auto-install/update hook files to user directory (`~/.mcp-voice-hooks/hooks/`)
-  - [x] Automatically configure project-specific Claude Code settings (`./.claude/settings.json`)
+  - [x] Automatically configure project-specific Claude Code settings (`./.claude/settings.local.json`)
   - [x] Handle first-time setup and updates seamlessly
 - [x] Create comprehensive documentation for npx installation
 - [ ] Test npx integration across different environments
@@ -359,7 +359,7 @@ Create an MCP server that enables real-time voice interaction with Claude Code a
   - [x] Ensure tests pass before allowing commits
   - [x] Require roadmap.md updates in every commit
 
-**Automatic Hook Configuration** (added to `~/.claude/settings.json`):
+**Automatic Hook Configuration** (added to `.claude/settings.local.json`):
 
    ```json
    {

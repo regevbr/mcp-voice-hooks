@@ -46,7 +46,9 @@ async function main() {
 // Automatically configure Claude Code settings
 async function configureClaudeCodeSettings() {
   const claudeDir = path.join(process.cwd(), '.claude');
-  const settingsPath = path.join(claudeDir, 'settings.json');
+  const settingsPath = path.join(claudeDir, 'settings.local.json');
+  // This was used in versions <= v1.0.21.
+  const oldSettingsPath = path.join(claudeDir, 'settings.json');
 
   console.log('⚙️  Configuring project Claude Code settings...');
 
@@ -54,6 +56,32 @@ async function configureClaudeCodeSettings() {
   if (!fs.existsSync(claudeDir)) {
     fs.mkdirSync(claudeDir, { recursive: true });
     console.log('✅ Created project .claude directory');
+  }
+
+  // Clean up old settings.json if it exists (for users upgrading from older versions)
+  if (fs.existsSync(oldSettingsPath)) {
+    try {
+      console.log('🔄 Found old settings.json, cleaning up voice hooks...');
+      const oldSettingsContent = fs.readFileSync(oldSettingsPath, 'utf8');
+      const oldSettings = JSON.parse(oldSettingsContent);
+
+      if (oldSettings.hooks) {
+        // Remove voice hooks from old settings
+        const cleanedHooks = removeVoiceHooks(oldSettings.hooks);
+
+        if (Object.keys(cleanedHooks).length === 0) {
+          delete oldSettings.hooks;
+        } else {
+          oldSettings.hooks = cleanedHooks;
+        }
+
+        // Write back cleaned settings
+        fs.writeFileSync(oldSettingsPath, JSON.stringify(oldSettings, null, 2));
+        console.log('✅ Cleaned up voice hooks from old settings.json');
+      }
+    } catch (error) {
+      console.log('⚠️  Could not clean up old settings.json:', error.message);
+    }
   }
 
   // Read existing settings or create new
@@ -189,40 +217,49 @@ async function runMCPServer() {
 
 // Uninstall MCP Voice Hooks
 async function uninstall() {
-  const claudeSettingsPath = path.join(process.cwd(), '.claude', 'settings.json');
+  const claudeDir = path.join(process.cwd(), '.claude');
+  const settingsLocalPath = path.join(claudeDir, 'settings.local.json');
+  const settingsPath = path.join(claudeDir, 'settings.json');
 
-  // Remove voice hooks from Claude settings
-  if (fs.existsSync(claudeSettingsPath)) {
-    try {
-      console.log('⚙️  Removing voice hooks from Claude settings...');
+  // Helper function to remove hooks from a settings file
+  async function removeHooksFromFile(filePath, fileName) {
+    if (fs.existsSync(filePath)) {
+      try {
+        console.log(`⚙️  Removing voice hooks from ${fileName}...`);
 
-      const settingsContent = fs.readFileSync(claudeSettingsPath, 'utf8');
-      const settings = JSON.parse(settingsContent);
+        const settingsContent = fs.readFileSync(filePath, 'utf8');
+        const settings = JSON.parse(settingsContent);
 
-      if (settings.hooks) {
-        // Remove voice hooks
-        const cleanedHooks = removeVoiceHooks(settings.hooks);
+        if (settings.hooks) {
+          // Remove voice hooks
+          const cleanedHooks = removeVoiceHooks(settings.hooks);
 
-        if (Object.keys(cleanedHooks).length === 0) {
-          // If no hooks remain, remove the hooks property entirely
-          delete settings.hooks;
+          if (Object.keys(cleanedHooks).length === 0) {
+            // If no hooks remain, remove the hooks property entirely
+            delete settings.hooks;
+          } else {
+            settings.hooks = cleanedHooks;
+          }
+
+          // Write updated settings
+          fs.writeFileSync(filePath, JSON.stringify(settings, null, 2));
+          console.log(`✅ Removed voice hooks from ${fileName}`);
         } else {
-          settings.hooks = cleanedHooks;
+          console.log(`ℹ️  No hooks found in ${fileName}`);
         }
-
-        // Write updated settings
-        fs.writeFileSync(claudeSettingsPath, JSON.stringify(settings, null, 2));
-        console.log('✅ Removed voice hooks from Claude settings');
-      } else {
-        console.log('ℹ️  No hooks found in Claude settings');
+      } catch (error) {
+        console.log(`⚠️  Could not update ${fileName}:`, error.message);
       }
-    } catch (error) {
-      console.log('⚠️  Could not update Claude settings:', error.message);
     }
-  } else {
-    console.log('ℹ️  No Claude settings file found in current project');
   }
 
+  // Remove hooks from both settings.local.json and settings.json (for backwards compatibility)
+  await removeHooksFromFile(settingsLocalPath, 'settings.local.json');
+  await removeHooksFromFile(settingsPath, 'settings.json');
+
+  if (!fs.existsSync(settingsLocalPath) && !fs.existsSync(settingsPath)) {
+    console.log('ℹ️  No Claude settings files found in current project');
+  }
 
   console.log('\n✅ Uninstallation complete!');
   console.log('👋 MCP Voice Hooks has been removed.');
