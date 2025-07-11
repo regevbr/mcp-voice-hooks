@@ -4,7 +4,7 @@ Voice Mode for Claude Code allows you to have a continuous two-way conversation 
 
 It uses the new [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) to deliver voice input to Claude while it works.
 
-This lets you speak continuously to Claude - interrupt, redirect, or provide feedback without stopping.
+This lets you speak continuously to Claude - interrupt, redirect, or provide feedback without stopping what Claude is doing.
 
 Optionally enable text-to-speech to have Claude speak back to you.
 
@@ -21,8 +21,7 @@ Installation is easy.
 ### 1. Install Claude Code
 
 ```bash
-# IMPORTANT: there is a bug in the @latest version of Claude Code (1.0.44), so you must specify the version explicitly
-npm install -g @anthropic-ai/claude-code@">=1.0.45"
+npm install -g @anthropic-ai/claude-code
 ```
 
 ### 2. Install Voice Mode
