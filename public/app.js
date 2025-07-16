@@ -25,6 +25,7 @@ class VoiceHooksClient {
         this.initializeTTSEvents();
 
         // TTS controls
+        this.languageSelect = document.getElementById('languageSelect');
         this.voiceSelect = document.getElementById('voiceSelect');
         this.speechRateSlider = document.getElementById('speechRate');
         this.speechRateInput = document.getElementById('speechRateInput');
@@ -123,6 +124,15 @@ class VoiceHooksClient {
         this.clearAllBtn.addEventListener('click', () => this.clearAllUtterances());
         this.listenBtn.addEventListener('click', () => this.toggleListening());
 
+        // Language filter
+        if (this.languageSelect) {
+            this.languageSelect.addEventListener('change', () => {
+                // Save language preference
+                localStorage.setItem('selectedLanguage', this.languageSelect.value);
+                // Repopulate voice list with filtered voices
+                this.populateVoiceList();
+            });
+        }
 
         // TTS controls
         this.voiceSelect.addEventListener('change', (e) => {
@@ -389,8 +399,48 @@ class VoiceHooksClient {
         };
     }
 
+    populateLanguageFilter() {
+        if (!this.languageSelect || !this.voices) return;
+
+        // Get current selection
+        const currentSelection = this.languageSelect.value || 'en-US';
+
+        // Clear existing options
+        this.languageSelect.innerHTML = '';
+
+        // Add "All Languages" option
+        const allOption = document.createElement('option');
+        allOption.value = 'all';
+        allOption.textContent = 'All Languages';
+        this.languageSelect.appendChild(allOption);
+
+        // Collect unique language codes
+        const languageCodes = new Set();
+        this.voices.forEach(voice => {
+            languageCodes.add(voice.lang);
+        });
+
+        // Sort and add language codes
+        Array.from(languageCodes).sort().forEach(lang => {
+            const option = document.createElement('option');
+            option.value = lang;
+            option.textContent = lang;
+            this.languageSelect.appendChild(option);
+        });
+
+        // Restore selection
+        this.languageSelect.value = currentSelection;
+        if (this.languageSelect.value !== currentSelection) {
+            // If saved selection not available, default to en-US
+            this.languageSelect.value = 'en-US';
+        }
+    }
+
     populateVoiceList() {
         if (!this.voiceSelect || !this.localVoicesGroup || !this.cloudVoicesGroup) return;
+
+        // First populate the language filter
+        this.populateLanguageFilter();
 
         // Clear existing browser voice options
         this.localVoicesGroup.innerHTML = '';
@@ -408,10 +458,23 @@ class VoiceHooksClient {
             'Fred', 'Junior', 'Kathy', 'Ralph'
         ];
 
-        // Filter and add only English voices
+        // Get selected language filter
+        const selectedLanguage = this.languageSelect ? this.languageSelect.value : 'en-US';
+
+        // Filter voices based on selected language
         this.voices.forEach((voice, index) => {
-            // Only include English voices (en-US, en-GB, en-AU, etc.)
-            if (voice.lang.toLowerCase().startsWith('en-')) {
+            const voiceLang = voice.lang;
+            let shouldInclude = false;
+
+            if (selectedLanguage === 'all') {
+                // Include all languages
+                shouldInclude = true;
+            } else {
+                // Check if voice matches selected language/locale
+                shouldInclude = voiceLang === selectedLanguage;
+            }
+
+            if (shouldInclude) {
                 // Check if voice should be excluded
                 const voiceName = voice.name;
                 const isExcluded = excludedVoices.some(excluded =>
@@ -587,6 +650,12 @@ class VoiceHooksClient {
 
         // Load selected voice (will be applied after voices load)
         this.selectedVoice = localStorage.getItem('selectedVoice') || 'system';
+
+        // Load selected language
+        const savedLanguage = localStorage.getItem('selectedLanguage');
+        if (savedLanguage && this.languageSelect) {
+            this.languageSelect.value = savedLanguage;
+        }
 
         // Update UI visibility
         this.updateVoiceOptionsVisibility();
