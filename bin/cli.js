@@ -146,7 +146,7 @@ async function configureClaudeCodeSettings() {
     ],
     "PostToolUse": [
       {
-        "matcher": "^(?!mcp__voice-hooks__).*",
+        "matcher": "^(?!mcp__voice-hooks__|ExitPlanMode).*",
         "hooks": [
           {
             "type": "command",
