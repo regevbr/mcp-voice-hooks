@@ -42,9 +42,13 @@ The browser interface will automatically open (<http://localhost:5111>).
 
 ### 3. Chat with Claude
 
-Claude will now be able to use the `speak` tool to read responses aloud.
+Claude can now read responses aloud using voice output.
 
-Type your questions to Claude as normal. Ask Claude to use the `speak` tool if you want audio responses.
+## Using Voice Output (Text-to-Speech)
+You have several options:
+
+1**Ask Claude to speak**: "Please speak your response" or "Use the speak tool to say hello"
+2**Natural conversation**: After using `/speak` once, Claude will often automatically speak subsequent responses
 
 ## Voice Input (Speech-to-Text)
 
@@ -52,9 +56,9 @@ Voice input is powered by OpenAI's Whisper running locally on your machine for c
 
 ### Using Voice Input
 
-1. **Press the Home key** (or Menu key on some keyboards) to start voice recording
+1. **Press the Home key** (or Menu key on some keyboards) to start voice recording (after the beep)
 2. **Speak your message** - transcription happens in real-time
-3. **Transcribed text is automatically typed** at your cursor position in Claude Code
+3. **Transcribed text is automatically typed** at your cursor position in Claude Code and will stop after a few seconds of silence
 
 ### Requirements
 
