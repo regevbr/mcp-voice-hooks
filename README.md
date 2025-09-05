@@ -1,10 +1,11 @@
-# Text-to-Speech for Claude Code
+# Voice Interface for Claude Code
 
-Text-to-Speech for Claude Code allows Claude to speak back to you using natural-sounding voices.
+A complete voice interface for Claude Code with both **Speech-to-Text** and **Text-to-Speech** capabilities.
 
-It uses the new [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) to enable Claude to speak responses aloud.
+- **🎤 Voice Input**: Speak to Claude using the Home key (powered by [Whisper](https://openai.com/research/whisper))
+- **🔊 Voice Output**: Claude can speak responses back to you using natural-sounding voices
 
-Choose from browser-based voices or high-quality Mac system voices. No API keys needed.
+Uses the new [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) for seamless voice interaction. No API keys needed - everything runs locally.
 
 ## Installation
 
@@ -45,13 +46,49 @@ Claude will now be able to use the `speak` tool to read responses aloud.
 
 Type your questions to Claude as normal. Ask Claude to use the `speak` tool if you want audio responses.
 
+## Voice Input (Speech-to-Text)
+
+Voice input is powered by OpenAI's Whisper running locally on your machine for complete privacy.
+
+### Using Voice Input
+
+1. **Press the Home key** (or Menu key on some keyboards) to start voice recording
+2. **Speak your message** - transcription happens in real-time
+3. **Transcribed text is automatically typed** at your cursor position in Claude Code
+
+### Requirements
+
+Voice input requires the following to be installed on your system:
+
+- **Python 3**: For running Whisper
+- **FFmpeg**: For audio processing (`brew install ffmpeg` on macOS)
+- **PortAudio**: For microphone access (`brew install portaudio` on macOS)
+
+These dependencies are automatically installed when you first run the MCP server.
+
+### How It Works
+
+1. The MCP server automatically downloads and sets up [whisper-typer-tool](https://github.com/regevbr/whisper-typer-tool)
+2. Whisper runs in the background as a local server
+3. Voice transcription happens entirely on your device - no data is sent anywhere
+4. Press Home key anywhere in your system to start voice input
+
+### Troubleshooting Voice Input
+
+If voice input isn't working:
+
+1. **Check dependencies**: Ensure Python 3, FFmpeg, and PortAudio are installed
+2. **Check permissions**: Grant microphone access when prompted
+3. **Test manually**: Navigate to `~/.mcp-voice-hooks/whisper-typer-tool` and run `python server.py`
+4. **Check logs**: Look for error messages when starting the MCP server
+
 ## Browser Compatibility
 
 - ✅ **Chrome**: Full support for browser text-to-speech and system text-to-speech
 - ⚠️ **Safari**: Full support for browser text-to-speech and system text-to-speech  
 - ⚠️ **Edge**: Limited voice selection, but functional
 
-## Voice Options
+## Voice Output (Text-to-Speech) Options
 
 ### System Voice (Recommended)
 - Uses Mac's built-in `say` command

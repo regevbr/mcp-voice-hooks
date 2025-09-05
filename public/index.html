@@ -82,6 +82,40 @@
         }
 
 
+        .stt-info {
+            background: #e8f5e8;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            border-left: 4px solid #28a745;
+        }
+
+        .stt-info h3 {
+            margin: 0 0 12px 0;
+            color: #155724;
+            font-size: 18px;
+        }
+
+        .stt-info p {
+            margin: 8px 0;
+            color: #155724;
+            line-height: 1.5;
+        }
+
+        .stt-info small {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .stt-info a {
+            color: #155724;
+            text-decoration: none;
+        }
+
+        .stt-info a:hover {
+            text-decoration: underline;
+        }
+
         .tts-settings {
             background: #f8f9fa;
             padding: 12px;
@@ -290,7 +324,12 @@
     <div class="container">
         <h1>Text-to-Speech for Claude Code</h1>
 
-
+        <div class="stt-info">
+            <h3>🎤 Voice Input</h3>
+            <p>Press the <strong>Home</strong> key (or <strong>Menu</strong> key on some keyboards) to start voice input with Whisper.</p>
+            <p>Voice transcription happens locally and types text directly at your cursor position.</p>
+            <small>Powered by <a href="https://github.com/regevbr/whisper-typer-tool" target="_blank">whisper-typer-tool</a></small>
+        </div>
 
         <div class="tts-settings">
             <h4>Text-to-Speech Settings</h4>

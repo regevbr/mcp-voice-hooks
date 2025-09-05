@@ -213,7 +213,7 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
 
   if (name === 'speak') {
     debugLog('[MCP] Serving speak prompt');
-    
+
     return {
       description: 'Instructions for Claude to use voice updates when communicating with users',
       messages: [
@@ -233,6 +233,8 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
 
 5. **When encountering errors**: Alert users to problems that require their attention
 
+6. **When completed processing(*: Alert users that you finished all your tasks
+
 Keep your spoken messages:
 - Concise and clear (1-2 sentences maximum)
 - Informative but not overwhelming
@@ -241,11 +243,10 @@ Keep your spoken messages:
 
 Do NOT use the speak tool for:
 - Every single message (avoid being overly chatty)
-- Routine confirmations that don't require immediate attention  
 - Detailed technical explanations (use text for those)
 - Repetitive updates during long-running processes
 
-Use your judgment to balance being helpful with being appropriately selective about when to speak.`
+Use your judgment to balance being helpful with being appropriately selective about when to speak but make sure the users always know that you are either done or waiting for his input`
           }
         }
       ]
