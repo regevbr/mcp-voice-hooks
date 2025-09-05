@@ -58,7 +58,7 @@ async function setupSTT() {
       await execAsync(`git clone ${STT_REPO} "${STT_DIR}"`);
       console.log('✅ Cloned whisper-typer-tool');
     }
-    
+
     // Install Python dependencies
     console.log('📦 Installing Python dependencies...');
     const requirementsPath = path.join(STT_DIR, 'requirements.txt');
@@ -84,15 +84,25 @@ function startSTTServer() {
   if (!isSTTInstalled()) {
     return null;
   }
-  
+
   try {
     const sttChild = spawn('python', ['whisper-typer-server.py'], {
       cwd: STT_DIR,
-      detached: true,
-      stdio: 'ignore'
+      stdio: ['ignore', 'ignore', 'pipe'], // Allow stderr for error handling
+      detached: false // Keep attached for better process management
     });
-    
-    sttChild.unref(); // Don't keep the parent process alive
+
+    // Handle STT server errors
+    sttChild.stderr?.on('data', (data) => {
+      console.warn('⚠️  STT server warning:', data.toString().trim());
+    });
+
+    sttChild.on('exit', (code, signal) => {
+      if (code !== 0 && code !== null) {
+        console.warn(`⚠️  STT server exited with code ${code}`);
+      }
+    });
+
     console.log('🎤 Started whisper-typer-tool server (PID:', sttChild.pid + ')');
     return sttChild;
   } catch (error) {
@@ -105,16 +115,17 @@ function startSTTServer() {
 async function runMCPServer() {
   // Setup STT first
   await setupSTT();
-  
+
   // Start STT server
   const sttChild = startSTTServer();
-  
+
   const serverPath = path.join(__dirname, '..', 'dist', 'unified-server.js');
 
   // Run the compiled JavaScript server
   const child = spawn('node', [serverPath, '--mcp-managed'], {
     stdio: 'inherit',
-    cwd: path.join(__dirname, '..')
+    cwd: path.join(__dirname, '..'),
+    detached: false // Keep attached for proper cleanup
   });
 
   child.on('error', (error) => {
@@ -128,20 +139,54 @@ async function runMCPServer() {
   });
 
   // Handle graceful shutdown
-  process.on('SIGINT', () => {
-    console.log('\n🛑 Shutting down...');
-    if (sttChild) {
-      sttChild.kill('SIGINT');
+  const shutdown = (signal) => {
+    console.log(`\n🛑 Shutting down (${signal})...`);
+    
+    // Kill STT server first
+    if (sttChild && !sttChild.killed) {
+      console.log('🔄 Stopping STT server...');
+      sttChild.kill(signal);
+      
+      // Force kill STT after timeout
+      setTimeout(() => {
+        if (!sttChild.killed) {
+          console.log('⚠️  Force killing STT server...');
+          sttChild.kill('SIGKILL');
+        }
+      }, 2000);
     }
-    child.kill('SIGINT');
-  });
+    
+    // Kill main server
+    if (!child.killed) {
+      console.log('🔄 Stopping MCP server...');
+      child.kill(signal);
+      
+      // Force kill main server after timeout
+      setTimeout(() => {
+        if (!child.killed) {
+          console.log('⚠️  Force killing MCP server...');
+          child.kill('SIGKILL');
+        }
+      }, 2000);
+    }
+    
+    // Exit after giving processes time to clean up
+    setTimeout(() => {
+      console.log('✅ Shutdown complete');
+      process.exit(0);
+    }, 3000);
+  };
 
-  process.on('SIGTERM', () => {
-    console.log('\n🛑 Shutting down...');
-    if (sttChild) {
-      sttChild.kill('SIGTERM');
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('exit', () => {
+    // Last resort cleanup
+    if (sttChild && !sttChild.killed) {
+      sttChild.kill('SIGKILL');
     }
-    child.kill('SIGTERM');
+    if (child && !child.killed) {
+      child.kill('SIGKILL');
+    }
   });
 }
 

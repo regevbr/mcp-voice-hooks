@@ -246,7 +246,10 @@ Do NOT use the speak tool for:
 - Detailed technical explanations (use text for those)
 - Repetitive updates during long-running processes
 
-Use your judgment to balance being helpful with being appropriately selective about when to speak but make sure the users always know that you are either done or waiting for his input`
+Use your judgment to balance being helpful with being appropriately selective about when to speak but make sure the users always know that you are either done or waiting for his input
+
+Pleaes continue the conversation from the previous message. 
+`
           }
         }
       ]
@@ -259,10 +262,12 @@ Use your judgment to balance being helpful with being appropriately selective ab
 // In TTS-only mode, we don't need complex hook validation
 // The speak tool will handle its own validation
 
+let httpServer: any = null;
+
 async function startUnifiedServer() {
   // Start HTTP server
   const httpPromise = new Promise<void>((resolve, reject) => {
-    app.listen(HTTP_PORT, (err) => {
+    httpServer = app.listen(HTTP_PORT, (err) => {
         if (err) {
             reject(err);
         }
@@ -271,43 +276,93 @@ async function startUnifiedServer() {
     });
   });
 
-  // Auto-open browser if enabled and in MCP mode
-  if (IS_MCP_MANAGED && AUTO_OPEN_BROWSER) {
-    try {
-      await execAsync(`open http://localhost:${HTTP_PORT}`);
-      debugLog('[Browser] Auto-opened browser');
-    } catch (error) {
-      debugLog(`[Browser] Failed to auto-open browser: ${error}`);
-    }
-  }
-
-  if (IS_MCP_MANAGED) {
-    // Start MCP server with stdio transport
-    const transport = new StdioServerTransport();
-    debugLog('[MCP] Starting stdio transport');
-    await server.connect(transport);
-    debugLog('[MCP] Connected to stdio transport');
-  }
-
   await httpPromise;
 
-  if (!IS_MCP_MANAGED) {
+    // Auto-open browser if enabled and in MCP mode
+    if (IS_MCP_MANAGED && AUTO_OPEN_BROWSER) {
+        try {
+            await execAsync(`open http://localhost:${HTTP_PORT}`);
+            debugLog('[Browser] Auto-opened browser');
+        } catch (error) {
+            debugLog(`[Browser] Failed to auto-open browser: ${error}`);
+        }
+    }
+
+    if (IS_MCP_MANAGED) {
+        // Start MCP server with stdio transport
+        const transport = new StdioServerTransport();
+        debugLog('[MCP] Starting stdio transport');
+        await server.connect(transport);
+        debugLog('[MCP] Connected to stdio transport');
+    }
+
+    if (!IS_MCP_MANAGED) {
     console.error(`[HTTP] Server listening on http://localhost:${HTTP_PORT}`);
     console.log('TTS-only server started successfully!');
     console.log(`Open http://localhost:${HTTP_PORT} to configure text-to-speech settings`);
   }
 }
 
+// Cleanup function
+function cleanup() {
+  debugLog('[Cleanup] Starting server cleanup...');
+
+  // Close HTTP server
+  if (httpServer) {
+    debugLog('[Cleanup] Closing HTTP server...');
+    httpServer.close((err: any) => {
+      if (err) {
+        debugLog(`[Cleanup] Error closing HTTP server: ${err}`);
+      } else {
+        debugLog('[Cleanup] HTTP server closed');
+      }
+    });
+  }
+
+  // Clear SSE clients
+  debugLog(`[Cleanup] Closing ${sseClients.length} SSE connections...`);
+  sseClients.forEach((client, index) => {
+    try {
+      client.end();
+      debugLog(`[Cleanup] Closed SSE client ${index + 1}`);
+    } catch (error) {
+      debugLog(`[Cleanup] Error closing SSE client ${index + 1}: ${error}`);
+    }
+  });
+  sseClients.length = 0;
+
+  debugLog('[Cleanup] Server cleanup complete');
+}
+
+// Handle graceful shutdown
+process.on('SIGINT', () => {
+  debugLog('[Signal] Received SIGINT, shutting down gracefully...');
+  cleanup();
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  debugLog('[Signal] Received SIGTERM, shutting down gracefully...');
+  cleanup();
+  process.exit(0);
+});
+
+process.on('exit', (code) => {
+  debugLog(`[Process] Exiting with code ${code}`);
+});
+
 // Handle uncaught errors
 process.on('uncaughtException', (error) => {
   debugLog(`[Error] Uncaught exception: ${error}`);
   console.error('Uncaught exception:', error);
+  cleanup();
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
   debugLog(`[Error] Unhandled rejection at ${promise}: ${reason}`);
   console.error('Unhandled rejection at:', promise, 'reason:', reason);
+  cleanup();
   process.exit(1);
 });
 

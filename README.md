@@ -5,7 +5,7 @@ A complete voice interface for Claude Code with both **Speech-to-Text** and **Te
 - **🎤 Voice Input**: Speak to Claude using the Home key (powered by [Whisper](https://openai.com/research/whisper))
 - **🔊 Voice Output**: Claude can speak responses back to you using natural-sounding voices
 
-**Everything runs locally for complete privacy - no API keys needed, no data sent to external services.**
+**Privacy-focused design with local processing options - no API keys needed.**
 
 ## Installation
 
@@ -92,6 +92,10 @@ If voice input isn't working:
 - ⚠️ **Safari**: Full support for browser text-to-speech and system text-to-speech  
 - ⚠️ **Edge**: Limited voice selection, but functional
 
+**Note**: Browser voices may use cloud services for high-quality speech synthesis. Check voice names for indicators:
+- Local voices: Usually have simple names like "Alex", "Samantha" 
+- Cloud voices: Often have longer names or quality indicators like "Google US English", "Microsoft Zira"
+
 ## Voice Output (Text-to-Speech) Options
 
 ### System Voice (Recommended)
@@ -100,8 +104,8 @@ If voice input isn't working:
 - Download additional voices in System Preferences > Accessibility > Spoken Content > System Voice
 
 ### Browser Voices
-- **Cloud voices**: High-quality voices that require internet connection
-- **Local voices**: Lower-quality voices that work offline
+- **Cloud voices**: High-quality voices that require internet connection and may send data to external services
+- **Local voices**: Lower-quality voices that work offline and keep everything on your device
 
 ## Configuration
 
@@ -116,20 +120,20 @@ Voice preferences are saved in your browser's localStorage and persist across se
 
 ## Privacy & Local Processing
 
-**Everything runs on your device - your voice data never leaves your computer.**
+**Voice Input is 100% local. Voice Output can be local or cloud-based depending on your choice.**
 
-### Voice Input (STT)
-- **100% Local**: All speech recognition happens locally using OpenAI's Whisper model
+### Voice Input (STT) - 100% Local
+- **Always Local**: All speech recognition happens locally using OpenAI's Whisper model
 - **No Network Required**: Transcription works completely offline after initial setup
 - **No Data Sharing**: Audio never leaves your device - nothing sent to external services
 - **Complete Privacy**: Your conversations remain private on your machine
 
-### Voice Output (TTS)
+### Voice Output (TTS) - You Choose
 - **System Voice (Recommended)**: Uses your operating system's built-in speech synthesis (completely local)
 - **Browser Voices**: 
-  - Local voices work offline and keep everything on your device
-  - Cloud voices require internet but can be avoided for complete privacy
-- **Your Choice**: Select local-only options for 100% offline operation
+  - **Local voices**: Work offline and keep everything on your device
+  - **Cloud voices**: High-quality but may send text to external services (Google, Microsoft, etc.)
+- **Privacy Control**: Select system voice or local browser voices for 100% offline operation
 
 ## Troubleshooting
 
