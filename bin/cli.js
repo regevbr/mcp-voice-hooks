@@ -39,7 +39,7 @@ const STT_REPO = 'https://github.com/regevbr/whisper-typer-tool.git';
 
 // Check if whisper-typer-tool is installed
 function isSTTInstalled() {
-  return fs.existsSync(STT_DIR) && fs.existsSync(path.join(STT_DIR, 'server.py'));
+  return fs.existsSync(STT_DIR) && fs.existsSync(path.join(STT_DIR, 'whisper-typer-server.py'));
 }
 
 // Install or update whisper-typer-tool
@@ -86,7 +86,7 @@ function startSTTServer() {
   }
   
   try {
-    const sttChild = spawn('python', ['server.py'], {
+    const sttChild = spawn('python', ['whisper-typer-server.py'], {
       cwd: STT_DIR,
       detached: true,
       stdio: 'ignore'

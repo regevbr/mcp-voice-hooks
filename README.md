@@ -48,7 +48,7 @@ Claude can now read responses aloud using voice output.
 You have several options:
 
 1**Ask Claude to speak**: "Please speak your response" or "Use the speak tool to say hello"
-2**Natural conversation**: After using `/speak` once, Claude will often automatically speak subsequent responses
+2**Natural conversation**: After using `/voice-hooks:spea` once, Claude will often automatically speak subsequent responses
 
 ## Voice Input (Speech-to-Text)
 
