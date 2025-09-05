@@ -124,7 +124,6 @@ NEVER proactively create documentation files (*.md) or README files. Only create
 
 Read the docs before responding to the user:
 
-- roadmap.md
 - README.md
 - <https://modelcontextprotocol.io/tutorials/building-mcp-with-llms>
 - <https://docs.anthropic.com/en/docs/claude-code/hooks>
