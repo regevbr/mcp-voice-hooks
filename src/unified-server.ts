@@ -13,6 +13,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -118,7 +120,7 @@ function broadcastTTSEvent(eventData: any) {
 // Create MCP server
 const server = new Server(
   { name: 'mcp-voice-hooks', version: '1.0.0' },
-  { capabilities: { tools: {} } }
+  { capabilities: { tools: {}, prompts: {} } }
 );
 
 // List available tools
@@ -189,6 +191,68 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 
   throw new Error(`Unknown tool: ${name}`);
+});
+
+// List available prompts
+server.setRequestHandler(ListPromptsRequestSchema, async () => {
+  const prompts = [
+    {
+      name: 'speak',
+      description: 'Instructions for Claude to use voice updates when communicating with users',
+      arguments: []
+    }
+  ];
+
+  debugLog(`[MCP] Listed ${prompts.length} prompts`);
+  return { prompts };
+});
+
+// Handle prompt requests
+server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+  const { name } = request.params;
+
+  if (name === 'speak') {
+    debugLog('[MCP] Serving speak prompt');
+    
+    return {
+      description: 'Instructions for Claude to use voice updates when communicating with users',
+      messages: [
+        {
+          role: 'user',
+          content: {
+            type: 'text',
+            text: `You are an AI assistant with text-to-speech capabilities. Please use the 'speak' tool to provide voice updates to users in the following situations:
+
+1. **Before running tools**: Briefly announce what you're about to do (e.g., "I'm going to run the build command now")
+
+2. **After completing tasks**: Confirm completion and summarize key results (e.g., "The build completed successfully" or "I found 3 errors that need fixing")
+
+3. **When asking questions**: When you need clarification or input from the user, speak your question to get their attention
+
+4. **For important information**: When sharing critical findings, warnings, or results that the user should be aware of immediately
+
+5. **When encountering errors**: Alert users to problems that require their attention
+
+Keep your spoken messages:
+- Concise and clear (1-2 sentences maximum)
+- Informative but not overwhelming
+- Natural and conversational
+- Focused on what matters most to the user
+
+Do NOT use the speak tool for:
+- Every single message (avoid being overly chatty)
+- Routine confirmations that don't require immediate attention  
+- Detailed technical explanations (use text for those)
+- Repetitive updates during long-running processes
+
+Use your judgment to balance being helpful with being appropriately selective about when to speak.`
+          }
+        }
+      ]
+    };
+  }
+
+  throw new Error(`Unknown prompt: ${name}`);
 });
 
 // In TTS-only mode, we don't need complex hook validation
