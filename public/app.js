@@ -1,22 +1,7 @@
-class VoiceHooksClient {
+class TTSClient {
     constructor() {
         this.baseUrl = window.location.origin;
-        this.debug = localStorage.getItem('voiceHooksDebug') === 'true';
-        this.refreshBtn = document.getElementById('refreshBtn');
-        this.clearAllBtn = document.getElementById('clearAllBtn');
-        this.utterancesList = document.getElementById('utterancesList');
-        this.infoMessage = document.getElementById('infoMessage');
-
-        // Voice controls
-        this.listenBtn = document.getElementById('listenBtn');
-        this.listenBtnText = document.getElementById('listenBtnText');
-        this.listeningIndicator = document.getElementById('listeningIndicator');
-        this.interimText = document.getElementById('interimText');
-
-        // Speech recognition
-        this.recognition = null;
-        this.isListening = false;
-        this.initializeSpeechRecognition();
+        this.debug = localStorage.getItem('ttsDebug') === 'true';
 
         // Speech synthesis
         this.initializeSpeechSynthesis();
@@ -30,8 +15,6 @@ class VoiceHooksClient {
         this.speechRateSlider = document.getElementById('speechRate');
         this.speechRateInput = document.getElementById('speechRateInput');
         this.testTTSBtn = document.getElementById('testTTSBtn');
-        this.voiceResponsesToggle = document.getElementById('voiceResponsesToggle');
-        this.voiceOptions = document.getElementById('voiceOptions');
         this.localVoicesGroup = document.getElementById('localVoicesGroup');
         this.cloudVoicesGroup = document.getElementById('cloudVoicesGroup');
         this.rateWarning = document.getElementById('rateWarning');
@@ -41,88 +24,10 @@ class VoiceHooksClient {
         this.loadPreferences();
 
         this.setupEventListeners();
-        this.loadData();
-
-        // Auto-refresh every 2 seconds
-        setInterval(() => this.loadData(), 2000);
     }
 
-    initializeSpeechRecognition() {
-        // Check for browser support
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-        if (!SpeechRecognition) {
-            console.error('Speech recognition not supported in this browser');
-            this.listenBtn.disabled = true;
-            this.listenBtnText.textContent = 'Not Supported';
-            return;
-        }
-
-        this.recognition = new SpeechRecognition();
-        this.recognition.continuous = true;
-        this.recognition.interimResults = true;
-
-        // Handle results
-        this.recognition.onresult = (event) => {
-            let interimTranscript = '';
-
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const transcript = event.results[i][0].transcript;
-
-                if (event.results[i].isFinal) {
-                    // User paused - send as complete utterance
-                    this.sendVoiceUtterance(transcript);
-                    // Restore placeholder text
-                    this.interimText.textContent = 'Start speaking and your words will appear here...';
-                    this.interimText.classList.remove('active');
-                } else {
-                    // Still speaking - show interim results
-                    interimTranscript += transcript;
-                }
-            }
-
-            if (interimTranscript) {
-                this.interimText.textContent = interimTranscript;
-                this.interimText.classList.add('active');
-            }
-        };
-
-        // Handle errors
-        this.recognition.onerror = (event) => {
-            console.error('Speech recognition error:', event.error);
-
-            if (event.error === 'no-speech') {
-                // Continue listening
-                return;
-            }
-
-            if (event.error === 'not-allowed') {
-                alert('Microphone access denied. Please allow microphone access to use voice input.');
-            } else {
-                alert(`Speech recognition error: ${event.error}`);
-            }
-
-            this.stopListening();
-        };
-
-        // Handle end
-        this.recognition.onend = () => {
-            if (this.isListening) {
-                // Restart recognition to continue listening
-                try {
-                    this.recognition.start();
-                } catch (e) {
-                    console.error('Failed to restart recognition:', e);
-                    this.stopListening();
-                }
-            }
-        };
-    }
 
     setupEventListeners() {
-        this.refreshBtn.addEventListener('click', () => this.loadData());
-        this.clearAllBtn.addEventListener('click', () => this.clearAllUtterances());
-        this.listenBtn.addEventListener('click', () => this.toggleListening());
 
         // Language filter
         if (this.languageSelect) {
@@ -139,7 +44,6 @@ class VoiceHooksClient {
             this.selectedVoice = e.target.value;
             // Save selected voice to localStorage
             localStorage.setItem('selectedVoice', this.selectedVoice);
-            this.updateVoicePreferences();
             this.updateVoiceWarnings();
         });
 
@@ -163,177 +67,12 @@ class VoiceHooksClient {
         });
 
         this.testTTSBtn.addEventListener('click', () => {
-            this.speakText('This is Voice Mode for Claude Code. How can I help you today?');
+            this.speakText('This is Text-to-Speech for Claude Code. How can I help you today?');
         });
 
-        // Voice toggle listeners
-        this.voiceResponsesToggle.addEventListener('change', (e) => {
-            const enabled = e.target.checked;
-            localStorage.setItem('voiceResponsesEnabled', enabled);
-            this.updateVoicePreferences();
-            this.updateVoiceOptionsVisibility();
-        });
     }
 
 
-    async loadData() {
-        try {
-            // Load utterances
-            const utterancesResponse = await fetch(`${this.baseUrl}/api/utterances?limit=20`);
-            if (utterancesResponse.ok) {
-                const data = await utterancesResponse.json();
-                this.updateUtterancesList(data.utterances);
-            }
-        } catch (error) {
-            console.error('Failed to load data:', error);
-        }
-    }
-
-    updateUtterancesList(utterances) {
-        if (utterances.length === 0) {
-            this.utterancesList.innerHTML = '<div class="empty-state">Nothing yet.</div>';
-            this.infoMessage.style.display = 'none';
-            return;
-        }
-
-        // Check if all messages are pending
-        const allPending = utterances.every(u => u.status === 'pending');
-        if (allPending) {
-            // Show info message but don't replace the utterances list
-            this.infoMessage.style.display = 'block';
-        } else {
-            // Hide info message when at least one utterance is delivered
-            this.infoMessage.style.display = 'none';
-        }
-
-        this.utterancesList.innerHTML = utterances.map(utterance => `
-            <div class="utterance-item">
-                <div class="utterance-text">${this.escapeHtml(utterance.text)}</div>
-                <div class="utterance-meta">
-                    <div>${this.formatTimestamp(utterance.timestamp)}</div>
-                    <div class="utterance-status status-${utterance.status}">
-                        ${utterance.status.toUpperCase()}
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    formatTimestamp(timestamp) {
-        const date = new Date(timestamp);
-        return date.toLocaleTimeString();
-    }
-
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    toggleListening() {
-        if (this.isListening) {
-            this.stopListening();
-        } else {
-            this.startListening();
-        }
-    }
-
-    async startListening() {
-        if (!this.recognition) {
-            alert('Speech recognition not supported in this browser');
-            return;
-        }
-
-        try {
-            this.recognition.start();
-            this.isListening = true;
-            this.listenBtn.classList.add('listening');
-            this.listenBtnText.textContent = 'Stop Listening';
-            this.listeningIndicator.classList.add('active');
-            this.debugLog('Started listening');
-
-            // Notify server that voice input is active
-            await this.updateVoiceInputState(true);
-        } catch (e) {
-            console.error('Failed to start recognition:', e);
-            alert('Failed to start speech recognition. Please try again.');
-        }
-    }
-
-    async stopListening() {
-        if (this.recognition) {
-            this.isListening = false;
-            this.recognition.stop();
-            this.listenBtn.classList.remove('listening');
-            this.listenBtnText.textContent = 'Start Listening';
-            this.listeningIndicator.classList.remove('active');
-            this.interimText.textContent = 'Start speaking and your words will appear here...';
-            this.interimText.classList.remove('active');
-            this.debugLog('Stopped listening');
-
-            // Notify server that voice input is no longer active
-            await this.updateVoiceInputState(false);
-        }
-    }
-
-    async sendVoiceUtterance(text) {
-        const trimmedText = text.trim();
-        if (!trimmedText) return;
-
-        this.debugLog('Sending voice utterance:', trimmedText);
-
-        try {
-            const response = await fetch(`${this.baseUrl}/api/potential-utterances`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    text: trimmedText,
-                    timestamp: new Date().toISOString()
-                }),
-            });
-
-            if (response.ok) {
-                this.loadData(); // Refresh the list
-            } else {
-                const error = await response.json();
-                console.error('Error sending voice utterance:', error);
-            }
-        } catch (error) {
-            console.error('Failed to send voice utterance:', error);
-        }
-    }
-
-    async clearAllUtterances() {
-
-        this.clearAllBtn.disabled = true;
-        this.clearAllBtn.textContent = 'Clearing...';
-
-        try {
-            const response = await fetch(`${this.baseUrl}/api/utterances`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                this.loadData(); // Refresh the list
-                this.debugLog('Cleared all utterances:', result);
-            } else {
-                const error = await response.json();
-                alert(`Error: ${error.error || 'Failed to clear utterances'}`);
-            }
-        } catch (error) {
-            console.error('Failed to clear utterances:', error);
-            alert('Failed to clear utterances. Make sure the server is running.');
-        } finally {
-            this.clearAllBtn.disabled = false;
-            this.clearAllBtn.textContent = 'Clear All';
-        }
-    }
 
     debugLog(...args) {
         if (this.debug) {
@@ -624,22 +363,6 @@ class VoiceHooksClient {
     }
 
     loadPreferences() {
-        // Simple localStorage with defaults to true
-        const storedVoiceResponses = localStorage.getItem('voiceResponsesEnabled');
-
-        // Default to true if not stored
-        const voiceResponsesEnabled = storedVoiceResponses !== null
-            ? storedVoiceResponses === 'true'
-            : true;
-
-        // Set the checkbox
-        this.voiceResponsesToggle.checked = voiceResponsesEnabled;
-
-        // Save to localStorage if this is first time
-        if (storedVoiceResponses === null) {
-            localStorage.setItem('voiceResponsesEnabled', 'true');
-        }
-
         // Load voice settings
         const storedRate = localStorage.getItem('speechRate');
         if (storedRate !== null) {
@@ -657,69 +380,15 @@ class VoiceHooksClient {
             this.languageSelect.value = savedLanguage;
         }
 
-        // Update UI visibility
-        this.updateVoiceOptionsVisibility();
-
-        // Send preferences to server
-        this.updateVoicePreferences();
 
         // Update warnings after preferences are loaded
         this.updateVoiceWarnings();
     }
 
-    updateVoiceOptionsVisibility() {
-        const voiceResponsesEnabled = this.voiceResponsesToggle.checked;
-        this.voiceOptions.style.display = voiceResponsesEnabled ? 'flex' : 'none';
-    }
 
-    async updateVoicePreferences() {
-        const voiceResponsesEnabled = this.voiceResponsesToggle.checked;
-
-        try {
-            // Send preferences to server
-            await fetch(`${this.baseUrl}/api/voice-preferences`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    voiceResponsesEnabled
-                }),
-            });
-
-            this.debugLog('Voice preferences updated:', { voiceResponsesEnabled });
-        } catch (error) {
-            console.error('Failed to update voice preferences:', error);
-        }
-    }
-
-    async updateVoiceInputState(active) {
-        try {
-            // Send voice input state to server
-            await fetch(`${this.baseUrl}/api/voice-input-state`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ active }),
-            });
-
-            this.debugLog('Voice input state updated:', { active });
-        } catch (error) {
-            console.error('Failed to update voice input state:', error);
-        }
-    }
 
     async syncStateWithServer() {
         this.debugLog('Syncing state with server after reconnection');
-
-        // Sync voice response preferences
-        await this.updateVoicePreferences();
-
-        // Sync voice input state if currently listening
-        if (this.isListening) {
-            await this.updateVoiceInputState(true);
-        }
     }
 
     updateVoiceWarnings() {
@@ -763,22 +432,9 @@ class VoiceHooksClient {
         }
     }
 
-    handleWaitStatus(isWaiting) {
-        const listeningIndicatorText = this.listeningIndicator.querySelector('span');
-
-        if (isWaiting) {
-            // Claude is waiting for voice input
-            listeningIndicatorText.textContent = 'Claude is paused and waiting for voice input';
-            this.debugLog('Claude is waiting for voice input');
-        } else {
-            // Back to normal listening state
-            listeningIndicatorText.textContent = 'Listening...';
-            this.debugLog('Claude finished waiting');
-        }
-    }
 }
 
 // Initialize the client when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    new VoiceHooksClient();
+    new TTSClient();
 });

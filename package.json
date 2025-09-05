@@ -22,16 +22,17 @@
     "test:watch": "jest --watch",
     "prepare": "husky"
   },
-  "description": "Real-time voice interaction for Claude Code. Speak naturally while Claude works - interrupt, redirect, or provide continuous feedback without stopping.",
+  "description": "Text-to-speech functionality for Claude Code. Let Claude speak responses aloud with natural-sounding voices.",
   "keywords": [
     "mcp",
     "claude",
     "claude-code",
-    "voice",
-    "speech-recognition",
+    "text-to-speech",
+    "tts",
+    "speech-synthesis",
     "model-context-protocol",
     "ai-assistant",
-    "voice-control"
+    "voice"
   ],
   "author": "",
   "license": "UNLICENSED",
@@ -46,8 +47,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.13.3",
     "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "open": "^10.1.2"
+    "express": "^5.1.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

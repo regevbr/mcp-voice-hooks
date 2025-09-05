@@ -1,7 +1,6 @@
 import express from 'express';
 import type { Request, Response } from 'express';
 import cors from 'cors';
-import { randomUUID } from 'crypto';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
@@ -14,47 +13,6 @@ jest.mock('child_process', () => ({
     callback(null, { stdout: '', stderr: '' });
   })
 }));
-
-// Shared utterance queue
-interface Utterance {
-  id: string;
-  text: string;
-  timestamp: Date;
-  status: 'pending' | 'delivered' | 'responded';
-}
-
-class UtteranceQueue {
-  utterances: Utterance[] = [];
-
-  add(text: string, timestamp?: Date): Utterance {
-    const utterance: Utterance = {
-      id: randomUUID(),
-      text: text.trim(),
-      timestamp: timestamp || new Date(),
-      status: 'pending'
-    };
-
-    this.utterances.push(utterance);
-    return utterance;
-  }
-
-  getRecent(limit: number = 10): Utterance[] {
-    return this.utterances
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-      .slice(0, limit);
-  }
-
-  markDelivered(id: string): void {
-    const utterance = this.utterances.find(u => u.id === id);
-    if (utterance) {
-      utterance.status = 'delivered';
-    }
-  }
-
-  clear(): void {
-    this.utterances = [];
-  }
-}
 
 // Voice preferences (controlled by browser)
 let voicePreferences = {
@@ -76,8 +34,6 @@ export function setupApp() {
   const app = express();
   app.use(cors());
   app.use(express.json());
-
-  const queue = new UtteranceQueue();
 
   // API for voice preferences
   app.post('/api/voice-preferences', (req: Request, res: Response) => {
@@ -114,16 +70,9 @@ export function setupApp() {
       // Always notify browser clients - they decide how to speak
       notifyTTSClients(text);
 
-      // Mark all delivered utterances as responded
-      const deliveredUtterances = queue.utterances.filter(u => u.status === 'delivered');
-      deliveredUtterances.forEach(u => {
-        u.status = 'responded';
-      });
-
       res.json({
         success: true,
-        message: 'Text spoken successfully',
-        respondedCount: deliveredUtterances.length
+        message: 'Text spoken successfully'
       });
     } catch (error) {
       res.status(500).json({

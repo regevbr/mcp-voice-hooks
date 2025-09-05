@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Mode for Claude Code</title>
+    <title>Text-to-Speech for Claude Code</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -73,74 +73,6 @@
             cursor: not-allowed;
         }
 
-        .utterances-section h3 {
-            color: #333;
-            margin-bottom: 16px;
-        }
-
-        .utterances-list {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-
-        .utterance-item {
-            padding: 12px 16px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .utterance-item:last-child {
-            border-bottom: none;
-        }
-
-        .utterance-text {
-            flex: 1;
-            margin-right: 12px;
-        }
-
-        .utterance-meta {
-            font-size: 12px;
-            color: #666;
-            text-align: right;
-        }
-
-        .utterance-status {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-top: 4px;
-        }
-
-        .status-pending {
-            background: #FFF3CD;
-            color: #856404;
-        }
-
-        .status-delivered {
-            background: #D1ECF1;
-            color: #0C5460;
-        }
-
-        .refresh-btn {
-            background: #6C757D;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            margin-left: 12px;
-        }
-
-        .refresh-btn:hover {
-            background: #545B62;
-        }
 
         .empty-state {
             text-align: center;
@@ -149,105 +81,6 @@
             font-style: italic;
         }
 
-        .voice-controls {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        #listenBtn {
-            background: #28A745;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        #listenBtn:hover {
-            background: #218838;
-        }
-
-        #listenBtn.listening {
-            background: #DC3545;
-        }
-
-        #listenBtn.listening:hover {
-            background: #C82333;
-        }
-
-        #listenBtn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .listening-indicator {
-            display: none;
-            align-items: center;
-            gap: 8px;
-            color: #DC3545;
-            font-weight: 500;
-        }
-
-        .listening-indicator.active {
-            display: flex;
-        }
-
-        .listening-dot {
-            width: 8px;
-            height: 8px;
-            background: #DC3545;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.3;
-            }
-
-            100% {
-                opacity: 1;
-            }
-        }
-
-        .interim-text {
-            padding: 12px;
-            background: #F8F9FA;
-            border: 1px solid #DEE2E6;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-style: italic;
-            color: #6C757D;
-            min-height: 44px;
-            /* Maintain minimum height to prevent collapse */
-            max-height: 120px;
-            /* Prevent excessive growth */
-            overflow-y: auto;
-            /* Add scroll if content is too long */
-            transition: color 0.2s ease-in-out;
-        }
-
-        .interim-text.active {
-            color: #333;
-            /* Darker color for actual speech */
-            font-style: normal;
-        }
-
-        .mic-icon {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
-        }
 
         .tts-settings {
             background: #f8f9fa;
@@ -349,18 +182,6 @@
             font-size: 16px;
         }
 
-        .info-message {
-            background: #d1ecf1;
-            border: 1px solid #bee5eb;
-            border-radius: 8px;
-            margin-bottom: 16px;
-        }
-
-        .info-message .empty-state {
-            color: #0c5460;
-            padding: 20px;
-            font-style: normal;
-        }
 
         /* Toggle switch styles */
         .switch {
@@ -412,36 +233,13 @@
 
 <body>
     <div class="container">
-        <h1>Voice Mode for Claude Code</h1>
+        <h1>Text-to-Speech for Claude Code</h1>
 
 
 
-        <div class="input-section">
-            <div class="voice-controls">
-                <button id="listenBtn">
-                    <svg class="mic-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path
-                            d="M12 1C10.34 1 9 2.34 9 4V12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12V4C15 2.34 13.66 1 12 1ZM19 12C19 15.53 16.39 18.44 13 18.93V22H11V18.93C7.61 18.44 5 15.53 5 12H7C7 14.76 9.24 17 12 17C14.76 17 17 14.76 17 12H19Z" />
-                    </svg>
-                    <span id="listenBtnText">Start Listening</span>
-                </button>
-                <div class="listening-indicator" id="listeningIndicator">
-                    <div class="listening-dot"></div>
-                    <span>Listening...</span>
-                </div>
-            </div>
-
-            <div class="interim-text" id="interimText">Start speaking and your words will appear here...</div>
-        </div>
         <div class="tts-settings">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h4>Allow Claude to speak back to you</h4>
-                <label class="switch">
-                    <input type="checkbox" id="voiceResponsesToggle">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="tts-controls" id="voiceOptions" style="display: none;">
+            <h4>Text-to-Speech Settings</h4>
+            <div class="tts-controls" id="voiceOptions">
                 <div class="tts-control">
                     <label for="languageSelect">Language:</label>
                     <select id="languageSelect">
@@ -477,21 +275,6 @@
             </div>
         </div>
 
-        <div class="utterances-section">
-            <h3>
-                Recent Utterances
-                <button class="refresh-btn" id="refreshBtn">Refresh</button>
-                <button class="refresh-btn" id="clearAllBtn" style="background: #DC3545; margin-left: 8px;">Clear
-                    All</button>
-            </h3>
-            <div class="info-message" id="infoMessage" style="display: none;">
-                <div class="empty-state">You need to send one message in the Claude code CLI to start voice interaction
-                </div>
-            </div>
-            <div class="utterances-list" id="utterancesList">
-                <div class="empty-state">Nothing yet.</div>
-            </div>
-        </div>
     </div>
 
     <script src="app.js"></script>
