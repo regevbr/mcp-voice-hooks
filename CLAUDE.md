@@ -4,7 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MCP TTS Hooks is a text-to-speech system for Claude Code that enables Claude to speak responses aloud. It implements the Model Context Protocol (MCP) server pattern for text-to-speech processing.
+MCP Voice Hooks is a complete voice interface for Claude Code with both Speech-to-Text (STT) and Text-to-Speech (TTS) capabilities. It implements the Model Context Protocol (MCP) server pattern for voice processing.
+
+**Key Features:**
+- **STT**: Voice input using Whisper (via whisper-typer-tool)
+- **TTS**: Voice output using browser/system voices
+- **Privacy**: All processing happens locally
 
 ## Development Commands
 
@@ -61,6 +66,20 @@ npm run mcp-unified-debug
 2. **TTS Output**: Text-to-speech via browser API or macOS `say` command
 3. **Browser Integration**: Server-sent events notify browser clients of speech requests
 
+### STT Processing Flow
+
+1. **Installation**: CLI automatically clones/updates whisper-typer-tool from GitHub
+2. **Setup**: Python dependencies installed via `pip` or `uv`
+3. **Server Start**: `python server.py` runs in background alongside MCP server
+4. **Voice Input**: User presses Home/Menu key → Whisper transcribes → text typed at cursor
+5. **Privacy**: All processing happens locally using OpenAI's Whisper model
+
+**STT Integration Details:**
+- **Installation Directory**: `~/.mcp-voice-hooks/whisper-typer-tool/`
+- **Repository**: `https://github.com/regevbr/whisper-typer-tool.git`
+- **Dependencies**: Python 3, FFmpeg, PortAudio
+- **Update Mechanism**: `git pull` on each server startup
+- **Process Management**: Python subprocess started/stopped with MCP server
 
 ### Configuration
 
@@ -99,12 +118,15 @@ Environment variables control behavior:
 
 Add the MCP server to Claude Code using:
 ```bash
-claude mcp add tts-hooks npx mcp-voice-hooks@latest
+claude mcp add voice-hooks npx mcp-voice-hooks@latest
 ```
 
-The server provides a `speak` tool that Claude can use to output text-to-speech.
+The server provides:
+- **STT**: Voice input via Home key (automatic setup of whisper-typer-tool)
+- **TTS**: `speak` tool that Claude can use for voice output
 
-**Important**: Users must click anywhere on the browser page (shown as an overlay) before TTS will work. This is required by browser autoplay policies and must be done on every page reload.
+**STT Setup**: Automatically installs whisper-typer-tool and dependencies on first run
+**TTS Setup**: Users must click anywhere on the browser page (shown as an overlay) before TTS will work. This is required by browser autoplay policies and must be done on every page reload.
 
 ## Key Files
 

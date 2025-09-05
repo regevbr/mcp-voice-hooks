@@ -112,10 +112,17 @@ Voice preferences are saved in your browser's localStorage and persist across se
 
 ## Privacy
 
-- All text-to-speech processing happens locally on your device
-- No data is sent to external services
-- System voice uses Mac's built-in speech synthesis
+Both voice input and output are designed with privacy in mind:
+
+### Voice Input (STT)
+- All speech recognition happens locally using Whisper
+- No audio data is sent to external services
+- Transcription runs entirely on your device
+
+### Voice Output (TTS)
+- System voice uses Mac's built-in speech synthesis (fully local)
 - Browser voices may use cloud services depending on your selection
+- You can choose local-only browser voices for complete privacy
 
 ## Troubleshooting
 
@@ -166,6 +173,10 @@ npm test
 npx mcp-voice-hooks@latest uninstall
 claude mcp remove tts-hooks
 ```
+
+## Acknowledgments
+
+This project is forked from [mcp-voice-hooks](https://github.com/johnmatthewtennant/mcp-voice-hooks) by John Matthew Tennant. The original project provided the excellent foundation for text-to-speech integration with Claude Code. This fork adds speech-to-text capabilities via Whisper integration.
 
 ## License
 
