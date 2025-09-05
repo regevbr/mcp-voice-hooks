@@ -35,7 +35,7 @@ claude
 
 The browser interface will automatically open (<http://localhost:5111>).
 
-1. Enable "Allow Claude to speak back to you" toggle
+1. **Click anywhere on the page to enable voice** (required by browser security policy)
 2. Choose your preferred voice and settings
 3. Test with the "Test Voice" button
 
@@ -84,10 +84,11 @@ Voice preferences are saved in your browser's localStorage and persist across se
 
 ### Claude isn't speaking
 
-1. Make sure the browser interface is open and the toggle is enabled
+1. Make sure you've clicked anywhere on the browser page to enable voice (shown on page load)
 2. Check that you've selected a voice in the dropdown
 3. Test the voice with the "Test Voice" button
 4. Ask Claude to explicitly use the `speak` tool: "Please use the speak tool to say hello"
+5. If you reload the page, you'll need to click anywhere again to re-enable voice
 
 ### System voice not working
 

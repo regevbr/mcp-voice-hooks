@@ -3,6 +3,12 @@ class TTSClient {
         this.baseUrl = window.location.origin;
         this.debug = localStorage.getItem('ttsDebug') === 'true';
 
+        // TTS activation state (per session only)
+        this.ttsActivated = false;
+
+        // Initialize activation overlay
+        this.initializeActivationOverlay();
+
         // Speech synthesis
         this.initializeSpeechSynthesis();
 
@@ -67,6 +73,10 @@ class TTSClient {
         });
 
         this.testTTSBtn.addEventListener('click', () => {
+            // Activate TTS if not already activated
+            if (!this.ttsActivated) {
+                this.activateTTS();
+            }
             this.speakText('This is Text-to-Speech for Claude Code. How can I help you today?');
         });
 
@@ -77,6 +87,43 @@ class TTSClient {
     debugLog(...args) {
         if (this.debug) {
             console.log(...args);
+        }
+    }
+
+    initializeActivationOverlay() {
+        this.activationOverlay = document.getElementById('activationOverlay');
+        
+        if (this.activationOverlay) {
+            // Add click handler to activate TTS and hide overlay
+            this.activationOverlay.addEventListener('click', () => {
+                this.activateTTS();
+            });
+
+            // Prevent clicks on the message itself from bubbling
+            const message = this.activationOverlay.querySelector('.activation-message');
+            if (message) {
+                message.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.activateTTS();
+                });
+            }
+        }
+    }
+
+    activateTTS() {
+        this.ttsActivated = true;
+        this.debugLog('TTS activated by user interaction');
+        
+        // Hide the overlay
+        if (this.activationOverlay) {
+            this.activationOverlay.classList.add('hidden');
+        }
+
+        // Create a silent utterance to wake up the speech synthesis
+        if (window.speechSynthesis) {
+            const silentUtterance = new SpeechSynthesisUtterance(' ');
+            silentUtterance.volume = 0;
+            window.speechSynthesis.speak(silentUtterance);
         }
     }
 
@@ -297,6 +344,11 @@ class TTSClient {
     }
 
     async speakText(text) {
+        // Activate TTS if not already activated
+        if (!this.ttsActivated) {
+            this.activateTTS();
+        }
+
         // Check if we should use system voice
         if (this.selectedVoice === 'system') {
             // Use Mac system voice via server

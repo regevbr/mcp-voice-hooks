@@ -93,6 +93,7 @@ Environment variables control behavior:
 - Real-time communication via Server-Sent Events
 - Text-to-Speech API integration
 - Voice selection and rate control interface
+- **User Interaction Required**: Browser security policy requires user click before enabling TTS (shows activation overlay on page load)
 
 ## Usage
 
@@ -102,6 +103,8 @@ claude mcp add tts-hooks npx mcp-voice-hooks@latest
 ```
 
 The server provides a `speak` tool that Claude can use to output text-to-speech.
+
+**Important**: Users must click anywhere on the browser page (shown as an overlay) before TTS will work. This is required by browser autoplay policies and must be done on every page reload.
 
 ## Key Files
 
