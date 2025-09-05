@@ -5,7 +5,7 @@ A complete voice interface for Claude Code with both **Speech-to-Text** and **Te
 - **🎤 Voice Input**: Speak to Claude using the Home key (powered by [Whisper](https://openai.com/research/whisper))
 - **🔊 Voice Output**: Claude can speak responses back to you using natural-sounding voices
 
-Uses the new [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) for seamless voice interaction. No API keys needed - everything runs locally.
+**Everything runs locally for complete privacy - no API keys needed, no data sent to external services.**
 
 ## Installation
 
@@ -110,19 +110,22 @@ If voice input isn't working:
 
 Voice preferences are saved in your browser's localStorage and persist across sessions.
 
-## Privacy
+## Privacy & Local Processing
 
-Both voice input and output are designed with privacy in mind:
+**Everything runs on your device - your voice data never leaves your computer.**
 
 ### Voice Input (STT)
-- All speech recognition happens locally using Whisper
-- No audio data is sent to external services
-- Transcription runs entirely on your device
+- **100% Local**: All speech recognition happens locally using OpenAI's Whisper model
+- **No Network Required**: Transcription works completely offline after initial setup
+- **No Data Sharing**: Audio never leaves your device - nothing sent to external services
+- **Complete Privacy**: Your conversations remain private on your machine
 
 ### Voice Output (TTS)
-- System voice uses Mac's built-in speech synthesis (fully local)
-- Browser voices may use cloud services depending on your selection
-- You can choose local-only browser voices for complete privacy
+- **System Voice (Recommended)**: Uses your operating system's built-in speech synthesis (completely local)
+- **Browser Voices**: 
+  - Local voices work offline and keep everything on your device
+  - Cloud voices require internet but can be avoided for complete privacy
+- **Your Choice**: Select local-only options for 100% offline operation
 
 ## Troubleshooting
 
